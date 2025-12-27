@@ -1,0 +1,148 @@
+# =============================================================================
+# cert-manager - Automatic TLS Certificate Management
+# =============================================================================
+# cert-manager adds certificates and certificate issuers as resource types
+# in Kubernetes clusters, and simplifies the process of obtaining, renewing
+# and using those certificates.
+#
+# Helm Chart: https://github.com/cert-manager/cert-manager/tree/master/deploy/charts/cert-manager
+# =============================================================================
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cert-manager
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  # -----------------------------------------------------------------------------
+  # Project Configuration
+  # -----------------------------------------------------------------------------
+  project: default
+
+  # -----------------------------------------------------------------------------
+  # Source Configuration - Helm Chart
+  # -----------------------------------------------------------------------------
+  source:
+    # Official cert-manager Helm repository
+    repoURL: https://charts.jetstack.io
+    chart: cert-manager
+    # Pin to specific version for reproducibility
+    targetRevision: v1.16.2
+    helm:
+      releaseName: cert-manager
+      values: |
+        # =======================================================================
+        # CRD Installation
+        # =======================================================================
+        # Install cert-manager CRDs (required for first installation)
+        # For upgrades, you may want to manage CRDs separately
+        crds:
+          enabled: true
+          # Keep CRDs when cert-manager is uninstalled
+          keep: true
+
+        # =======================================================================
+        # Controller Configuration
+        # =======================================================================
+        # Number of replicas (use 1 due to leader election)
+        replicaCount: 1
+
+        # Resource limits and requests
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
+
+        # =======================================================================
+        # Webhook Configuration
+        # =======================================================================
+        webhook:
+          # Webhook is required for validation and mutation
+          enabled: true
+          replicaCount: 1
+          resources:
+            limits:
+              cpu: 50m
+              memory: 64Mi
+            requests:
+              cpu: 25m
+              memory: 32Mi
+
+        # =======================================================================
+        # CA Injector Configuration
+        # =======================================================================
+        cainjector:
+          # CA Injector is required for injecting CA bundles
+          enabled: true
+          replicaCount: 1
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
+
+        # =======================================================================
+        # Prometheus Monitoring
+        # =======================================================================
+        prometheus:
+          # Enable Prometheus ServiceMonitor
+          enabled: false
+          servicemonitor:
+            enabled: false
+
+        # =======================================================================
+        # Global Configuration
+        # =======================================================================
+        global:
+          # Log level (1-5, higher is more verbose)
+          logLevel: 2
+          # Leader election namespace
+          leaderElection:
+            namespace: cert-manager
+
+  # -----------------------------------------------------------------------------
+  # Destination Configuration
+  # -----------------------------------------------------------------------------
+  destination:
+    server: https://kubernetes.default.svc
+    # cert-manager typically installs in its own namespace
+    namespace: cert-manager
+
+  # -----------------------------------------------------------------------------
+  # Sync Policy Configuration
+  # -----------------------------------------------------------------------------
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      # ServerSideApply recommended for CRD-heavy installations
+      - ServerSideApply=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+
+  # -----------------------------------------------------------------------------
+  # Ignore Differences
+  # -----------------------------------------------------------------------------
+  # cert-manager webhook CA bundle is auto-generated
+  ignoreDifferences:
+    - group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+      jsonPointers:
+        - /webhooks/0/clientConfig/caBundle
+    - group: admissionregistration.k8s.io
+      kind: MutatingWebhookConfiguration
+      jsonPointers:
+        - /webhooks/0/clientConfig/caBundle

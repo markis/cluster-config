@@ -1,0 +1,89 @@
+# =============================================================================
+# Apps - Root Application
+# =============================================================================
+# This is the root ArgoCD Application that manages all other applications.
+# It watches the apps/ directory and automatically deploys any Application
+# manifests found there. This is the only Application you need to manually
+# apply to bootstrap the entire GitOps workflow.
+#
+# Bootstrap command:
+#   kubectl apply -f bootstrap/apps.yaml
+# =============================================================================
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  # Name of the root application - this appears in ArgoCD UI
+  name: cluster
+  # ArgoCD applications must be in the argocd namespace
+  namespace: argocd
+  # Finalizer ensures child applications are deleted when parent is deleted
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  # -----------------------------------------------------------------------------
+  # Project Configuration
+  # -----------------------------------------------------------------------------
+  # The ArgoCD project this application belongs to
+  # 'default' project has full cluster access; create custom projects for RBAC
+  project: default
+
+  # -----------------------------------------------------------------------------
+  # Source Configuration
+  # -----------------------------------------------------------------------------
+  # Where to fetch the Application manifests from
+  source:
+    # Git repository URL containing the Application manifests
+    repoURL: https://github.com/markis/cluster-config.git
+    # Branch, tag, or commit SHA to track
+    targetRevision: main
+    # Path within the repository to the Application manifests
+    # ArgoCD will recursively scan this directory for Application resources
+    path: apps
+
+  # -----------------------------------------------------------------------------
+  # Destination Configuration
+  # -----------------------------------------------------------------------------
+  # Where to deploy the Application resources (the child Application CRDs)
+  destination:
+    # Kubernetes API server URL
+    # Use 'https://kubernetes.default.svc' for in-cluster deployment
+    server: https://kubernetes.default.svc
+    # Namespace where child Application CRDs will be created
+    # Must be 'argocd' as Application resources are cluster-scoped to ArgoCD
+    namespace: argocd
+
+  # -----------------------------------------------------------------------------
+  # Sync Policy Configuration
+  # -----------------------------------------------------------------------------
+  # Automated sync keeps the cluster state in sync with Git
+  syncPolicy:
+    # Enable automated synchronization
+    automated:
+      # Prune: Delete resources that are no longer defined in Git
+      # WARNING: Be careful with this in production - deleted manifests = deleted resources
+      prune: true
+      # SelfHeal: Automatically revert manual changes made to the cluster
+      # This ensures Git remains the single source of truth
+      selfHeal: true
+      # AllowEmpty: Allow syncing when there are no resources (useful for initial setup)
+      allowEmpty: false
+    # Sync options modify the sync behavior
+    syncOptions:
+      # CreateNamespace: Automatically create the target namespace if it doesn't exist
+      - CreateNamespace=true
+      # PruneLast: Prune resources after all other sync operations complete
+      - PruneLast=true
+      # ApplyOutOfSyncOnly: Only sync resources that are out of sync (performance optimization)
+      - ApplyOutOfSyncOnly=true
+    # Retry configuration for failed syncs
+    retry:
+      # Maximum number of sync attempts
+      limit: 5
+      backoff:
+        # Initial retry delay
+        duration: 5s
+        # Factor to multiply delay by for each retry
+        factor: 2
+        # Maximum retry delay
+        maxDuration: 3m
