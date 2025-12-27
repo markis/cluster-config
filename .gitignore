@@ -1,0 +1,164 @@
+# =============================================================================
+# GitOps Repository .gitignore
+# =============================================================================
+
+# =============================================================================
+# Kubernetes & Helm
+# =============================================================================
+
+# Helm dependencies and lock files
+**/charts/
+Chart.lock
+
+# Helm packaging output
+*.tgz
+
+# Kubernetes secrets (NEVER commit secrets!)
+*-secret.yaml
+*-secrets.yaml
+secrets.yaml
+secret.yaml
+
+# Kubeconfig files
+kubeconfig
+kubeconfig.yaml
+*.kubeconfig
+
+# Kustomize build output
+kustomization-output.yaml
+
+# =============================================================================
+# Editor & IDE
+# =============================================================================
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# JetBrains IDEs (IntelliJ, GoLand, etc.)
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+.netrwhist
+
+# Emacs
+*~
+\#*\#
+.#*
+
+# =============================================================================
+# Operating System
+# =============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+*~
+.directory
+
+# =============================================================================
+# Build & Temp Files
+# =============================================================================
+
+# Logs
+*.log
+logs/
+
+# Temp files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# Output directories
+dist/
+build/
+out/
+
+# =============================================================================
+# Secrets & Credentials
+# =============================================================================
+
+# Generic secrets
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Environment files with secrets
+.env
+.env.*
+!.env.example
+
+# 1Password credentials
+1password-credentials.json
+
+# ArgoCD secrets
+argocd-secret.yaml
+
+# TLS secrets
+tls.crt
+tls.key
+
+# =============================================================================
+# Tool-specific
+# =============================================================================
+
+# Terraform (if used alongside)
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Ansible (if used alongside)
+*.retry
+
+# Node.js (if using any JS tooling)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Python (if using any Python tooling)
+__pycache__/
+*.py[cod]
+.Python
+venv/
+.venv/
+
+# =============================================================================
+# CI/CD
+# =============================================================================
+
+# GitHub Actions
+.act/
+
+# Test outputs
+coverage/
+test-results/
+
+# Stashed files
+.stash/

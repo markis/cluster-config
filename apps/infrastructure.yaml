@@ -1,0 +1,57 @@
+# =============================================================================
+# Infrastructure Applications
+# =============================================================================
+# This Application manages all infrastructure/platform components by watching
+# the infrastructure/ directory. It acts as a parent for all infrastructure
+# apps (ArgoCD, Traefik, cert-manager, 1password-connect).
+# =============================================================================
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  # Name shown in ArgoCD UI
+  name: infrastructure
+  # Must be in argocd namespace
+  namespace: argocd
+  # Finalizer ensures proper cleanup of child resources
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  # -----------------------------------------------------------------------------
+  # Project Configuration
+  # -----------------------------------------------------------------------------
+  project: default
+
+  # -----------------------------------------------------------------------------
+  # Source Configuration
+  # -----------------------------------------------------------------------------
+  source:
+    repoURL: https://github.com/markis/cluster-config.git
+    targetRevision: main
+    # Points to infrastructure directory containing platform component Applications
+    path: apps/infrastructure
+
+  # -----------------------------------------------------------------------------
+  # Destination Configuration
+  # -----------------------------------------------------------------------------
+  destination:
+    server: https://kubernetes.default.svc
+    # Child Application CRDs are created in argocd namespace
+    namespace: argocd
+
+  # -----------------------------------------------------------------------------
+  # Sync Policy Configuration
+  # -----------------------------------------------------------------------------
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

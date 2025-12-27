@@ -1,0 +1,167 @@
+# =============================================================================
+# Traefik - Cloud Native Ingress Controller
+# =============================================================================
+# Traefik is a modern HTTP reverse proxy and load balancer that makes
+# deploying microservices easy. It integrates with Kubernetes Ingress
+# and provides automatic TLS certificate management.
+#
+# Helm Chart: https://github.com/traefik/traefik-helm-chart
+# =============================================================================
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traefik
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  # -----------------------------------------------------------------------------
+  # Project Configuration
+  # -----------------------------------------------------------------------------
+  project: default
+
+  # -----------------------------------------------------------------------------
+  # Source Configuration - Helm Chart
+  # -----------------------------------------------------------------------------
+  source:
+    # Official Traefik Helm repository
+    repoURL: https://traefik.github.io/charts
+    chart: traefik
+    # Pin to specific version for reproducibility
+    targetRevision: 33.2.1
+    helm:
+      releaseName: traefik
+      values: |
+        # =======================================================================
+        # Deployment Configuration
+        # =======================================================================
+        deployment:
+          # Number of Traefik pods (use 2+ for HA in production)
+          replicas: 1
+          # Pod annotations
+          annotations: {}
+
+        # =======================================================================
+        # Service Configuration
+        # =======================================================================
+        service:
+          # Service type: LoadBalancer for cloud, NodePort for bare metal
+          type: LoadBalancer
+          # Annotations for cloud provider load balancer configuration
+          annotations: {}
+            # For AWS NLB:
+            # service.beta.kubernetes.io/aws-load-balancer-type: nlb
+            # For GCP:
+            # cloud.google.com/load-balancer-type: External
+
+        # =======================================================================
+        # Entrypoints Configuration
+        # =======================================================================
+        ports:
+          # HTTP entrypoint
+          web:
+            port: 8000
+            expose:
+              default: true
+            exposedPort: 80
+            protocol: TCP
+            # Redirect HTTP to HTTPS (enable in production)
+            # redirectTo:
+            #   port: websecure
+          # HTTPS entrypoint
+          websecure:
+            port: 8443
+            expose:
+              default: true
+            exposedPort: 443
+            protocol: TCP
+            # TLS configuration
+            tls:
+              enabled: true
+              # Use cert-manager for automatic certificate management
+              # certResolver: letsencrypt
+
+        # =======================================================================
+        # Providers Configuration
+        # =======================================================================
+        providers:
+          # Enable Kubernetes Ingress provider
+          kubernetesIngress:
+            enabled: true
+            # Allow cross-namespace references
+            allowCrossNamespace: true
+          # Enable Kubernetes CRD provider (IngressRoute, etc.)
+          kubernetesCRD:
+            enabled: true
+            allowCrossNamespace: true
+
+        # =======================================================================
+        # Logs Configuration
+        # =======================================================================
+        logs:
+          # General logs
+          general:
+            # Log level: DEBUG, INFO, WARN, ERROR
+            level: INFO
+          # Access logs
+          access:
+            enabled: true
+            # Log format: json or common
+            format: json
+
+        # =======================================================================
+        # Dashboard Configuration
+        # =======================================================================
+        ingressRoute:
+          dashboard:
+            # Enable the Traefik dashboard (secure in production!)
+            enabled: false
+            # Uncomment to enable with basic auth
+            # matchRule: Host(`traefik.example.com`)
+            # middlewares:
+            #   - name: traefik-dashboard-auth
+
+        # =======================================================================
+        # Resources Configuration
+        # =======================================================================
+        resources:
+          limits:
+            cpu: 300m
+            memory: 150Mi
+          requests:
+            cpu: 100m
+            memory: 50Mi
+
+        # =======================================================================
+        # Additional Arguments
+        # =======================================================================
+        additionalArguments:
+          # Enable Prometheus metrics
+          - "--metrics.prometheus=true"
+          # Enable ping endpoint for health checks
+          - "--ping=true"
+
+  # -----------------------------------------------------------------------------
+  # Destination Configuration
+  # -----------------------------------------------------------------------------
+  destination:
+    server: https://kubernetes.default.svc
+    # Traefik typically installs in its own namespace
+    namespace: traefik
+
+  # -----------------------------------------------------------------------------
+  # Sync Policy Configuration
+  # -----------------------------------------------------------------------------
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
