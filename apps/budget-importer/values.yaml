@@ -1,0 +1,16 @@
+image:
+  repository: ghcr.io/markis/budget-importer
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    memory: "32Mi"
+    cpu: "50m"
+  limits:
+    memory: "128Mi"
+    cpu: "200m"
+
+schedule: "0 */6 * * *"
+
+secretName: budget-importer-secrets

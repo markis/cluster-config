@@ -1,0 +1,6 @@
+apiVersion: v2
+name: budget-importer
+description: Scheduled job to import budget data
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
