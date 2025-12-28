@@ -1,14 +1,14 @@
 # =============================================================================
-# MQTT - EMQX Message Broker Cluster
+# Apps - App-of-Apps Pattern
 # =============================================================================
-# EMQX MQTT broker running as a 3-node cluster with Redis authentication.
-# Secrets are managed via 1Password Connect.
+# Parent application that generates ArgoCD Applications for each app directory.
+# Add new apps to argocd/apps/values.yaml to have them automatically deployed.
 # =============================================================================
 
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: mqtt
+  name: apps
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -18,11 +18,11 @@ spec:
   source:
     repoURL: https://github.com/markis/cluster-config.git
     targetRevision: main
-    path: apps/mqtt
+    path: argocd/apps
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: default
+    namespace: argocd
 
   syncPolicy:
     automated:

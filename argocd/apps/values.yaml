@@ -1,0 +1,40 @@
+# =============================================================================
+# Application Deployments
+# =============================================================================
+# This file defines all user applications deployed via ArgoCD.
+# Each app entry generates an ArgoCD Application CRD pointing to a Helm chart
+# in the apps/ directory.
+#
+# To add a new application:
+#   1. Create a Helm chart in apps/<name>/
+#   2. Add a new entry to the apps list below
+#   3. Optionally specify a custom namespace (defaults to 'default')
+# =============================================================================
+
+repoURL: https://github.com/markis/cluster-config.git
+targetRevision: main
+basePath: apps
+
+apps:
+  # ===========================================================================
+  # Budget Importer - Scheduled Data Import Job
+  # ===========================================================================
+  # CronJob that imports budget data every 6 hours.
+  # Uses 1Password Connect to securely inject configuration secrets.
+  # ===========================================================================
+  - name: budget-importer
+
+  # ===========================================================================
+  # Dark Detector - Highway Sky Brightness Detection
+  # ===========================================================================
+  # Monitors highway camera images to detect sky brightness levels.
+  # Runs multiple detectors for different camera crop regions.
+  # ===========================================================================
+  - name: dark-detector
+
+  # ===========================================================================
+  # MQTT - Message Broker
+  # ===========================================================================
+  # MQTT message broker for IoT and home automation messaging.
+  # ===========================================================================
+  - name: mqtt

@@ -1,0 +1,5 @@
+apiVersion: v2
+name: infrastructure
+description: App-of-apps pattern to generate infrastructure ArgoCD Applications
+type: application
+version: 0.1.0

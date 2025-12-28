@@ -1,0 +1,249 @@
+# =============================================================================
+# Infrastructure Applications
+# =============================================================================
+# This file defines all infrastructure/platform components deployed via ArgoCD.
+# Each app entry generates an ArgoCD Application CRD.
+#
+# To add a new infrastructure component:
+#   1. Add a new entry to the apps list below
+#   2. Specify the Helm chart repository, chart name, and version
+#   3. Add any custom values under the 'values' key
+# =============================================================================
+
+infra:
+  # ===========================================================================
+  # ArgoCD - GitOps Continuous Delivery
+  # ===========================================================================
+  # ArgoCD manages itself! This is a common pattern where ArgoCD deploys and
+  # updates its own installation.
+  # Helm Chart: https://github.com/argoproj/argo-helm/tree/main/charts/argo-cd
+  # ===========================================================================
+  - name: argocd
+    namespace: argocd
+    repoURL: https://argoproj.github.io/argo-helm
+    chart: argo-cd
+    targetRevision: 7.7.12
+    serverSideApply: true
+    ignoreDifferences:
+      - group: apps
+        kind: Deployment
+        jsonPointers:
+          - /spec/replicas
+    values: |
+      global:
+        additionalLabels:
+          app.kubernetes.io/part-of: argocd
+      dex:
+        certificateSecret:
+          enabled: false
+      server:
+        replicas: 1
+        ingress:
+          enabled: false
+      controller:
+        replicas: 1
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 250m
+            memory: 256Mi
+      repoServer:
+        replicas: 1
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+      redis:
+        enabled: true
+        resources:
+          limits:
+            cpu: 200m
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 64Mi
+      applicationSet:
+        enabled: true
+        replicas: 1
+      notifications:
+        enabled: true
+
+  # ===========================================================================
+  # 1Password Connect - Secrets Automation
+  # ===========================================================================
+  # 1Password Connect provides a secure way to access 1Password items from
+  # your infrastructure. It runs a local API server that integrates with
+  # Kubernetes to inject secrets from 1Password vaults.
+  #
+  # IMPORTANT: You must create secrets before deploying:
+  #   kubectl create secret generic op-credentials \
+  #     --from-file=1password-credentials.json -n 1password
+  #   kubectl create secret generic onepassword-token \
+  #     --from-literal=token=<your-token> -n 1password
+  #
+  # Helm Chart: https://github.com/1Password/connect-helm-charts
+  # ===========================================================================
+  - name: 1password-connect
+    namespace: 1password
+    repoURL: https://1password.github.io/connect-helm-charts
+    chart: connect
+    targetRevision: 1.17.0
+    values: |
+      connect:
+        create: true
+        replicas: 1
+        credentialsName: op-credentials
+        credentialsKey: 1password-credentials.json
+        serviceType: ClusterIP
+        api:
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
+      operator:
+        create: true
+        replicas: 1
+        token:
+          name: onepassword-token
+          key: token
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
+
+  # ===========================================================================
+  # cert-manager - Automatic TLS Certificate Management
+  # ===========================================================================
+  # cert-manager adds certificates and certificate issuers as resource types
+  # in Kubernetes clusters, and simplifies the process of obtaining, renewing
+  # and using those certificates.
+  #
+  # Helm Chart: https://github.com/cert-manager/cert-manager
+  # ===========================================================================
+  - name: cert-manager
+    namespace: cert-manager
+    repoURL: https://charts.jetstack.io
+    chart: cert-manager
+    targetRevision: v1.16.2
+    serverSideApply: true
+    ignoreDifferences:
+      - group: admissionregistration.k8s.io
+        kind: ValidatingWebhookConfiguration
+        jsonPointers:
+          - /webhooks/0/clientConfig/caBundle
+      - group: admissionregistration.k8s.io
+        kind: MutatingWebhookConfiguration
+        jsonPointers:
+          - /webhooks/0/clientConfig/caBundle
+    values: |
+      crds:
+        enabled: true
+        keep: true
+      replicaCount: 1
+      resources:
+        limits:
+          cpu: 100m
+          memory: 128Mi
+        requests:
+          cpu: 50m
+          memory: 64Mi
+      webhook:
+        replicaCount: 1
+        resources:
+          limits:
+            cpu: 50m
+            memory: 64Mi
+          requests:
+            cpu: 25m
+            memory: 32Mi
+      cainjector:
+        replicaCount: 1
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
+      prometheus:
+        enabled: false
+        servicemonitor:
+          enabled: false
+      global:
+        logLevel: 2
+        leaderElection:
+          namespace: cert-manager
+
+  # ===========================================================================
+  # Traefik - Cloud Native Ingress Controller
+  # ===========================================================================
+  # Traefik is a modern HTTP reverse proxy and load balancer that makes
+  # deploying microservices easy. It integrates with Kubernetes Ingress
+  # and provides automatic TLS certificate management.
+  #
+  # Helm Chart: https://github.com/traefik/traefik-helm-chart
+  # ===========================================================================
+  - name: traefik
+    namespace: traefik
+    repoURL: https://traefik.github.io/charts
+    chart: traefik
+    targetRevision: 33.2.1
+    values: |
+      deployment:
+        replicas: 1
+        annotations: {}
+      service:
+        type: LoadBalancer
+        annotations: {}
+      ports:
+        web:
+          port: 8000
+          expose:
+            default: true
+          exposedPort: 80
+          protocol: TCP
+        websecure:
+          port: 8443
+          expose:
+            default: true
+          exposedPort: 443
+          protocol: TCP
+          tls:
+            enabled: true
+      providers:
+        kubernetesIngress:
+          enabled: true
+          allowCrossNamespace: true
+        kubernetesCRD:
+          enabled: true
+          allowCrossNamespace: true
+      logs:
+        general:
+          level: INFO
+        access:
+          enabled: true
+          format: json
+      ingressRoute:
+        dashboard:
+          enabled: false
+      resources:
+        limits:
+          cpu: 300m
+          memory: 150Mi
+        requests:
+          cpu: 100m
+          memory: 50Mi
+      additionalArguments:
+        - "--metrics.prometheus=true"
+        - "--ping=true"
