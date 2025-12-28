@@ -29,7 +29,7 @@ spec:
     repoURL: https://github.com/markis/cluster-config.git
     targetRevision: main
     # Points to infrastructure directory containing platform component Applications
-    path: apps/infrastructure
+    path: argocd/infrastructure
 
   # -----------------------------------------------------------------------------
   # Destination Configuration
