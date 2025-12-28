@@ -23,7 +23,7 @@ spec:
 {{- range $values.detectors }}
         - name: {{ $chartName }}-{{ .name }}
           image: "{{ $values.image.repository }}:{{ $values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          imagePullPolicy: {{ $values.image.pullPolicy }}
           resources:
             {{ toYaml $values.resources | nindent 12 }}
           env:
