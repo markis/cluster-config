@@ -48,6 +48,14 @@ spec:
             app.kubernetes.io/part-of: argocd
 
         # =======================================================================
+        # Dex Configuration
+        # =======================================================================
+        dex:
+          # Disable TLS for dex server (simplifies setup)
+          certificateSecret:
+            enabled: false
+
+        # =======================================================================
         # Server Configuration
         # =======================================================================
         server:

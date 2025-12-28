@@ -62,8 +62,6 @@ spec:
         # Webhook Configuration
         # =======================================================================
         webhook:
-          # Webhook is required for validation and mutation
-          enabled: true
           replicaCount: 1
           resources:
             limits:
@@ -77,8 +75,6 @@ spec:
         # CA Injector Configuration
         # =======================================================================
         cainjector:
-          # CA Injector is required for injecting CA bundles
-          enabled: true
           replicaCount: 1
           resources:
             limits:
