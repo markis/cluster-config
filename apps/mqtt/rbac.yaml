@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mqtt
+  labels:
+    app: mqtt
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: mqtt
+  labels:
+    app: mqtt
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - endpoints
+    verbs:
+      - get
+      - watch
+      - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: mqtt
+  labels:
+    app: mqtt
+subjects:
+  - kind: ServiceAccount
+    name: mqtt
+    namespace: default
+roleRef:
+  kind: Role
+  name: mqtt
+  apiGroup: rbac.authorization.k8s.io

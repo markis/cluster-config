@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mqtt-config
+  labels:
+    app: mqtt
+data:
+  emqx.conf: |
+    node.data_dir = "/opt/emqx/data"
+    node.db_backend = "mnesia"
+
+    log.console.enable = true
+    log.console.level = warning
+
+    cluster.discovery_strategy = "k8s"
+    cluster.k8s.apiserver = "https://kubernetes.default.svc:443"
+    cluster.k8s.service_name = "mqtt-headless"
+    cluster.k8s.address_type = "hostname"
+    cluster.k8s.namespace = "default"
+    cluster.k8s.suffix = "svc.cluster.local"
+
+    authentication = [{
+      backend = redis
+      redis_type = single
+      server = "127.0.0.1:6379"
+      cmd = "HMGET mqtt:${username} password"
+      database = 0
+      enable = true
+      mechanism = password_based
+      password_hash_algorithm.name = plain
+      password_hash_algorithm.salt_position = disable
+      pool_size = 8
+    }]
+
+    authorization.deny_action = "ignore"
+    authorization.no_match = "allow"
+    authorization.sources = [{
+      type = "file"
+      enable = true
+      path = "/opt/emqx/etc/acl.conf"
+    }]
+
+    listeners.ssl.default.enabled = false
+    listeners.ws.default.enabled = false
+    listeners.wss.default.enabled = false
+
+    dashboard.default_username = "markis"
+    dashboard.listeners.http.bind = "0.0.0.0:18083"
+    dashboard.listeners.http.max_connections = 512
+
+  acl.conf: |
+    {allow, all}.

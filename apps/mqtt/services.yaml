@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mqtt
+  labels:
+    app: mqtt
+spec:
+  selector:
+    app: mqtt
+  type: LoadBalancer
+  ports:
+    - name: mqtt
+      port: 1883
+      protocol: TCP
+      targetPort: mqtt
+    - name: dashboard
+      port: 18083
+      protocol: TCP
+      targetPort: dashboard
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mqtt-headless
+  labels:
+    app: mqtt
+spec:
+  clusterIP: None
+  selector:
+    app: mqtt
