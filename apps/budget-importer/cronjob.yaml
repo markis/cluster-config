@@ -1,0 +1,58 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: budget-importer
+  labels:
+    app: budget-importer
+spec:
+  # Run every 6 hours
+  schedule: "0 */6 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 300
+      template:
+        metadata:
+          labels:
+            app: budget-importer
+            app.kubernetes.io/name: budget-importer
+            app.kubernetes.io/component: cronjob
+            app.kubernetes.io/part-of: budget-importer
+        spec:
+          restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            fsGroup: 65534
+          volumes:
+            - name: secrets
+              secret:
+                secretName: budget-importer-secrets
+          containers:
+            - name: budget-importer
+              image: ghcr.io/markis/budget-importer:0.1.0
+              imagePullPolicy: IfNotPresent
+              args:
+                - "-config"
+                - "/var/secrets/config.yaml"
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop:
+                    - ALL
+              volumeMounts:
+                - name: secrets
+                  mountPath: /var/secrets
+                  readOnly: true
+              resources:
+                requests:
+                  memory: "32Mi"
+                  cpu: "50m"
+                limits:
+                  memory: "128Mi"
+                  cpu: "200m"
