@@ -47,6 +47,11 @@ spec:
                 secretKeyRef:
                   name: mqtt-secrets
                   key: node-cookie
+            - name: EMQX_DASHBOARD__DEFAULT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mqtt-secrets
+                  key: dashboard-username
             - name: EMQX_DASHBOARD__DEFAULT_PASSWORD
               valueFrom:
                 secretKeyRef:

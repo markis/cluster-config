@@ -44,7 +44,6 @@ data:
     listeners.ws.default.enabled = false
     listeners.wss.default.enabled = false
 
-    dashboard.default_username = "markis"
     dashboard.listeners.http.bind = "0.0.0.0:18083"
     dashboard.listeners.http.max_connections = 512
 
