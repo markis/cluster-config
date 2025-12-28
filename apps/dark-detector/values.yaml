@@ -1,6 +1,7 @@
 image:
   repository: ghcr.io/markis/dark-detector
   tag: sha-90c66f8
+  pullPolicy: IfNotPresent
 
 resources:
   requests:
