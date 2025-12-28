@@ -1,0 +1,48 @@
+{{- $chartName := .Chart.Name -}}
+{{- $values := .Values -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $chartName }}
+  labels:
+    app: {{ $chartName }}
+    app.kubernetes.io/name: {{ $chartName }}
+    app.kubernetes.io/component: detector
+    app.kubernetes.io/part-of: {{ $chartName }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ $chartName }}
+  template:
+    metadata:
+      labels:
+        app: {{ $chartName }}
+    spec:
+      containers:
+{{- range $values.detectors }}
+        - name: {{ $chartName }}-{{ .name }}
+          image: "{{ $values.image.repository }}:{{ $values.image.tag }}"
+          resources:
+{{ toYaml $values.resources | indent 12 }}
+          env:
+            - name: IMAGE_URL
+              value: {{ .imageUrl | quote }}
+            - name: IMAGE_CROP
+              value: {{ .imageCrop | quote }}
+            - name: HASS_NAME
+              value: {{ .hassName | quote }}
+            - name: MQTT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $values.mqtt.secretName }}
+                  key: username
+            - name: MQTT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $values.mqtt.secretName }}
+                  key: password
+          envFrom:
+            - configMapRef:
+                name: {{ $chartName }}-env
+{{- end }}
