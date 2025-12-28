@@ -1,0 +1,38 @@
+image:
+  repository: ghcr.io/markis/dark-detector
+  tag: sha-90c66f8
+
+resources:
+  requests:
+    memory: 100Mi
+    cpu: 100m
+  limits:
+    memory: 200Mi
+    cpu: 200m
+
+mqtt:
+  host: "10.0.0.1"
+  port: "1883"
+  interval: "30"
+  secretName: dark-detector-secrets
+
+detectors:
+  - name: highway-sky-east
+    imageUrl: https://itscameras.dot.state.oh.us/images/CLE/CLE015-L.jpg
+    imageCrop: "952,0,325,40"
+    hassName: "Highway Sky East"
+
+  - name: highway-sky-south
+    imageUrl: https://itscameras.dot.state.oh.us/images/CLE/CLE015-L.jpg
+    imageCrop: "2070,0,325,40"
+    hassName: "Highway Sky South"
+
+  - name: highway-sky-west
+    imageUrl: https://itscameras.dot.state.oh.us/images/CLE/CLE015-L.jpg
+    imageCrop: "0,960,325,40"
+    hassName: "Highway Sky West"
+
+  - name: highway-sky-north
+    imageUrl: https://itscameras.dot.state.oh.us/images/CLE/CLE015-L.jpg
+    imageCrop: "1285,960,330,40"
+    hassName: "Highway Sky North"
