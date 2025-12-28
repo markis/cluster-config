@@ -104,8 +104,11 @@ spec:
               value: "yes"
           volumeMounts:
             - name: mqtt-secrets
-              mountPath: /opt/passwords.txt
-              subPath: passwords.txt
+              mountPath: /opt/users.txt
+              subPath: users
+            - name: mqtt-config
+              mountPath: /opt/load-users.sh
+              subPath: load-users.sh
           resources:
             requests:
               memory: "64Mi"
@@ -132,8 +135,7 @@ spec:
               exec:
                 command:
                   - "/bin/sh"
-                  - "-c"
-                  - "while ! redis-cli ping; do sleep 0.1; done && cat /opt/passwords.txt | redis-cli --pipe"
+                  - "/opt/load-users.sh"
 
       volumes:
         - name: mqtt-config
