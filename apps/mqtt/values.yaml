@@ -1,0 +1,41 @@
+replicaCount: 3
+
+image:
+  repository: emqx/emqx
+  tag: "5.8.8"
+  pullPolicy: IfNotPresent
+
+redis:
+  image:
+    repository: redis
+    tag: "8.4.0"
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "50m"
+    limits:
+      memory: "128Mi"
+      cpu: "100m"
+
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "250m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+service:
+  type: LoadBalancer
+  mqttPort: 1883
+  dashboardPort: 18083
+
+secretName: mqtt-secrets
+
+onepassword:
+  itemPath: "vaults/k8s-secrets/items/mqtt"
+
+config:
+  logLevel: warning
+  dashboardMaxConnections: 512

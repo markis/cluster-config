@@ -1,22 +1,22 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: mqtt-config
+  name: "{{ .Chart.Name }}-config"
   labels:
-    app: mqtt
+    app: {{ .Chart.Name }}
 data:
   emqx.conf: |
     node.data_dir = "/opt/emqx/data"
     node.db_backend = "mnesia"
 
     log.console.enable = true
-    log.console.level = warning
+    log.console.level = {{ .Values.config.logLevel }}
 
     cluster.discovery_strategy = "k8s"
     cluster.k8s.apiserver = "https://kubernetes.default.svc:443"
-    cluster.k8s.service_name = "mqtt-headless"
+    cluster.k8s.service_name = "{{ .Chart.Name }}-headless"
     cluster.k8s.address_type = "hostname"
-    cluster.k8s.namespace = "default"
+    cluster.k8s.namespace = "{{ .Release.Namespace }}"
     cluster.k8s.suffix = "svc.cluster.local"
 
     authentication = [{
@@ -45,7 +45,7 @@ data:
     listeners.wss.default.enabled = false
 
     dashboard.listeners.http.bind = "0.0.0.0:18083"
-    dashboard.listeners.http.max_connections = 512
+    dashboard.listeners.http.max_connections = {{ .Values.config.dashboardMaxConnections }}
 
   acl.conf: |
     {allow, all}.
