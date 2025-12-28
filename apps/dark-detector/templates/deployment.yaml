@@ -24,7 +24,7 @@ spec:
         - name: {{ $chartName }}-{{ .name }}
           image: "{{ $values.image.repository }}:{{ $values.image.tag }}"
           resources:
-{{ toYaml $values.resources | indent 12 }}
+            {{ toYaml $values.resources | nindent 12 }}
           env:
             - name: IMAGE_URL
               value: {{ .imageUrl | quote }}
@@ -36,12 +36,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ $values.mqtt.secretName }}
-                  key: username
+                  key: mqtt-username
             - name: MQTT_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ $values.mqtt.secretName }}
-                  key: password
+                  key: mqtt-password
           envFrom:
             - configMapRef:
                 name: {{ $chartName }}-env
