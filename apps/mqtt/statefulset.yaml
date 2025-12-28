@@ -52,6 +52,11 @@ spec:
                 secretKeyRef:
                   name: mqtt-secrets
                   key: dashboard-password
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mqtt-secrets
+                  key: redis-password
           volumeMounts:
             - name: mqtt-config
               mountPath: /opt/emqx/etc/emqx.conf
@@ -97,11 +102,19 @@ spec:
             - ""
             - "--appendonly"
             - "no"
+            - "--requirepass"
+            - "$(REDIS_PASSWORD)"
           env:
-            - name: MASTER
-              value: "true"
-            - name: ALLOW_EMPTY_PASSWORD
-              value: "yes"
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mqtt-secrets
+                  key: redis-password
+            - name: REDISCLI_AUTH
+              valueFrom:
+                secretKeyRef:
+                  name: mqtt-secrets
+                  key: redis-password
           volumeMounts:
             - name: mqtt-secrets
               mountPath: /opt/users.txt

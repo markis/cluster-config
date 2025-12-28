@@ -23,6 +23,7 @@ data:
       backend = redis
       redis_type = single
       server = "127.0.0.1:6379"
+      password = "${REDIS_PASSWORD}"
       cmd = "HMGET mqtt:${username} password_hash salt"
       database = 0
       enable = true
