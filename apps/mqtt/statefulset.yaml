@@ -52,7 +52,7 @@ spec:
                 secretKeyRef:
                   name: mqtt-secrets
                   key: dashboard-password
-            - name: REDIS_PASSWORD
+            - name: EMQX_AUTHENTICATION__1__PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: mqtt-secrets
