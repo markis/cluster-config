@@ -23,12 +23,12 @@ data:
       backend = redis
       redis_type = single
       server = "127.0.0.1:6379"
-      cmd = "HMGET mqtt:${username} password"
+      cmd = "HMGET mqtt:${username} password_hash salt"
       database = 0
       enable = true
       mechanism = password_based
-      password_hash_algorithm.name = plain
-      password_hash_algorithm.salt_position = disable
+      password_hash_algorithm.name = sha256
+      password_hash_algorithm.salt_position = prefix
       pool_size = 8
     }]
 
@@ -50,3 +50,34 @@ data:
 
   acl.conf: |
     {allow, all}.
+
+  load-users.sh: |
+    #!/bin/sh
+    set -e
+
+    # Wait for Redis to be ready
+    until redis-cli ping >/dev/null 2>&1; do
+      echo "Waiting for Redis..."
+      sleep 0.5
+    done
+
+    echo "Redis is ready, loading users..."
+
+    # Read users file (format: username:password per line)
+    while IFS=: read -r username password || [ -n "$username" ]; do
+      # Skip empty lines and comments
+      [ -z "$username" ] && continue
+      echo "$username" | grep -q '^#' && continue
+
+      # Generate random 16-byte salt (hex encoded)
+      salt=$(head -c 16 /dev/urandom | od -An -tx1 | tr -d ' \n')
+
+      # Hash: SHA256(salt + password), output as hex
+      password_hash=$(printf '%s%s' "$salt" "$password" | sha256sum | cut -d' ' -f1)
+
+      # Store in Redis: HSET mqtt:<username> password_hash <hash> salt <salt>
+      redis-cli HSET "mqtt:${username}" password_hash "$password_hash" salt "$salt"
+      echo "Loaded user: $username"
+    done < /opt/users.txt
+
+    echo "All users loaded successfully"
