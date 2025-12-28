@@ -93,7 +93,7 @@ spec:
             failureThreshold: 30
 
         - name: mqtt-redis
-          image: redis:7.0.15
+          image: redis:8.4.0
           ports:
             - containerPort: 6379
               name: redis
