@@ -1,26 +1,27 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: mqtt
+  name: {{ .Chart.Name }}
   labels:
-    app: mqtt
+    app: {{ .Chart.Name }}
 spec:
-  serviceName: mqtt-headless
+  serviceName: "{{ .Chart.Name }}-headless"
   updateStrategy:
     type: RollingUpdate
-  replicas: 3
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: mqtt
+      app: {{ .Chart.Name }}
   template:
     metadata:
       labels:
-        app: mqtt
+        app: {{ .Chart.Name }}
     spec:
-      serviceAccountName: mqtt
+      serviceAccountName: {{ .Chart.Name }}
       containers:
-        - name: mqtt
-          image: emqx/emqx:5.8.8
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: mqtt
               containerPort: 1883
@@ -37,45 +38,40 @@ spec:
                   apiVersion: v1
                   fieldPath: metadata.name
             - name: EMQX_NAME
-              value: mqtt
+              value: {{ .Chart.Name }}
             - name: EMQX_HOST
               value: $(POD_NAME)
             - name: EMQX_NODE__NAME
-              value: $(EMQX_NAME)@$(POD_NAME).mqtt-headless.default.svc.cluster.local
+              value: $(EMQX_NAME)@$(POD_NAME).{{ .Chart.Name }}-headless.{{ .Release.Namespace }}.svc.cluster.local
             - name: EMQX_NODE__COOKIE
               valueFrom:
                 secretKeyRef:
-                  name: mqtt-secrets
+                  name: {{ .Values.secretName }}
                   key: node-cookie
             - name: EMQX_DASHBOARD__DEFAULT_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: mqtt-secrets
+                  name: {{ .Values.secretName }}
                   key: dashboard-username
             - name: EMQX_DASHBOARD__DEFAULT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mqtt-secrets
+                  name: {{ .Values.secretName }}
                   key: dashboard-password
             - name: EMQX_AUTHENTICATION__1__PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mqtt-secrets
+                  name: {{ .Values.secretName }}
                   key: redis-password
           volumeMounts:
-            - name: mqtt-config
+            - name: config
               mountPath: /opt/emqx/etc/emqx.conf
               subPath: emqx.conf
-            - name: mqtt-config
+            - name: config
               mountPath: /opt/emqx/etc/acl.conf
               subPath: acl.conf
           resources:
-            requests:
-              memory: "256Mi"
-              cpu: "250m"
-            limits:
-              memory: "512Mi"
-              cpu: "500m"
+            {{- toYaml .Values.resources | nindent 12 }}
           livenessProbe:
             tcpSocket:
               port: 1883
@@ -97,8 +93,9 @@ spec:
             periodSeconds: 10
             failureThreshold: 30
 
-        - name: mqtt-redis
-          image: redis:8.4.0
+        - name: redis
+          image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
+          imagePullPolicy: {{ .Values.redis.image.pullPolicy }}
           ports:
             - containerPort: 6379
               name: redis
@@ -113,27 +110,22 @@ spec:
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mqtt-secrets
+                  name: {{ .Values.secretName }}
                   key: redis-password
             - name: REDISCLI_AUTH
               valueFrom:
                 secretKeyRef:
-                  name: mqtt-secrets
+                  name: {{ .Values.secretName }}
                   key: redis-password
           volumeMounts:
-            - name: mqtt-secrets
+            - name: secrets
               mountPath: /opt/users.txt
               subPath: users
-            - name: mqtt-config
+            - name: config
               mountPath: /opt/load-users.sh
               subPath: load-users.sh
           resources:
-            requests:
-              memory: "64Mi"
-              cpu: "50m"
-            limits:
-              memory: "128Mi"
-              cpu: "100m"
+            {{- toYaml .Values.redis.resources | nindent 12 }}
           livenessProbe:
             tcpSocket:
               port: 6379
@@ -156,9 +148,9 @@ spec:
                   - "/opt/load-users.sh"
 
       volumes:
-        - name: mqtt-config
+        - name: config
           configMap:
-            name: mqtt-config
-        - name: mqtt-secrets
+            name: "{{ .Chart.Name }}-config"
+        - name: secrets
           secret:
-            secretName: mqtt-secrets
+            secretName: {{ .Values.secretName }}
