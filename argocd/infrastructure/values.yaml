@@ -247,6 +247,7 @@ infra:
       additionalArguments:
         - "--metrics.prometheus=true"
         - "--ping=true"
+        - "--ping.entryPoint=web"
 
   # ===========================================================================
   # Monitoring Secrets - 1Password integration for Grafana
@@ -330,10 +331,10 @@ infra:
           enabled: true
           ingressClassName: traefik
           hosts:
-            - k3s-grafana.lan
+            - grafana.k3s.lan
         grafana.ini:
           server:
-            root_url: http://k3s-grafana.lan
+            root_url: http://grafana.k3s.lan
       alertmanager:
         enabled: false
       nodeExporter:
