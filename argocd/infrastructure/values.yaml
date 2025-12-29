@@ -237,8 +237,6 @@ infra:
       ingressRoute:
         dashboard:
           enabled: false
-      ping:
-        entryPoint: web
       resources:
         limits:
           cpu: 300m
@@ -248,6 +246,7 @@ infra:
           memory: 50Mi
       additionalArguments:
         - "--metrics.prometheus=true"
+        - "--ping=true"
 
   # ===========================================================================
   # Monitoring Secrets - 1Password integration for Grafana
