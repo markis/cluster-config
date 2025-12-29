@@ -40,7 +40,7 @@ spec:
               cpu: {{ .Values.generator.resources.limits.cpu }}
           volumeMounts:
             - name: assets
-              mountPath: /src
+              mountPath: /output
             - name: secrets
               mountPath: /app/config.yaml
               subPath: config.yaml
@@ -50,7 +50,7 @@ spec:
               command:
                 - "test"
                 - "-n"
-                - "`find /src -mmin -1`"
+                - "`find /output -mmin -1`"
             initialDelaySeconds: 10
             periodSeconds: 60
         - name: nginx
