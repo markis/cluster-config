@@ -1,0 +1,30 @@
+image:
+  repository: ghcr.io/markis/dynasty
+  tag: "sha-43a432e"
+  pullPolicy: IfNotPresent
+
+cronjob:
+  schedule: "30 3 * * *"
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "200m"
+
+deployment:
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "600m"
+    limits:
+      memory: "2Gi"
+      cpu: "1"
+
+service:
+  type: LoadBalancer
+  port: 8501
+  targetPort: 8501
+
+secretName: dynasty-secrets

@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Chart.Name }}-importer
+  labels:
+    app: {{ .Chart.Name }}
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/component: cronjob
+    app.kubernetes.io/part-of: {{ .Chart.Name }}
+spec:
+  schedule: {{ .Values.cronjob.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 300
+      template:
+        metadata:
+          labels:
+            app: {{ .Chart.Name }}
+            app.kubernetes.io/name: {{ .Chart.Name }}
+            app.kubernetes.io/component: cronjob
+            app.kubernetes.io/part-of: {{ .Chart.Name }}
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: {{ .Chart.Name }}-importer
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              command: ["python", "-m", "dynasty.import"]
+              env:
+                - name: TZ
+                  value: America/New_York
+                - name: PSQL_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.secretName }}
+                      key: psql-url
+              resources:
+                {{- toYaml .Values.cronjob.resources | nindent 16 }}
