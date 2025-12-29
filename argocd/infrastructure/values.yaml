@@ -247,3 +247,108 @@ infra:
       additionalArguments:
         - "--metrics.prometheus=true"
         - "--ping=true"
+
+  # ===========================================================================
+  # Monitoring Secrets - 1Password integration for Grafana
+  # ===========================================================================
+  # Deploys 1Password secrets for the monitoring stack. Must be deployed
+  # before kube-prometheus-stack so the secret exists.
+  # ===========================================================================
+  - name: monitoring-secrets
+    namespace: monitoring
+    repoURL: https://github.com/markis/cluster-config.git
+    path: infrastructure/monitoring-secrets
+    targetRevision: HEAD
+
+  # ===========================================================================
+  # Prometheus + Grafana - Monitoring Stack
+  # ===========================================================================
+  # kube-prometheus-stack provides a complete monitoring solution including
+  # Prometheus for metrics collection, Grafana for visualization, and
+  # various exporters for Kubernetes metrics.
+  #
+  # Configured for lightweight operation on Raspberry Pi cluster.
+  # Helm Chart: https://github.com/prometheus-community/helm-charts
+  # ===========================================================================
+  - name: kube-prometheus-stack
+    namespace: monitoring
+    repoURL: https://prometheus-community.github.io/helm-charts
+    chart: kube-prometheus-stack
+    targetRevision: 69.3.1
+    serverSideApply: true
+    ignoreDifferences:
+      - group: admissionregistration.k8s.io
+        kind: MutatingWebhookConfiguration
+        jsonPointers:
+          - /webhooks/0/clientConfig/caBundle
+      - group: admissionregistration.k8s.io
+        kind: ValidatingWebhookConfiguration
+        jsonPointers:
+          - /webhooks/0/clientConfig/caBundle
+    values: |
+      # Lightweight config for Raspberry Pi cluster
+      prometheus:
+        prometheusSpec:
+          nodeSelector:
+            workload/prometheus: "true"
+          retention: 7d
+          retentionSize: "8GB"
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          storageSpec:
+            volumeClaimTemplate:
+              spec:
+                storageClassName: local-path
+                accessModes: ["ReadWriteOnce"]
+                resources:
+                  requests:
+                    storage: 10Gi
+      grafana:
+        nodeSelector:
+          workload/prometheus: "true"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+        persistence:
+          enabled: true
+          storageClassName: local-path
+          size: 1Gi
+        admin:
+          existingSecret: grafana-admin
+          userKey: admin-user
+          passwordKey: admin-password
+      alertmanager:
+        enabled: false
+      nodeExporter:
+        resources:
+          requests:
+            cpu: 50m
+            memory: 30Mi
+          limits:
+            cpu: 200m
+            memory: 50Mi
+      kube-state-metrics:
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            cpu: 100m
+            memory: 64Mi
+      prometheusOperator:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 200m
+            memory: 200Mi
