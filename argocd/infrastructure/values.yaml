@@ -326,6 +326,14 @@ infra:
           existingSecret: grafana-admin
           userKey: admin-user
           passwordKey: admin-password
+        ingress:
+          enabled: true
+          ingressClassName: traefik
+          hosts:
+            - k3s-grafana.lan
+        grafana.ini:
+          server:
+            root_url: http://k3s-grafana.lan
       alertmanager:
         enabled: false
       nodeExporter:
