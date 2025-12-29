@@ -1,6 +1,6 @@
 # Cluster Config - ArgoCD App of Apps Pattern
 
-ArgoCD GitOps repository using the App of Apps pattern for Kubernetes cluster management. Includes infrastructure components (ArgoCD, Traefik, cert-manager, 1Password Connect). Supports automated sync, self-healing, and pruning.
+ArgoCD GitOps repository using the App of Apps pattern for Kubernetes cluster management. Uses ApplicationSets for automatic app discovery. Includes infrastructure components (ArgoCD, Traefik, cert-manager, 1Password Connect) and application workloads deployed as Helm charts.
 
 ## Repository Structure
 
@@ -8,13 +8,21 @@ ArgoCD GitOps repository using the App of Apps pattern for Kubernetes cluster ma
 .
 ├── bootstrap/                    # Bootstrap manifests (apply manually once)
 │   └── apps.yaml                # Root Application that manages all other apps
-├── apps/                         # Application manifests (watched by app-of-apps)
+├── argocd/                       # ArgoCD ApplicationSet configurations
+│   ├── apps.yaml                # Parent app for application workloads
 │   ├── infrastructure.yaml      # Parent app for infrastructure components
-│   └── infrastructure/          # Infrastructure component Applications
-│       ├── argocd.yaml          # ArgoCD (self-managed)
-│       ├── traefik.yaml         # Traefik Ingress Controller
-│       ├── cert-manager.yaml    # cert-manager for TLS
-│       └── 1password-connect.yaml # 1Password secrets management
+│   ├── apps/                    # ApplicationSet for apps/ directory
+│   │   └── templates/
+│   │       └── applications.yaml
+│   └── infrastructure/          # ApplicationSet for infrastructure
+│       └── templates/
+│           └── applications.yaml
+├── apps/                         # Application Helm charts (auto-discovered)
+│   ├── budget-importer/         # Scheduled budget data importer
+│   ├── dark-detector/           # Dark mode detection service
+│   ├── dynasty/                 # Fantasy football tracker
+│   ├── hass-dashboard/          # Home Assistant dashboard
+│   └── mqtt/                    # MQTT broker (Mosquitto)
 ├── .gitignore                   # Git ignore patterns
 ├── .editorconfig                # Editor configuration
 └── README.md                    # This file
@@ -74,23 +82,24 @@ Open https://localhost:8080 and login with:
 ### App of Apps Pattern
 
 ```
-                    ┌─────────────────────┐
-                    │      cluster        │
-                    │   (bootstrap/)      │
-                    └──────────┬──────────┘
-                               │
-                               ▼
-                    ┌─────────────────────┐
-                    │   infrastructure    │
-                    │   (apps/)           │
-                    └──────────┬──────────┘
-                               │
-         ┌─────────┬───────────┼───────────┬─────────┐
-         │         │           │           │         │
-         ▼         ▼           ▼           ▼         ▼
-      ┌──────┐ ┌───────┐ ┌──────────┐ ┌──────────────┐
-      │argocd│ │traefik│ │cert-mgr  │ │1password-conn│
-      └──────┘ └───────┘ └──────────┘ └──────────────┘
+                         ┌─────────────────────┐
+                         │      cluster        │
+                         │   (bootstrap/)      │
+                         └──────────┬──────────┘
+                                    │
+                 ┌──────────────────┴──────────────────┐
+                 │                                     │
+                 ▼                                     ▼
+      ┌─────────────────────┐             ┌─────────────────────┐
+      │   infrastructure    │             │       apps          │
+      │   (argocd/)         │             │   (argocd/)         │
+      └──────────┬──────────┘             └──────────┬──────────┘
+                 │                                    │
+    ┌────────────┼────────────┐          ┌───────────┼───────────┐
+    │      │     │     │      │          │     │     │     │     │
+    ▼      ▼     ▼     ▼      ▼          ▼     ▼     ▼     ▼     ▼
+ argocd traefik cert  1pass  ...      budget dark  dynasty hass mqtt
+                -mgr  -conn           -import -det        -dash
 ```
 
 ### Sync Configuration
@@ -109,93 +118,105 @@ All Applications use automated sync with:
 | cert-manager | TLS certificate management | jetstack/cert-manager |
 | 1Password Connect | Secrets management | 1password/connect |
 
+## Application Workloads
+
+All applications are Helm charts in the `apps/` directory, automatically discovered and deployed by the ApplicationSet.
+
+| Application | Description | Components |
+|-------------|-------------|------------|
+| budget-importer | Scheduled budget data importer | CronJob, 1Password secrets |
+| dark-detector | Dark mode detection service | Deployment, ConfigMap, 1Password secrets |
+| dynasty | Fantasy football tracker | Deployment, CronJob, Service (LoadBalancer), 1Password secrets |
+| hass-dashboard | Home Assistant dashboard generator | Deployment (generator + nginx), Service, ConfigMap, 1Password secrets |
+| mqtt | MQTT broker (Mosquitto) | StatefulSet, Services, ConfigMap, RBAC, 1Password secrets |
+
 ## Adding New Applications
 
-### Using Helm (External Chart)
+### Adding an Application (Helm Chart in apps/)
 
-Create a new Application manifest in `apps/`:
+The ApplicationSet automatically discovers Helm charts in `apps/`. Simply create a new directory:
+
+```
+apps/my-app/
+├── Chart.yaml
+├── values.yaml
+└── templates/
+    ├── deployment.yaml
+    ├── service.yaml
+    └── onepassword-item.yaml  # If using 1Password secrets
+```
+
+Example `Chart.yaml`:
 
 ```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: my-app
-  namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
-spec:
-  project: default
-  source:
+apiVersion: v2
+name: my-app
+description: My application description
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+```
+
+Example `values.yaml`:
+
+```yaml
+image:
+  repository: ghcr.io/username/my-app
+  tag: "1.0.0"
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "200m"
+
+service:
+  type: ClusterIP
+  port: 8080
+
+secretName: my-app-secrets
+```
+
+### Adding Infrastructure Components
+
+Add a new entry to `argocd/infrastructure/values.yaml`:
+
+```yaml
+infra:
+  - name: my-component
+    namespace: my-namespace
     repoURL: https://charts.example.com
     chart: my-chart
     targetRevision: 1.0.0
-    helm:
-      releaseName: my-app
-      values: |
-        replicaCount: 2
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: my-app
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
+    values: |
+      replicaCount: 2
 ```
 
-### Using Helm (Git Repository with Values Overlays)
+### Using 1Password for Secrets
+
+Create a `onepassword-item.yaml` template:
 
 ```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Application
+apiVersion: onepassword.com/v1
+kind: OnePasswordItem
 metadata:
-  name: my-app-prod
-  namespace: argocd
+  name: {{ .Values.secretName }}
 spec:
-  project: default
-  source:
-    repoURL: https://github.com/markis/cluster-config.git
-    targetRevision: main
-    path: apps/my-app/base
-    helm:
-      valueFiles:
-        - values.yaml
-        - ../overlays/prod/values.yaml
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: my-app-prod
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
+  itemPath: "vaults/k8s-secrets/items/my-app"
 ```
 
-### Using Kustomize
+Then reference the secret in your deployment:
 
 ```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: my-app-prod
-  namespace: argocd
-spec:
-  project: default
-  source:
-    repoURL: https://github.com/markis/cluster-config.git
-    targetRevision: main
-    path: apps/my-app/overlays/prod
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: my-app-prod
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
+env:
+  - name: MY_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: {{ .Values.secretName }}
+        key: my-secret-key
 ```
 
 ## Configuration
