@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+    app: {{ .Chart.Name }}
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/component: dashboard
+    app.kubernetes.io/part-of: {{ .Chart.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: generator
+          image: "{{ .Values.generator.image.repository }}:{{ .Values.generator.image.tag }}"
+          imagePullPolicy: {{ .Values.generator.image.pullPolicy }}
+          securityContext:
+            capabilities:
+              add:
+                - SYS_ADMIN
+          resources:
+            requests:
+              memory: {{ .Values.generator.resources.requests.memory }}
+              cpu: {{ .Values.generator.resources.requests.cpu }}
+            limits:
+              memory: {{ .Values.generator.resources.limits.memory }}
+              cpu: {{ .Values.generator.resources.limits.cpu }}
+          volumeMounts:
+            - name: assets
+              mountPath: /src
+            - name: secrets
+              mountPath: /app/config.yaml
+              subPath: config.yaml
+              readOnly: true
+          livenessProbe:
+            exec:
+              command:
+                - "test"
+                - "-n"
+                - "`find /src -mmin -1`"
+            initialDelaySeconds: 10
+            periodSeconds: 60
+        - name: nginx
+          image: "{{ .Values.nginx.image.repository }}:{{ .Values.nginx.image.tag }}"
+          imagePullPolicy: {{ .Values.nginx.image.pullPolicy }}
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+          resources:
+            requests:
+              memory: {{ .Values.nginx.resources.requests.memory }}
+              cpu: {{ .Values.nginx.resources.requests.cpu }}
+            limits:
+              memory: {{ .Values.nginx.resources.limits.memory }}
+              cpu: {{ .Values.nginx.resources.limits.cpu }}
+          ports:
+            - containerPort: 80
+          env:
+            - name: TZ
+              value: America/New_York
+          volumeMounts:
+            - name: assets
+              mountPath: /var/www/assets
+            - name: config
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: nginx.conf
+            - name: nginx-cache
+              mountPath: /var/cache/nginx
+            - name: nginx-run
+              mountPath: /var/run
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+      volumes:
+        - name: assets
+          emptyDir: {}
+        - name: config
+          configMap:
+            name: {{ .Chart.Name }}-conf
+        - name: secrets
+          secret:
+            secretName: {{ .Values.secretName }}
+        - name: nginx-cache
+          emptyDir: {}
+        - name: nginx-run
+          emptyDir: {}
