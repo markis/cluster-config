@@ -333,7 +333,7 @@ infra:
             - grafana.k3s.lan
         grafana.ini:
           server:
-            root_url: http://grafana.k3s.lan
+            root_url: https://grafana.markis.network
       alertmanager:
         enabled: false
       nodeExporter:
