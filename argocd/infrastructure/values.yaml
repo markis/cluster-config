@@ -330,7 +330,7 @@ infra:
           enabled: true
           ingressClassName: traefik
           hosts:
-            - grafana.k3s.lan
+            - grafana.markis.network
         grafana.ini:
           server:
             root_url: https://grafana.markis.network
