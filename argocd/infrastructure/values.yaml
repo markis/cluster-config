@@ -333,6 +333,7 @@ infra:
             - grafana.markis.network
         grafana.ini:
           server:
+            domain: grafana.markis.network
             root_url: https://grafana.markis.network
       alertmanager:
         enabled: false
