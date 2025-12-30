@@ -271,6 +271,155 @@ kubectl logs -n argocd -l app.kubernetes.io/name=argocd-application-controller
 kubectl logs -n argocd -l app.kubernetes.io/name=argocd-server
 ```
 
+## Exposing Services via OPNsense (Caddy + relayd)
+
+Services in the k3s cluster are exposed externally through OPNsense using Caddy (reverse proxy with TLS) and relayd (load balancing). This provides a single entry point with automatic TLS certificates.
+
+### Architecture
+
+```
+External:  https://myservice.markis.network
+              ↓
+           Unbound DNS → 10.0.0.1 (OPNsense)
+              ↓
+           Caddy (TLS termination, header rewrite)
+              ↓
+Internal:  myservice.k3s.lan:8080
+              ↓
+           Unbound DNS → 10.0.0.16 (relayd VIP)
+              ↓
+           relayd (round-robin load balancing)
+              ↓
+           10.0.0.10-13:80 (k3s nodes)
+              ↓
+           Traefik Ingress (Host: myservice.k3s.lan)
+              ↓
+           Service in cluster
+```
+
+### Adding a New Service
+
+When adding a new service (e.g., `argocd`), configure the following in OPNsense:
+
+#### 1. Unbound DNS - External Override
+
+**Services → Unbound DNS → Host Overrides → Add**
+
+| Setting | Value |
+|---------|-------|
+| Host | `argocd` |
+| Domain | `markis.network` |
+| Type | A |
+| IP | `10.0.0.1` |
+| Description | `ArgoCD - route to Caddy` |
+
+This routes external hostname to Caddy on OPNsense.
+
+#### 2. Unbound DNS - Internal Override
+
+**Services → Unbound DNS → Host Overrides → Add**
+
+| Setting | Value |
+|---------|-------|
+| Host | `argocd` |
+| Domain | `k3s.lan` |
+| Type | A |
+| IP | `10.0.0.16` |
+| Description | `ArgoCD - route to relayd VIP` |
+
+This routes internal hostname to the relayd VIP.
+
+#### 3. Caddy - Domain
+
+**Services → Caddy Web Server → Reverse Proxy → Domains → Add**
+
+| Setting | Value |
+|---------|-------|
+| Domain | `argocd.markis.network` |
+| Description | `ArgoCD` |
+
+#### 4. Caddy - Handler
+
+**Services → Caddy Web Server → Reverse Proxy → Handlers → Add**
+
+| Setting | Value |
+|---------|-------|
+| Domain | `argocd.markis.network` |
+| Upstream Domain | `argocd.k3s.lan` |
+| Upstream Port | `8080` |
+
+#### 5. Caddy - Header (Rewrite Host)
+
+**Services → Caddy Web Server → Reverse Proxy → Headers → Add**
+
+| Setting | Value |
+|---------|-------|
+| Handler | (select the argocd handler) |
+| Header Type | `Host` |
+| Header Value | `^(.+)\.markis\.network$` |
+| Header Replace | `$1.k3s.lan` |
+
+This regex rewrites `argocd.markis.network` → `argocd.k3s.lan` so Traefik matches the correct Ingress.
+
+#### 6. Traefik Ingress (in cluster)
+
+Add an Ingress resource for your service:
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd
+  namespace: argocd
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: argocd.k3s.lan
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: argocd-server
+                port:
+                  number: 80
+```
+
+#### 7. Application Configuration (if needed)
+
+If your application validates the Origin header (like Grafana), update its `root_url` or equivalent setting to use the external URL:
+
+```yaml
+# Example for Grafana
+grafana.ini:
+  server:
+    root_url: https://argocd.markis.network
+```
+
+### Existing Infrastructure
+
+The following are already configured and shared by all services:
+
+| Component | Configuration |
+|-----------|---------------|
+| **relayd VIP** | `10.0.0.16` on LAN (ax1) interface |
+| **relayd Virtual Server** | `k3s_http` - listens on `:8080`, forwards to `pi_cluster:80` |
+| **Firewall Rule** | Allow TCP 8080 to `10.0.0.16` |
+| **Caddy Header Regex** | `^(.+)\.markis\.network$` → `$1.k3s.lan` (reusable) |
+
+### Quick Checklist
+
+For each new service, add:
+
+- [ ] Unbound: `service.markis.network` → `10.0.0.1`
+- [ ] Unbound: `service.k3s.lan` → `10.0.0.16`
+- [ ] Caddy Domain: `service.markis.network`
+- [ ] Caddy Handler: upstream `service.k3s.lan:8080`
+- [ ] Caddy Header: reuse the regex pattern (or create per-handler)
+- [ ] Traefik Ingress: `host: service.k3s.lan`
+- [ ] App config: update `root_url` if needed for CORS
+
 ## Security Considerations
 
 1. **RBAC**: Create custom ArgoCD projects with limited permissions
