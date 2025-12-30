@@ -362,5 +362,4 @@ infra:
             cpu: 200m
             memory: 200Mi
         admissionWebhooks:
-          patch:
-            enabled: false
+          enabled: false
