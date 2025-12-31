@@ -19,11 +19,23 @@ spec:
       labels:
         app: {{ $chartName }}
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
       containers:
 {{- range $values.detectors }}
         - name: {{ $chartName }}-{{ .name }}
           image: "{{ $values.image.repository }}:{{ $values.image.tag }}"
           imagePullPolicy: {{ $values.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
           resources:
             {{ toYaml $values.resources | nindent 12 }}
           env:
