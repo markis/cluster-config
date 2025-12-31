@@ -287,6 +287,14 @@ infra:
           - /webhooks/0/clientConfig/caBundle
     values: |
       # Lightweight config for Raspberry Pi cluster
+      # Disable expensive default rules that cause timeouts on Pi cluster
+      defaultRules:
+        rules:
+          kubeApiserver: false
+          kubeApiserverAvailability: false
+          kubeApiserverBurnrate: false
+          kubeApiserverHistogram: false
+          kubeApiserverSlos: false
       prometheus:
         prometheusSpec:
           nodeSelector:
@@ -298,8 +306,8 @@ infra:
               cpu: 200m
               memory: 512Mi
             limits:
-              cpu: 1000m
-              memory: 1Gi
+              cpu: "2"
+              memory: 2Gi
           storageSpec:
             volumeClaimTemplate:
               spec:
