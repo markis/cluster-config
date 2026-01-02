@@ -23,8 +23,11 @@ deployment:
       cpu: "1"
 
 service:
-  type: LoadBalancer
+  type: ClusterIP
   port: 8501
   targetPort: 8501
+
+ingress:
+  host: dynasty.markis.network
 
 secretName: dynasty-secrets
