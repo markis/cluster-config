@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+    app: {{ .Chart.Name }}
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/component: meter-reader
+    app.kubernetes.io/part-of: {{ .Chart.Name }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate  # Only one instance should access the USB device
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/component: meter-reader
+        app.kubernetes.io/part-of: {{ .Chart.Name }}
+    spec:
+      # Target nodes with RTL-SDR hardware
+      nodeSelector:
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
+
+      initContainers:
+        # Substitute environment variables in config file
+        - name: config-init
+          image: bhgedigital/envsubst:latest
+          command: ['sh', '-c', 'envsubst < /config-template/rtlamr2mqtt.yaml > /config/rtlamr2mqtt.yaml']
+          env:
+            - name: MQTT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.mqtt.secretName }}
+                  key: mqtt-username
+            - name: MQTT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.mqtt.secretName }}
+                  key: mqtt-password
+          volumeMounts:
+            - name: config-template
+              mountPath: /config-template
+              readOnly: true
+            - name: config
+              mountPath: /config
+
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: TZ
+              value: America/New_York
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/rtlamr2mqtt.yaml
+              subPath: rtlamr2mqtt.yaml
+              readOnly: true
+            - name: dev
+              mountPath: /dev
+            - name: healthcheck
+              mountPath: /var/run
+          # Privileged access required for USB RTL-SDR device
+          securityContext:
+            privileged: true
+          # File-based health check matching Dockerfile HEALTHCHECK
+          livenessProbe:
+            exec:
+              command: ["/usr/bin/healthcheck.sh"]
+            initialDelaySeconds: 30
+            periodSeconds: 60
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command: ["/usr/bin/healthcheck.sh"]
+            initialDelaySeconds: 30
+            periodSeconds: 60
+            timeoutSeconds: 10
+            failureThreshold: 3
+
+      volumes:
+        - name: config-template
+          configMap:
+            name: {{ .Chart.Name }}-config
+        - name: config
+          emptyDir: {}
+        - name: healthcheck
+          emptyDir: {}
+        - name: dev
+          hostPath:
+            path: /dev
+            type: Directory

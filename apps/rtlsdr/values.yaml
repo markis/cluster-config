@@ -1,0 +1,41 @@
+image:
+  repository: ghcr.io/markis/rtlamr2mqtt
+  tag: sha-74f9180
+  pullPolicy: IfNotPresent
+
+# Node selector for RTL-SDR equipped nodes
+# Label your nodes with: kubectl label nodes <node-name> feature.node.kubernetes.io/usb-rtlsdr=true
+nodeSelector:
+  feature.node.kubernetes.io/usb-rtlsdr: "true"
+
+mqtt:
+  host: mqtt.default.svc.cluster.local
+  port: 1883
+  secretName: rtlsdr-secrets
+
+onepassword:
+  itemPath: "vaults/k8s-secrets/items/rtlsdr"
+
+meters:
+  - name: Electric Meter
+    icon: mdi:gauge
+    device_class: energy
+    id: 69782793
+    protocol: scm+
+    format: "######.##"
+    unit_of_measurement: "kWh"
+  - name: Gas Meter
+    icon: mdi:gauge
+    device_class: gas
+    id: 56480283
+    protocol: scm
+    format: "########"
+    unit_of_measurement: "ft³"
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
