@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-config
+  labels:
+    app: {{ .Chart.Name }}
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: {{ .Chart.Name }}
+data:
+  rtlamr2mqtt.yaml: |
+    general:
+      verbosity: info
+
+    mqtt:
+      host: {{ .Values.mqtt.host }}
+      port: {{ .Values.mqtt.port }}
+      user: "${MQTT_USERNAME}"
+      password: "${MQTT_PASSWORD}"
+
+    meters:
+    {{- range .Values.meters }}
+      - name: {{ .name }}
+        icon: {{ .icon }}
+        device_class: {{ .device_class }}
+        id: {{ .id | int }}
+        protocol: {{ .protocol }}
+        format: {{ .format | quote }}
+        unit_of_measurement: {{ .unit_of_measurement | quote }}
+    {{- end }}
