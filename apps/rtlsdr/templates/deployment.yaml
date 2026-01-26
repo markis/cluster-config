@@ -71,6 +71,8 @@ spec:
           # Requires udev rules installed on the host node
           securityContext:
             privileged: false
+            runAsUser: 0
+            runAsGroup: 0
           # File-based health check matching Dockerfile HEALTHCHECK
           livenessProbe:
             exec:
