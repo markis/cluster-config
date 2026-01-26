@@ -67,13 +67,10 @@ spec:
               mountPath: /dev/bus/usb
             - name: healthcheck
               mountPath: /var/run
-          # Non-privileged with SYS_RAWIO capability for USB access
-          # Requires udev rules (MODE="0666") on the host
+          # Privileged required for libusb USB access
+          # SYS_RAWIO capability alone is insufficient
           securityContext:
-            privileged: false
-            capabilities:
-              add:
-              - SYS_RAWIO
+            privileged: true
           # File-based health check matching Dockerfile HEALTHCHECK
           livenessProbe:
             exec:
