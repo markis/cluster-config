@@ -67,12 +67,10 @@ spec:
               mountPath: /dev/bus/usb
             - name: healthcheck
               mountPath: /var/run
-          # Non-privileged access via udev rules (MODE="0666")
-          # Requires udev rules installed on the host node
+          # Privileged required for libusb to access USB devices
+          # udev rules (MODE="0666") alone are insufficient
           securityContext:
-            privileged: false
-            runAsUser: 0
-            runAsGroup: 0
+            privileged: true
           # File-based health check matching Dockerfile HEALTHCHECK
           livenessProbe:
             exec:
