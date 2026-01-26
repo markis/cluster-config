@@ -1,6 +1,6 @@
 image:
   repository: ghcr.io/markis/rtlamr2mqtt
-  tag: sha-74f9180
+  tag: sha-7195736
   pullPolicy: IfNotPresent
 
 # Node selector for RTL-SDR equipped nodes
