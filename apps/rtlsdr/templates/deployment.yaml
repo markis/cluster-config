@@ -63,13 +63,14 @@ spec:
               mountPath: /etc/rtlamr2mqtt.yaml
               subPath: rtlamr2mqtt.yaml
               readOnly: true
-            - name: dev
-              mountPath: /dev
+            - name: usb
+              mountPath: /dev/bus/usb
             - name: healthcheck
               mountPath: /var/run
-          # Privileged access required for USB RTL-SDR device
+          # Non-privileged access via udev rules (MODE="0666")
+          # Requires udev rules installed on the host node
           securityContext:
-            privileged: true
+            privileged: false
           # File-based health check matching Dockerfile HEALTHCHECK
           livenessProbe:
             exec:
@@ -94,7 +95,7 @@ spec:
           emptyDir: {}
         - name: healthcheck
           emptyDir: {}
-        - name: dev
+        - name: usb
           hostPath:
-            path: /dev
+            path: /dev/bus/usb
             type: Directory
