@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/component: config
     app.kubernetes.io/part-of: {{ .Chart.Name }}
 data:
-  rtlamr2mqtt.yaml: |
+  rtlsdr2mqtt.yaml: |
     general:
       verbosity: info
 
@@ -23,6 +23,7 @@ data:
       - name: {{ .name }}
         icon: {{ .icon }}
         device_class: {{ .device_class }}
+        state_class: {{ .state_class | default "total_increasing" }}
         id: {{ .id | int }}
         protocol: {{ .protocol }}
         format: {{ .format | quote }}
