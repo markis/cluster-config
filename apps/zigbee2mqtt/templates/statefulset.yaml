@@ -15,14 +15,24 @@ spec:
       labels:
         app: {{ .Chart.Name }}
     spec:
-      containers:
-      - name: zigbee2mqtt
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        ports:
-        - name: http
-          containerPort: {{ .Values.frontend.port }}
-          protocol: TCP
+      initContainers:
+      - name: config-init
+        image: busybox:1.36
+        command:
+        - sh
+        - -c
+        - |
+          # Replace environment variables in config and write to data volume
+          cat /config-template/configuration.yaml | \
+            sed "s/\${MQTT_USERNAME}/$MQTT_USERNAME/g" | \
+            sed "s/\${MQTT_PASSWORD}/$MQTT_PASSWORD/g" | \
+            sed "s/\${ZIGBEE_PAN_ID}/$ZIGBEE_PAN_ID/g" | \
+            sed "s/\${ZIGBEE_EXT_PAN_ID}/$ZIGBEE_EXT_PAN_ID/g" | \
+            sed "s/\${ZIGBEE_NETWORK_KEY}/$ZIGBEE_NETWORK_KEY/g" \
+            > /data/configuration.yaml
+          
+          echo "Configuration initialized"
+          cat /data/configuration.yaml
         env:
         - name: MQTT_USERNAME
           valueFrom:
@@ -49,15 +59,25 @@ spec:
             secretKeyRef:
               name: {{ .Values.secretName }}
               key: zigbee-network-key
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: config
+          mountPath: /config-template
+      containers:
+      - name: zigbee2mqtt
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.frontend.port }}
+          protocol: TCP
+        env:
         - name: TZ
           value: "America/Los_Angeles"
         volumeMounts:
         - name: data
           mountPath: /app/data
-        - name: config
-          mountPath: /app/data/configuration.yaml
-          subPath: configuration.yaml
-          readOnly: true
         resources:
           {{- toYaml .Values.resources | nindent 10 }}
         livenessProbe:
