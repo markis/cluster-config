@@ -27,6 +27,7 @@ data:
     advanced:
       log_level: {{ .Values.log.level }}
       pan_id: ${ZIGBEE_PAN_ID}
+      ext_pan_id: ${ZIGBEE_EXT_PAN_ID}
       channel: {{ .Values.advanced.channel }}
       network_key: ${ZIGBEE_NETWORK_KEY}
       transmit_power: {{ .Values.advanced.transmitPower }}
