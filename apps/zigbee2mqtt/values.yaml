@@ -17,7 +17,7 @@ advanced:
   # networkKey: array of 16 bytes for encryption
   # panId: unique network identifier (0-65535)
   # extPanId: array of 8 bytes for extended network identifier
-  channel: 25
+  channel: 15  # Different from other instance (channel 25)
 
 # MQTT connection
 mqtt:
