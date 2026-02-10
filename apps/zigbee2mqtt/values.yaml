@@ -1,3 +1,6 @@
+# Deployment disabled - set replicas to 1 when ready to enable
+replicaCount: 0
+
 image:
   repository: koenkk/zigbee2mqtt
   tag: "1.41.0"
