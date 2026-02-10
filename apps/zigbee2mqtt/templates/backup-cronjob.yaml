@@ -1,0 +1,87 @@
+{{- if .Values.backup.enabled -}}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Chart.Name }}-backup
+  labels:
+    app: {{ .Chart.Name }}
+    component: backup
+spec:
+  schedule: {{ .Values.backup.schedule | quote }}
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: {{ .Chart.Name }}
+            component: backup
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: backup
+            image: alpine:3.19
+            command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              apk add --no-cache openssh-client rsync
+
+              # Create SSH directory
+              mkdir -p ~/.ssh
+              chmod 700 ~/.ssh
+
+              # Add SSH key from secret
+              echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+              chmod 600 ~/.ssh/id_rsa
+
+              # Disable host key checking for internal network
+              echo "StrictHostKeyChecking no" > ~/.ssh/config
+
+              # Create backup with timestamp
+              TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+              BACKUP_NAME="zigbee2mqtt-${TIMESTAMP}.tar.gz"
+
+              echo "Creating backup: ${BACKUP_NAME}"
+              tar czf "/tmp/${BACKUP_NAME}" -C /data .
+
+              # Ensure backup directory exists on remote
+              ssh -i ~/.ssh/id_rsa root@{{ .Values.backup.destination.host }} \
+                "mkdir -p {{ .Values.backup.destination.path }}"
+
+              # Copy backup to destination
+              echo "Uploading backup to {{ .Values.backup.destination.host }}:{{ .Values.backup.destination.path }}"
+              scp -i ~/.ssh/id_rsa "/tmp/${BACKUP_NAME}" \
+                "root@{{ .Values.backup.destination.host }}:{{ .Values.backup.destination.path }}/"
+
+              # Cleanup old backups (keep last N)
+              echo "Cleaning up old backups (keeping last {{ .Values.backup.retention }})"
+              ssh -i ~/.ssh/id_rsa root@{{ .Values.backup.destination.host }} \
+                "cd {{ .Values.backup.destination.path }} && ls -t zigbee2mqtt-*.tar.gz | tail -n +{{ add .Values.backup.retention 1 }} | xargs -r rm"
+
+              echo "Backup completed successfully"
+            env:
+            - name: SSH_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName }}
+                  key: backup-ssh-key
+            volumeMounts:
+            - name: data
+              mountPath: /data
+              readOnly: true
+            resources:
+              requests:
+                memory: "64Mi"
+                cpu: "50m"
+              limits:
+                memory: "128Mi"
+                cpu: "200m"
+          volumes:
+          - name: data
+            persistentVolumeClaim:
+              claimName: data-{{ .Chart.Name }}-0
+{{- end }}

@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Chart.Name }}-config"
+  labels:
+    app: {{ .Chart.Name }}
+data:
+  configuration.yaml: |
+    # Home Assistant integration
+    homeassistant: {{ .Values.homeassistant.enabled }}
+
+    # MQTT settings
+    mqtt:
+      server: {{ .Values.mqtt.server }}
+      base_topic: {{ .Values.mqtt.baseTopic }}
+      user: ${MQTT_USERNAME}
+      password: ${MQTT_PASSWORD}
+
+    # Serial settings
+    serial:
+      port: {{ .Values.serial.port }}
+      baudrate: {{ .Values.serial.baudrate }}
+      adapter: {{ .Values.serial.adapter }}
+      disable_led: {{ .Values.serial.disableLed }}
+
+    # Advanced settings
+    advanced:
+      log_level: {{ .Values.log.level }}
+      pan_id: {{ .Values.advanced.panId }}
+      channel: {{ .Values.advanced.channel }}
+      network_key: {{ .Values.advanced.networkKey }}
+      transmit_power: {{ .Values.advanced.transmitPower }}
+      homeassistant_discovery_topic: {{ .Values.homeassistant.discoveryTopic }}
+      homeassistant_status_topic: {{ .Values.homeassistant.statusTopic }}
+
+    # Frontend settings
+    frontend:
+      port: {{ .Values.frontend.port }}
+      auth_token: {{ .Values.frontend.auth }}
+
+    # Device options
+    device_options:
+      # Devices will retain their friendly names between restarts
+      retain: true

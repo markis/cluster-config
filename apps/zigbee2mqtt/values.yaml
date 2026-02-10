@@ -1,0 +1,82 @@
+image:
+  repository: koenkk/zigbee2mqtt
+  tag: "1.41.0"
+  pullPolicy: IfNotPresent
+
+# Zigbee adapter configuration
+serial:
+  port: "tcp://10.0.0.8:7638"
+  baudrate: 115200
+  adapter: "zstack"
+  disableLed: false
+
+# Advanced Zigbee settings
+advanced:
+  transmitPower: 20
+  networkKey: "GENERATE"  # Will be auto-generated on first start
+  panId: "GENERATE"       # Will be auto-generated on first start
+  channel: 11
+
+# MQTT connection
+mqtt:
+  server: "mqtt://mqtt.default.svc.cluster.local:1883"
+  baseTopic: "zigbee2mqtt"
+  # username and password come from 1Password secret
+
+# Home Assistant integration
+homeassistant:
+  enabled: true
+  discoveryTopic: "homeassistant"
+  statusTopic: "homeassistant/status"
+
+# Frontend configuration
+frontend:
+  enabled: true
+  port: 8080
+  auth: false  # Authentication handled by Traefik/Caddy
+
+# Logging
+log:
+  level: "info"
+
+# Storage
+persistence:
+  enabled: true
+  storageClassName: ""  # Use cluster default
+  size: "1Gi"
+
+# Resources
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+# Service
+service:
+  type: ClusterIP
+  port: 8080
+
+# Ingress
+ingress:
+  enabled: true
+  host: "zigbee.markis.network"
+  ingressClassName: "traefik"
+
+# 1Password integration
+secretName: zigbee2mqtt-secrets
+onepassword:
+  itemPath: "vaults/k8s-secrets/items/zigbee2mqtt"
+
+# Backup configuration
+backup:
+  enabled: true
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  # SSH backup destination
+  destination:
+    host: "10.0.0.10"  # Target node for backups
+    path: "/mnt/backups/zigbee2mqtt"  # Path on target node
+  # Retention: keep last N backups
+  retention: 7

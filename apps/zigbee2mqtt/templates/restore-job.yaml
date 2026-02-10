@@ -1,0 +1,93 @@
+# This is a manual Job template for restoring from backup
+# To use:
+# 1. Update BACKUP_FILE env var with the backup filename to restore
+# 2. kubectl apply -f this file
+# 3. Monitor: kubectl logs -f job/zigbee2mqtt-restore
+# 4. Delete job when done: kubectl delete job zigbee2mqtt-restore
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ .Chart.Name }}-restore"
+  labels:
+    app: {{ .Chart.Name }}
+    component: restore
+  annotations:
+    # This prevents ArgoCD from auto-applying this job
+    argocd.argoproj.io/sync-options: Prune=false
+spec:
+  ttlSecondsAfterFinished: 3600  # Auto-cleanup after 1 hour
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        component: restore
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: restore
+        image: alpine:3.19
+        command:
+        - /bin/sh
+        - -c
+        - |
+          set -e
+
+          if [ -z "$BACKUP_FILE" ]; then
+            echo "ERROR: BACKUP_FILE environment variable must be set"
+            echo "Example: BACKUP_FILE=zigbee2mqtt-20260210-020000.tar.gz"
+            exit 1
+          fi
+
+          apk add --no-cache openssh-client
+
+          # Create SSH directory
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          # Add SSH key from secret
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          # Disable host key checking for internal network
+          echo "StrictHostKeyChecking no" > ~/.ssh/config
+
+          # Download backup from destination
+          echo "Downloading backup: ${BACKUP_FILE}"
+          scp -i ~/.ssh/id_rsa \
+            "root@{{ .Values.backup.destination.host }}:{{ .Values.backup.destination.path }}/${BACKUP_FILE}" \
+            "/tmp/${BACKUP_FILE}"
+
+          # Clear existing data (be careful!)
+          echo "Clearing existing data..."
+          rm -rf /data/*
+
+          # Extract backup
+          echo "Restoring backup..."
+          tar xzf "/tmp/${BACKUP_FILE}" -C /data
+
+          echo "Restore completed successfully"
+          echo "You can now restart the zigbee2mqtt StatefulSet"
+        env:
+        - name: BACKUP_FILE
+          # UPDATE THIS VALUE before applying the job
+          value: ""  # e.g., "zigbee2mqtt-20260210-020000.tar.gz"
+        - name: SSH_PRIVATE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.secretName }}
+              key: backup-ssh-key
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: data-{{ .Chart.Name }}-0
