@@ -36,7 +36,6 @@ data:
     # Frontend settings
     frontend:
       port: {{ .Values.frontend.port }}
-      auth_token: {{ .Values.frontend.auth }}
 
     # Device options
     device_options:
