@@ -22,10 +22,11 @@ data:
       baudrate: {{ .Values.serial.baudrate }}
       adapter: {{ .Values.serial.adapter }}
       disable_led: {{ .Values.serial.disableLed }}
+      rtscts: false
 
     # Advanced settings
     advanced:
-      log_level: {{ .Values.log.level }}
+      log_level: debug
       pan_id: ${ZIGBEE_PAN_ID}
       ext_pan_id: ${ZIGBEE_EXT_PAN_ID}
       channel: {{ .Values.advanced.channel }}
@@ -33,6 +34,8 @@ data:
       transmit_power: {{ .Values.advanced.transmitPower }}
       homeassistant_discovery_topic: {{ .Values.homeassistant.discoveryTopic }}
       homeassistant_status_topic: {{ .Values.homeassistant.statusTopic }}
+      adapter_concurrent: null
+      adapter_delay: 0
 
     # Frontend settings
     frontend:
