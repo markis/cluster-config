@@ -26,9 +26,9 @@ data:
     # Advanced settings
     advanced:
       log_level: {{ .Values.log.level }}
-      pan_id: {{ .Values.advanced.panId }}
+      pan_id: ${ZIGBEE_PAN_ID}
       channel: {{ .Values.advanced.channel }}
-      network_key: {{ .Values.advanced.networkKey }}
+      network_key: ${ZIGBEE_NETWORK_KEY}
       transmit_power: {{ .Values.advanced.transmitPower }}
       homeassistant_discovery_topic: {{ .Values.homeassistant.discoveryTopic }}
       homeassistant_status_topic: {{ .Values.homeassistant.statusTopic }}

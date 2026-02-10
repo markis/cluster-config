@@ -13,8 +13,9 @@ serial:
 # Advanced Zigbee settings
 advanced:
   transmitPower: 20
-  networkKey: "GENERATE"  # Will be auto-generated on first start
-  panId: "GENERATE"       # Will be auto-generated on first start
+  # Network key and PAN ID come from 1Password secret
+  # networkKey: array of 16 bytes for encryption
+  # panId: unique network identifier (0-65535)
   channel: 11
 
 # MQTT connection
