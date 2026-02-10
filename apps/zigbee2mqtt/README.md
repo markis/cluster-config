@@ -20,6 +20,7 @@ Create a 1Password item in `k8s-secrets` vault named `zigbee2mqtt` with:
 | `mqtt-username` | Username for EMQX broker | `zigbee2mqtt` |
 | `mqtt-password` | Password for EMQX broker | `your-secure-password` |
 | `zigbee-pan-id` | Zigbee PAN ID (0-65535) | `8397` |
+| `zigbee-ext-pan-id` | Extended PAN ID (8 bytes as JSON array) | `[19, 56, 98, 54, 49, 88, 100, 169]` |
 | `zigbee-network-key` | Network encryption key (16 bytes as JSON array) | `[33, 178, 70, 38, 20, 158, 0, 187, 35, 115, 240, 18, 219, 196, 177, 87]` |
 | `backup-ssh-key` | Private SSH key for backup node access (optional, for backups) | `-----BEGIN OPENSSH PRIVATE KEY-----...` |
 
@@ -27,6 +28,9 @@ Create a 1Password item in `k8s-secrets` vault named `zigbee2mqtt` with:
 ```bash
 # Generate PAN ID (random number 0-65535)
 python3 -c "import secrets; print(secrets.randbelow(0xFFFF))"
+
+# Generate Extended PAN ID (8 random bytes as JSON array)
+python3 -c "import secrets; print('[' + ', '.join(str(secrets.randbelow(256)) for _ in range(8)) + ']')"
 
 # Generate Network Key (16 random bytes as JSON array)
 python3 -c "import secrets; print('[' + ', '.join(str(secrets.randbelow(256)) for _ in range(16)) + ']')"
