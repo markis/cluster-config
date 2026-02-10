@@ -16,7 +16,8 @@ advanced:
   # Network key and PAN ID come from 1Password secret
   # networkKey: array of 16 bytes for encryption
   # panId: unique network identifier (0-65535)
-  channel: 11
+  # extPanId: array of 8 bytes for extended network identifier
+  channel: 25
 
 # MQTT connection
 mqtt:
