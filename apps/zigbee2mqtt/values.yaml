@@ -80,3 +80,8 @@ backup:
     path: "/mnt/backups/zigbee2mqtt"  # Path on target node
   # Retention: keep last N backups
   retention: 7
+
+# Restore configuration (manual - only enable when needed)
+restore:
+  enabled: false
+  backupFile: ""  # e.g., "zigbee2mqtt-20260210-020000.tar.gz"

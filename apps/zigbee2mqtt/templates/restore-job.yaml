@@ -1,9 +1,12 @@
 # This is a manual Job template for restoring from backup
 # To use:
-# 1. Update BACKUP_FILE env var with the backup filename to restore
-# 2. kubectl apply -f this file
-# 3. Monitor: kubectl logs -f job/zigbee2mqtt-restore
-# 4. Delete job when done: kubectl delete job zigbee2mqtt-restore
+# 1. Enable in values.yaml: restore.enabled=true
+# 2. Set BACKUP_FILE in values.yaml: restore.backupFile="zigbee2mqtt-20260210-020000.tar.gz"
+# 3. kubectl apply or let ArgoCD sync
+# 4. Monitor: kubectl logs -f job/zigbee2mqtt-restore
+# 5. Delete job when done: kubectl delete job zigbee2mqtt-restore
+# 6. Disable in values.yaml: restore.enabled=false
+{{- if .Values.restore.enabled -}}
 ---
 apiVersion: batch/v1
 kind: Job
@@ -70,8 +73,7 @@ spec:
           echo "You can now restart the zigbee2mqtt StatefulSet"
         env:
         - name: BACKUP_FILE
-          # UPDATE THIS VALUE before applying the job
-          value: ""  # e.g., "zigbee2mqtt-20260210-020000.tar.gz"
+          value: {{ .Values.restore.backupFile | quote }}
         - name: SSH_PRIVATE_KEY
           valueFrom:
             secretKeyRef:
@@ -91,3 +93,4 @@ spec:
       - name: data
         persistentVolumeClaim:
           claimName: data-{{ .Chart.Name }}-0
+{{- end }}
