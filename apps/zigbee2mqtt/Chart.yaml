@@ -1,0 +1,6 @@
+apiVersion: v2
+name: zigbee2mqtt
+description: Zigbee to MQTT bridge for controlling Zigbee devices
+type: application
+version: 0.1.0
+appVersion: "1.41.0"
