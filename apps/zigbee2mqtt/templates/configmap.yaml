@@ -26,7 +26,7 @@ data:
 
     # Advanced settings
     advanced:
-      log_level: debug
+      log_level: {{ .Values.log.level }}
       pan_id: ${ZIGBEE_PAN_ID}
       ext_pan_id: ${ZIGBEE_EXT_PAN_ID}
       channel: {{ .Values.advanced.channel }}

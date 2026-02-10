@@ -6,7 +6,7 @@ metadata:
     app: {{ .Chart.Name }}
 spec:
   serviceName: {{ .Chart.Name }}
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: {{ .Chart.Name }}
