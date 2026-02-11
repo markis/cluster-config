@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-apk add --no-cache openssh-client rsync
+apk add --no-cache openssh-client
 
 # Create SSH directory
 mkdir -p ~/.ssh
