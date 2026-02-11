@@ -23,47 +23,14 @@ spec:
           containers:
           - name: backup
             image: alpine:3.19
-            command:
-            - /bin/sh
-            - -c
-            - |
-              set -e
-              apk add --no-cache openssh-client rsync
-
-              # Create SSH directory
-              mkdir -p ~/.ssh
-              chmod 700 ~/.ssh
-
-              # Add SSH key from secret
-              echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-              chmod 600 ~/.ssh/id_rsa
-
-              # Disable host key checking for internal network
-              echo "StrictHostKeyChecking no" > ~/.ssh/config
-
-              # Create backup with timestamp
-              TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-              BACKUP_NAME="zigbee2mqtt-${TIMESTAMP}.tar.gz"
-
-              echo "Creating backup: ${BACKUP_NAME}"
-              tar czf "/tmp/${BACKUP_NAME}" -C /data .
-
-              # Ensure backup directory exists on remote
-              ssh -i ~/.ssh/id_rsa root@{{ .Values.backup.destination.host }} \
-                "mkdir -p {{ .Values.backup.destination.path }}"
-
-              # Copy backup to destination
-              echo "Uploading backup to {{ .Values.backup.destination.host }}:{{ .Values.backup.destination.path }}"
-              scp -i ~/.ssh/id_rsa "/tmp/${BACKUP_NAME}" \
-                "root@{{ .Values.backup.destination.host }}:{{ .Values.backup.destination.path }}/"
-
-              # Cleanup old backups (keep last N)
-              echo "Cleaning up old backups (keeping last {{ .Values.backup.retention }})"
-              ssh -i ~/.ssh/id_rsa root@{{ .Values.backup.destination.host }} \
-                "cd {{ .Values.backup.destination.path }} && ls -t zigbee2mqtt-*.tar.gz | tail -n +{{ add .Values.backup.retention 1 }} | xargs -r rm"
-
-              echo "Backup completed successfully"
+            command: ["/bin/sh", "/scripts/backup.sh"]
             env:
+            - name: BACKUP_HOST
+              value: {{ .Values.backup.destination.host | quote }}
+            - name: BACKUP_PATH
+              value: {{ .Values.backup.destination.path | quote }}
+            - name: BACKUP_RETENTION
+              value: {{ .Values.backup.retention | quote }}
             - name: SSH_PRIVATE_KEY
               valueFrom:
                 secretKeyRef:
@@ -73,6 +40,8 @@ spec:
             - name: data
               mountPath: /data
               readOnly: true
+            - name: scripts
+              mountPath: /scripts
             resources:
               requests:
                 memory: "64Mi"
@@ -84,4 +53,8 @@ spec:
           - name: data
             persistentVolumeClaim:
               claimName: data-{{ .Chart.Name }}-0
+          - name: scripts
+            configMap:
+              name: {{ .Chart.Name }}-scripts
+              defaultMode: 0755
 {{- end }}
