@@ -8,11 +8,11 @@ mkdir -p ~/.ssh
 chmod 700 ~/.ssh
 
 # Add SSH key from secret
-echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+echo "$SSH_PRIVATE_KEY" >~/.ssh/id_rsa
 chmod 600 ~/.ssh/id_rsa
 
 # Disable host key checking for internal network
-echo "StrictHostKeyChecking no" > ~/.ssh/config
+echo "StrictHostKeyChecking no" >~/.ssh/config
 
 # Create backup with timestamp
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
