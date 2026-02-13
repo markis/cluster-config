@@ -27,6 +27,8 @@ spec:
             env:
             - name: BACKUP_HOST
               value: {{ .Values.backup.destination.host | quote }}
+            - name: BACKUP_USER
+              value: {{ .Values.backup.destination.user | quote }}
             - name: BACKUP_PATH
               value: {{ .Values.backup.destination.path | quote }}
             - name: BACKUP_RETENTION

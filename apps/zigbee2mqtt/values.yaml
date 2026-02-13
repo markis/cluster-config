@@ -82,6 +82,7 @@ backup:
   # SSH backup destination
   destination:
     host: "10.0.0.70" # Target node for backups
+    user: "markis" # SSH user for backup host
     path: "/mnt/drive0/servers/zigbee" # Path on target node
   # Retention: keep last N backups
   retention: 7

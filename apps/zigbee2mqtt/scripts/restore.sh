@@ -23,7 +23,7 @@ echo "StrictHostKeyChecking no" >~/.ssh/config
 # Download backup from destination
 echo "Downloading backup: ${BACKUP_FILE}"
 scp -i ~/.ssh/id_rsa \
-  "root@${BACKUP_HOST}:${BACKUP_PATH}/${BACKUP_FILE}" \
+  "${BACKUP_USER}@${BACKUP_HOST}:${BACKUP_PATH}/${BACKUP_FILE}" \
   "/tmp/${BACKUP_FILE}"
 
 # Clear existing data (be careful!)

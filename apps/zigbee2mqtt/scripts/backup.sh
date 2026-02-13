@@ -22,17 +22,17 @@ echo "Creating backup: ${BACKUP_NAME}"
 tar czf "/tmp/${BACKUP_NAME}" -C /data .
 
 # Ensure backup directory exists on remote
-ssh -i ~/.ssh/id_rsa "root@${BACKUP_HOST}" \
+ssh -i ~/.ssh/id_rsa "${BACKUP_USER}@${BACKUP_HOST}" \
   "mkdir -p ${BACKUP_PATH}"
 
 # Copy backup to destination
 echo "Uploading backup to ${BACKUP_HOST}:${BACKUP_PATH}"
 scp -i ~/.ssh/id_rsa "/tmp/${BACKUP_NAME}" \
-  "root@${BACKUP_HOST}:${BACKUP_PATH}/"
+  "${BACKUP_USER}@${BACKUP_HOST}:${BACKUP_PATH}/"
 
 # Cleanup old backups (keep last N)
 echo "Cleaning up old backups (keeping last ${BACKUP_RETENTION})"
-ssh -i ~/.ssh/id_rsa "root@${BACKUP_HOST}" \
+ssh -i ~/.ssh/id_rsa "${BACKUP_USER}@${BACKUP_HOST}" \
   "cd ${BACKUP_PATH} && ls -t zigbee2mqtt-*.tar.gz | tail -n +$((BACKUP_RETENTION + 1)) | xargs -r rm"
 
 echo "Backup completed successfully"
