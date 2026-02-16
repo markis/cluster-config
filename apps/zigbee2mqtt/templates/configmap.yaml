@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: "{{ .Chart.Name }}-config"
   labels:
-    app: {{ .Chart.Name }}
+    app: { { .Chart.Name } }
 data:
   configuration.yaml: |
     {{- if .Values.homeassistant.enabled }}
@@ -39,7 +39,7 @@ data:
       channel: {{ .Values.advanced.channel }}
       network_key: ${ZIGBEE_NETWORK_KEY}
       transmit_power: {{ .Values.advanced.transmitPower }}
-      adapter_concurrent: null
+      adapter_concurrent: {{ .Values.advanced.adapterConcurrent }}
       adapter_delay: 0
 
     # Frontend settings
