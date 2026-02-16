@@ -31,6 +31,14 @@ spec:
             capabilities:
               add:
                 - SYS_ADMIN
+          env:
+            # Disable Chrome crashpad handler completely
+            - name: CHROME_CRASHPAD_HANDLER_DISABLE
+              value: "1"
+            - name: CHROME_CRASHPAD_PIPE_NAME
+              value: ""
+            - name: BREAKPAD_DUMP_LOCATION
+              value: "/dev/null"
           resources:
             requests:
               memory: {{ .Values.generator.resources.requests.memory }}
@@ -45,6 +53,8 @@ spec:
               mountPath: /app/config.yaml
               subPath: config.yaml
               readOnly: true
+            - name: dshm
+              mountPath: /dev/shm
           livenessProbe:
             exec:
               command:
@@ -106,3 +116,7 @@ spec:
           emptyDir: {}
         - name: nginx-run
           emptyDir: {}
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 512Mi
