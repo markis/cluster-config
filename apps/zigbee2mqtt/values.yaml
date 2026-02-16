@@ -16,6 +16,9 @@ serial:
 # Advanced Zigbee settings
 advanced:
   transmitPower: 20
+  # The CC2652 can handle more simultaneous Zigbee messages,
+  # reducing lag in high-density networks
+  adapterConcurrent: 16
   # Network key and PAN ID come from 1Password secret
   # networkKey: array of 16 bytes for encryption
   # panId: unique network identifier (0-65535)
@@ -78,14 +81,13 @@ onepassword:
 # Backup configuration
 backup:
   enabled: true
+  retention: 7 # Retention: keep last N backups
   schedule: "0 2 * * *" # Daily at 2 AM
   # SSH backup destination
   destination:
     host: "10.0.0.70" # Target node for backups
     user: "markis" # SSH user for backup host
     path: "/mnt/drive0/servers/zigbee" # Path on target node
-  # Retention: keep last N backups
-  retention: 7
 
 # Restore configuration (manual - only enable when needed)
 restore:
