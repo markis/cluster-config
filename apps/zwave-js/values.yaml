@@ -1,0 +1,83 @@
+# Z-Wave JS UI deployment
+replicaCount: 1
+
+image:
+  repository: zwavejs/zwave-js-ui
+  tag: "v11.11.0"
+  pullPolicy: IfNotPresent
+
+# Z-Wave adapter configuration (SLZB-MRW10U network adapter)
+serial:
+  port: "tcp://10.0.0.8:6638"
+
+# MQTT connection
+mqtt:
+  enabled: false  # Disabled by default, can be enabled later
+  server: "mqtt://mqtt.default.svc.cluster.local:1883"
+  baseTopic: "zwave"
+  # username and password come from 1Password secret
+
+# Z-Wave settings
+zwave:
+  enabled: true
+  logLevel: "debug"
+  serverEnabled: true
+  serverPort: 3000
+  # Security keys come from 1Password secret
+
+# Home Assistant integration
+homeassistant:
+  enabled: true
+  discoveryPrefix: "homeassistant"
+
+# UI settings
+ui:
+  colorScheme: "system"
+  darkMode: true
+
+# Storage
+persistence:
+  enabled: true
+  storageClassName: "" # Use cluster default
+  size: "1Gi"
+
+# Resources
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+# Service
+service:
+  type: ClusterIP
+  port: 8091
+
+# Ingress
+ingress:
+  enabled: true
+  host: "zwave.markis.network"
+  ingressClassName: "traefik"
+
+# 1Password integration
+secretName: zwave-js-secrets
+onepassword:
+  itemPath: "vaults/k8s-secrets/items/zwave-js"
+
+# Backup configuration
+backup:
+  enabled: true
+  retention: 7 # Retention: keep last N backups
+  schedule: "0 3 * * *" # Daily at 3 AM
+  # SSH backup destination
+  destination:
+    host: "10.0.0.70" # Target node for backups
+    user: "markis" # SSH user for backup host
+    path: "/mnt/drive0/servers/zwave" # Path on target node
+
+# Restore configuration (manual - only enable when needed)
+restore:
+  enabled: false
+  backupFile: "" # e.g., "zwave-js-20260216-030000.tar.gz"

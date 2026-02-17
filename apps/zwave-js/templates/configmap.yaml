@@ -1,0 +1,119 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Chart.Name }}-config"
+  labels:
+    app: {{ .Chart.Name }}
+data:
+  settings.json: |
+    {
+      "mqtt": {
+        "name": "{{ .Chart.Name }}",
+        "host": "${MQTT_HOST}",
+        "port": 1883,
+        "qos": 1,
+        "prefix": "{{ .Values.mqtt.baseTopic }}",
+        "reconnectPeriod": 3000,
+        "retain": true,
+        "clean": true,
+        "auth": true,
+        "username": "${MQTT_USERNAME}",
+        "password": "${MQTT_PASSWORD}",
+        "_ca": "",
+        "ca": "",
+        "_cert": "",
+        "cert": "",
+        "_key": "",
+        "key": "",
+        "disabled": {{ not .Values.mqtt.enabled }},
+        "store": true
+      },
+      "gateway": {
+        "type": 0,
+        "plugins": [],
+        "authEnabled": false,
+        "payloadType": 0,
+        "nodeNames": true,
+        "hassDiscovery": {{ .Values.homeassistant.enabled }},
+        "discoveryPrefix": "{{ .Values.homeassistant.discoveryPrefix }}",
+        "logEnabled": false,
+        "logLevel": "{{ .Values.zwave.logLevel }}",
+        "logToFile": false,
+        "values": [],
+        "jobs": [],
+        "disableChangelog": false,
+        "notifyNewVersions": false,
+        "retainedDiscovery": false,
+        "entityTemplate": "%n"
+      },
+      "zwave": {
+        "enabled": {{ .Values.zwave.enabled }},
+        "port": "{{ .Values.serial.port }}",
+        "allowBootloaderOnly": false,
+        "commandsTimeout": 30,
+        "logLevel": "{{ .Values.zwave.logLevel }}",
+        "rf": {
+          "txPower": {},
+          "autoPowerlevels": true
+        },
+        "securityKeys": {
+          "S2_AccessControl": "${ZWAVE_S2_ACCESS_CONTROL}",
+          "S0_Legacy": "${ZWAVE_S0_LEGACY}",
+          "S2_Unauthenticated": "${ZWAVE_S2_UNAUTHENTICATED}",
+          "S2_Authenticated": "${ZWAVE_S2_AUTHENTICATED}"
+        },
+        "securityKeysLongRange": {},
+        "deviceConfigPriorityDir": "/usr/src/app/store/config",
+        "logEnabled": false,
+        "logToFile": true,
+        "maxFiles": 7,
+        "serverEnabled": {{ .Values.zwave.serverEnabled }},
+        "serverServiceDiscoveryDisabled": true,
+        "enableSoftReset": true,
+        "disableOptimisticValueUpdate": false,
+        "enableStatistics": false,
+        "serverPort": {{ .Values.zwave.serverPort }},
+        "maxNodeEventsQueueSize": 100,
+        "higherReportsTimeout": false,
+        "disableControllerRecovery": false,
+        "disableWatchdog": false,
+        "disableAutomaticFirmwareUpdateChecks": false,
+        "disclaimerVersion": 1,
+        "scales": []
+      },
+      "backup": {
+        "storeBackup": true,
+        "storeCron": "0 0 * * *",
+        "storeKeep": 7,
+        "nvmBackup": true,
+        "nvmBackupOnEvent": false,
+        "nvmCron": "0 0 * * *",
+        "nvmKeep": 7
+      },
+      "zniffer": {
+        "enabled": false,
+        "port": "",
+        "logEnabled": true,
+        "logToFile": true,
+        "maxFiles": 7,
+        "securityKeys": {
+          "S2_Unauthenticated": "",
+          "S2_Authenticated": "",
+          "S2_AccessControl": "",
+          "S0_Legacy": ""
+        },
+        "securityKeysLongRange": {
+          "S2_Authenticated": "",
+          "S2_AccessControl": ""
+        },
+        "convertRSSI": false
+      },
+      "ui": {
+        "colorScheme": "{{ .Values.ui.colorScheme }}",
+        "navTabs": false,
+        "compactMode": false,
+        "streamerMode": false,
+        "browserTitle": "Z-Wave JS UI",
+        "darkMode": {{ .Values.ui.darkMode }}
+      }
+    }
