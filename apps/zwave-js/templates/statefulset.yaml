@@ -82,19 +82,19 @@ spec:
           {{- toYaml .Values.resources | nindent 10 }}
         livenessProbe:
           httpGet:
-            path: /health
+            path: /
             port: http
-          initialDelaySeconds: 180
+          initialDelaySeconds: 60
           periodSeconds: 30
-          timeoutSeconds: 10
+          timeoutSeconds: 5
           failureThreshold: 5
         readinessProbe:
           httpGet:
-            path: /health
+            path: /
             port: http
-          initialDelaySeconds: 120
+          initialDelaySeconds: 30
           periodSeconds: 15
-          timeoutSeconds: 10
+          timeoutSeconds: 5
           failureThreshold: 5
       volumes:
       - name: config
