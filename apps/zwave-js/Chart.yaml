@@ -1,0 +1,6 @@
+apiVersion: v2
+name: zwave-js
+description: Z-Wave JS UI for controlling Z-Wave devices
+type: application
+version: 0.1.0
+appVersion: "11.11.0"

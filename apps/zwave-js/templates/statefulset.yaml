@@ -1,0 +1,122 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: "{{ .Chart.Name }}"
+  labels:
+    app: "{{ .Chart.Name }}"
+spec:
+  serviceName: {{ .Chart.Name }}
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+    spec:
+      initContainers:
+      - name: config-init
+        image: alpine:3.19
+        command: ["/bin/sh", "/scripts/init-config.sh"]
+        env:
+        - name: MQTT_HOST
+          value: {{ .Values.mqtt.server | default "10.0.0.1" | quote }}
+        - name: MQTT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.secretName }}
+              key: mqtt-username
+        - name: MQTT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.secretName }}
+              key: mqtt-password
+        - name: ZWAVE_S2_ACCESS_CONTROL
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.secretName }}
+              key: zwave-s2-access-control
+        - name: ZWAVE_S0_LEGACY
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.secretName }}
+              key: zwave-s0-legacy
+        - name: ZWAVE_S2_UNAUTHENTICATED
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.secretName }}
+              key: zwave-s2-unauthenticated
+        - name: ZWAVE_S2_AUTHENTICATED
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.secretName }}
+              key: zwave-s2-authenticated
+        volumeMounts:
+        - name: store
+          mountPath: /store
+        - name: config
+          mountPath: /config-template
+        - name: scripts
+          mountPath: /scripts
+      containers:
+      - name: zwave-js-ui
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.zwave.serverPort }}
+          protocol: TCP
+        env:
+        - name: TZ
+          value: "America/New_York"
+        - name: SESSION_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.secretName }}
+              key: session-secret
+        volumeMounts:
+        - name: store
+          mountPath: /usr/src/app/store
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 180
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 120
+          periodSeconds: 15
+          timeoutSeconds: 10
+          failureThreshold: 5
+      volumes:
+      - name: config
+        configMap:
+          name: {{ .Chart.Name }}-config
+      - name: scripts
+        configMap:
+          name: {{ .Chart.Name }}-scripts
+          defaultMode: 0755
+  {{- if .Values.persistence.enabled }}
+  volumeClaimTemplates:
+  - metadata:
+      name: store
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      {{- if .Values.persistence.storageClassName }}
+      storageClassName: {{ .Values.persistence.storageClassName }}
+      {{- end }}
+      resources:
+        requests:
+          storage: {{ .Values.persistence.size }}
+  {{- else }}
+      - name: store
+        emptyDir: {}
+  {{- end }}
