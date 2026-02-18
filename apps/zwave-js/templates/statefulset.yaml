@@ -70,6 +70,8 @@ spec:
         env:
         - name: TZ
           value: "America/New_York"
+        - name: HOST
+          value: "0.0.0.0"
         - name: SESSION_SECRET
           valueFrom:
             secretKeyRef:
