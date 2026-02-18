@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: "{{ .Chart.Name }}-config"
   labels:
-    app: { { .Chart.Name } }
+    app: {{ .Chart.Name }}
 data:
   configuration.yaml: |
     {{- if .Values.homeassistant.enabled }}
