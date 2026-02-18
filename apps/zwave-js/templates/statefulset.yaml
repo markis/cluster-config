@@ -52,6 +52,16 @@ spec:
             secretKeyRef:
               name: {{ .Values.secretName }}
               key: zwave-s2-authenticated
+        - name: ZWAVE_S2_LR_AUTHENTICATED
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.secretName }}
+              key: zwave-s2-lr-authenticated
+        - name: ZWAVE_S2_LR_ACCESS_CONTROL
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.secretName }}
+              key: zwave-s2-lr-access-control
         volumeMounts:
         - name: store
           mountPath: /store
@@ -72,6 +82,8 @@ spec:
           value: "America/New_York"
         - name: HOST
           value: "0.0.0.0"
+        - name: TRUST_PROXY
+          value: "true"
         - name: SESSION_SECRET
           valueFrom:
             secretKeyRef:
