@@ -19,7 +19,7 @@ mqtt:
 
 # Z-Wave settings
 zwave:
-  enabled: true
+  enabled: false  # Temporarily disabled to troubleshoot web UI
   logLevel: "debug"
   serverEnabled: true
   serverPort: 3000
