@@ -5,4 +5,5 @@ metadata:
   labels:
     app: {{ .Chart.Name }}
 data:
-  {{- (.Files.Glob "config/*").AsConfig | nindent 2 }}
+  settings.json: |
+    {{- tpl (.Files.Get "config/settings.json") . | nindent 4 }}
