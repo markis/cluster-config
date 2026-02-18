@@ -22,7 +22,7 @@ zwave:
   enabled: false  # Temporarily disabled to troubleshoot web UI
   logLevel: "debug"
   serverEnabled: true
-  serverPort: 3000
+  serverPort: 8091  # Web UI port
   # Security keys come from 1Password secret
 
 # Home Assistant integration
