@@ -6,8 +6,8 @@ metadata:
     app: {{ .Chart.Name }}
 data:
   backup.sh: |
-{{ .Files.Get "scripts/backup.sh" | indent 4 }}
+    {{ .Files.Get "scripts/backup.sh" | nindent 4 }}
   restore.sh: |
-{{ .Files.Get "scripts/restore.sh" | indent 4 }}
+    {{ .Files.Get "scripts/restore.sh" | nindent 4 }}
   init-config.sh: |
-{{ .Files.Get "scripts/init-config.sh" | indent 4 }}
+    {{ .Files.Get "scripts/init-config.sh" | nindent 4 }}

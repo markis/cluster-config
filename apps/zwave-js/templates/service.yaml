@@ -11,5 +11,9 @@ spec:
     targetPort: http
     protocol: TCP
     name: http
+  - port: {{ .Values.zwave.serverPort }}
+    targetPort: ws
+    protocol: TCP
+    name: ws
   selector:
     app: {{ .Chart.Name }}
