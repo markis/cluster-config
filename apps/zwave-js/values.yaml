@@ -12,7 +12,7 @@ serial:
 
 # MQTT connection
 mqtt:
-  enabled: false  # Disabled by default, can be enabled later
+  enabled: false # Disabled by default, can be enabled later
   server: "mqtt://mqtt.default.svc.cluster.local:1883"
   baseTopic: "zwave"
   # username and password come from 1Password secret
@@ -22,7 +22,7 @@ zwave:
   enabled: true
   logLevel: "debug"
   serverEnabled: true
-  serverPort: 8091  # Web UI port
+  serverPort: 3000
   # Security keys come from 1Password secret
 
 # Home Assistant integration
@@ -60,6 +60,9 @@ ingress:
   enabled: true
   host: "zwave.markis.network"
   ingressClassName: "traefik"
+  websocket:
+    enabled: true
+    host: "zwave-ws.markis.network"
 
 # 1Password integration
 secretName: zwave-js-secrets
