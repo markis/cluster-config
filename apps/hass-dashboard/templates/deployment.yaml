@@ -58,11 +58,13 @@ spec:
           livenessProbe:
             exec:
               command:
-                - "test"
-                - "-n"
-                - "`find /output -mmin -1`"
-            initialDelaySeconds: 10
+                - /app/scripts/healthcheck.sh
+                - --config
+                - /app/config.yaml
+            initialDelaySeconds: 30
             periodSeconds: 60
+            timeoutSeconds: 5
+            failureThreshold: 3
         - name: nginx
           image: "{{ .Values.nginx.image.repository }}:{{ .Values.nginx.image.tag }}"
           imagePullPolicy: {{ .Values.nginx.image.pullPolicy }}
