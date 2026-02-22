@@ -1,7 +1,7 @@
 generator:
   image:
     repository: ghcr.io/markis/hass-dashboard
-    tag: "2.2.0"
+    tag: "2.3.0"
     pullPolicy: IfNotPresent
   resources:
     requests:
@@ -14,7 +14,7 @@ generator:
 nginx:
   image:
     repository: nginx
-    tag: "1.25.3"
+    tag: "1.28.2"
     pullPolicy: IfNotPresent
   resources:
     requests:
