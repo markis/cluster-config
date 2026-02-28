@@ -27,7 +27,7 @@ advanced:
 
 # MQTT connection
 mqtt:
-  server: "mqtt://mqtt.default.svc.cluster.local:1883"
+  server: "mqtt://vernemq.default.svc.cluster.local:1883"
   baseTopic: "zigbee2mqtt"
   # username and password come from 1Password secret
 
