@@ -4,6 +4,27 @@ This repository is a Kubernetes GitOps cluster configuration using ArgoCD, Helm,
 
 ## Build, Lint & Test Commands
 
+### Agent Hooks Setup
+This repository includes agent hooks to ensure code quality before commits. Install them once after cloning:
+
+```bash
+# Install agent hooks (creates symlinks from .agents/hooks/ to .git/hooks/)
+.agents/hooks/install.sh
+```
+
+The pre-commit hook automatically runs:
+- **editorconfig-checker**: Validates file formatting (.editorconfig compliance)
+- **shellcheck**: Lints shell scripts for common issues
+- **helm lint --strict**: Validates all Helm chart syntax
+- **kubeconform**: Validates rendered Kubernetes manifests
+
+**For AI agents**: Before creating commits, always run `.agents/hooks/pre-commit` to validate changes. If the hook fails, fix the issues before committing.
+
+To skip hooks temporarily (not recommended):
+```bash
+git commit --no-verify
+```
+
 ### Helm Linting
 ```bash
 # Lint all charts
