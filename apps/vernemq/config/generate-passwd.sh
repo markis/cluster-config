@@ -10,8 +10,8 @@ while IFS=: read -r username password || [ -n "$username" ]; do
   echo "$username" | grep -q '^#' && continue
   
   echo "Generating hash for user: $username"
-  # Use vmq-passwd to generate bcrypt hash
-  echo "$password" | vmq-passwd -c /tmp/vmq.passwd "$username"
+  # Use vmq-passwd to generate bcrypt hash (password needs to be provided twice)
+  printf "%s\n%s\n" "$password" "$password" | vmq-passwd -c /tmp/vmq.passwd "$username"
 done < /secrets/users
 
 echo "vmq.passwd file generated successfully"
