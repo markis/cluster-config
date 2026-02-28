@@ -13,4 +13,4 @@
 
 # Allow all authenticated users to publish and subscribe to any topic
 # For production, restrict this based on your requirements
-pattern all #
+topic #
