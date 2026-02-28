@@ -1,0 +1,45 @@
+replicaCount: 3
+
+image:
+  repository: vernemq/vernemq
+  tag: "2.0.1-alpine"
+  pullPolicy: IfNotPresent
+
+# Resource limits tuned for Raspberry Pi 4/5
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "200m"
+  limits:
+    memory: "512Mi"
+    cpu: "400m"
+
+service:
+  type: LoadBalancer
+  mqttPort: 1884  # Use 1884 for blue-green testing, change to 1883 after cutover
+  metricsPort: 8888
+
+# 1Password secret integration
+secretName: vernemq-secrets
+
+onepassword:
+  itemPath: "vaults/k8s-secrets/items/vernemq"
+
+config:
+  logLevel: "info"
+  # Maximum client connections per node
+  maxConnections: 10000
+  # Allow anonymous connections (set to false to require authentication)
+  allowAnonymous: false
+  # Persistent storage for messages and sessions
+  persistentStorage:
+    enabled: true
+    size: 1Gi
+    storageClass: ""  # Use default storage class
+
+# VerneMQ clustering configuration
+cluster:
+  # Discovery method for k8s
+  discovery: k8s
+  # Namespace for pod discovery
+  namespace: default
