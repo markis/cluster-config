@@ -63,6 +63,8 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.secretName }}
                   key: redis-password
+            - name: EMQX_LISTENERS__TCP__DEFAULT__BIND
+              value: "0.0.0.0:{{ .Values.service.mqttPort }}"
           volumeMounts:
             - name: config
               mountPath: /opt/emqx/etc/emqx.conf
