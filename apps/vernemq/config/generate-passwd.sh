@@ -43,5 +43,7 @@ with open('/secrets/users', 'r') as f:
 print("vmq.passwd file generated successfully")
 PYTHON_SCRIPT
 
+# Set ownership to vernemq user (UID 10000)
+chown 10000:10000 /tmp/vmq.passwd
 chmod 600 /tmp/vmq.passwd
 cat /tmp/vmq.passwd
