@@ -3,16 +3,15 @@ set -e
 
 echo "Generating vmq.passwd file from user credentials..."
 
-# Install bcrypt library
-pip install --quiet bcrypt
-
 # Clear/Init password file
 > /tmp/vmq.passwd
 
-# Generate bcrypt hashes using Python
+# Generate SHA-512 hashes using Python (VerneMQ's native format)
 python - <<'PYTHON_SCRIPT'
 import sys
-import bcrypt
+import hashlib
+import secrets
+import base64
 
 with open('/secrets/users', 'r') as f:
     for line in f:
@@ -30,16 +29,25 @@ with open('/secrets/users', 'r') as f:
         if not username or not password:
             continue
         
-        print(f"Generating bcrypt hash for user: {username}")
+        print(f"Generating SHA-512 hash for user: {username}")
         
-        # Generate bcrypt hash (cost factor 12, standard for VerneMQ)
-        # Use prefix='2a' for better compatibility with VerneMQ
-        hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(rounds=12, prefix=b'2a'))
-        hash_str = hashed.decode('utf-8')
+        # Generate random 12-byte salt (VerneMQ default)
+        salt = secrets.token_bytes(12)
         
-        # Write to password file
+        # Create SHA-512 hash: sha512(password + salt)
+        h = hashlib.sha512()
+        h.update(password.encode('utf-8'))
+        h.update(salt)
+        digest = h.digest()
+        
+        # Base64 encode both salt and hash
+        salt_b64 = base64.b64encode(salt).decode('utf-8')
+        hash_b64 = base64.b64encode(digest).decode('utf-8')
+        
+        # VerneMQ format: username:$$<base64_salt>$<base64_hash>
+        # Note the double $$ at the start
         with open('/tmp/vmq.passwd', 'a') as out:
-            out.write(f"{username}:{hash_str}\n")
+            out.write(f"{username}:$${salt_b64}${hash_b64}\n")
 
 print("vmq.passwd file generated successfully")
 PYTHON_SCRIPT
