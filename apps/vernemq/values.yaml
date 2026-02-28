@@ -2,7 +2,7 @@ replicaCount: 3
 
 image:
   repository: vernemq/vernemq
-  tag: "2.0.1-alpine"
+  tag: "2.1.2-alpine"
   pullPolicy: IfNotPresent
 
 # Resource limits tuned for Raspberry Pi 4/5
