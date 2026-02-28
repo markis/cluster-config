@@ -33,7 +33,8 @@ with open('/secrets/users', 'r') as f:
         print(f"Generating bcrypt hash for user: {username}")
         
         # Generate bcrypt hash (cost factor 12, standard for VerneMQ)
-        hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(rounds=12))
+        # Use prefix='2a' for better compatibility with VerneMQ
+        hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(rounds=12, prefix=b'2a'))
         hash_str = hashed.decode('utf-8')
         
         # Write to password file
