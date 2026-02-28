@@ -18,10 +18,18 @@ while IFS=: read -r username password || [ -n "$username" ]; do
   
   echo "Generating hash for user: $username"
   # Use vmq-passwd with carriage returns (interactive mode simulation)
-  printf "%s\r%s\r" "$password" "$password" | vmq-passwd -c /tmp/vmq.passwd "$username" || {
-    echo "Failed to add user: $username" >&2
-    exit 1
-  }
+  # Use -cf to create or force overwrite for first user, then append
+  if [ ! -f /tmp/vmq.passwd ]; then
+    printf "%s\r%s\r" "$password" "$password" | vmq-passwd -c /tmp/vmq.passwd "$username" || {
+      echo "Failed to add user: $username" >&2
+      exit 1
+    }
+  else
+    printf "%s\r%s\r" "$password" "$password" | vmq-passwd /tmp/vmq.passwd "$username" || {
+      echo "Failed to add user: $username" >&2
+      exit 1
+    }
+  fi
 done < /secrets/users
 
 chmod 600 /tmp/vmq.passwd
