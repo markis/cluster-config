@@ -4,13 +4,13 @@ set -e
 echo "Generating vmq.passwd file from user credentials..."
 
 # Install bcrypt library
-pip3 install --quiet bcrypt
+pip install --quiet bcrypt
 
 # Clear/Init password file
 > /tmp/vmq.passwd
 
 # Generate bcrypt hashes using Python
-python3 - <<'PYTHON_SCRIPT'
+python - <<'PYTHON_SCRIPT'
 import sys
 import bcrypt
 
