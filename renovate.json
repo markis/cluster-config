@@ -16,15 +16,67 @@
   "customManagers": [
     {
       "customType": "regex",
-      "description": "Update appVersion in Chart.yaml to match image tags",
-      "fileMatch": [
-        "^apps/.+/Chart\\.yaml$"
-      ],
-      "matchStrings": [
-        "appVersion:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"
-      ],
+      "description": "Update appVersion in Chart.yaml for hass-dashboard",
+      "fileMatch": ["^apps/hass-dashboard/Chart\\.yaml$"],
+      "matchStrings": ["appVersion:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"],
       "datasourceTemplate": "docker",
       "depNameTemplate": "ghcr.io/markis/hass-dashboard"
+    },
+    {
+      "customType": "regex",
+      "description": "Update appVersion in Chart.yaml for budget-importer",
+      "fileMatch": ["^apps/budget-importer/Chart\\.yaml$"],
+      "matchStrings": ["appVersion:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "ghcr.io/markis/budget-importer"
+    },
+    {
+      "customType": "regex",
+      "description": "Update appVersion in Chart.yaml for dark-detector",
+      "fileMatch": ["^apps/dark-detector/Chart\\.yaml$"],
+      "matchStrings": ["appVersion:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "ghcr.io/markis/dark-detector"
+    },
+    {
+      "customType": "regex",
+      "description": "Update appVersion in Chart.yaml for dynasty",
+      "fileMatch": ["^apps/dynasty/Chart\\.yaml$"],
+      "matchStrings": ["appVersion:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "ghcr.io/markis/dynasty"
+    },
+    {
+      "customType": "regex",
+      "description": "Update appVersion in Chart.yaml for mqtt",
+      "fileMatch": ["^apps/mqtt/Chart\\.yaml$"],
+      "matchStrings": ["appVersion:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "emqx/emqx"
+    },
+    {
+      "customType": "regex",
+      "description": "Update appVersion in Chart.yaml for rtlsdr",
+      "fileMatch": ["^apps/rtlsdr/Chart\\.yaml$"],
+      "matchStrings": ["appVersion:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "ghcr.io/markis/rtlsdr2mqtt"
+    },
+    {
+      "customType": "regex",
+      "description": "Update appVersion in Chart.yaml for zigbee2mqtt",
+      "fileMatch": ["^apps/zigbee2mqtt/Chart\\.yaml$"],
+      "matchStrings": ["appVersion:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "koenkk/zigbee2mqtt"
+    },
+    {
+      "customType": "regex",
+      "description": "Update appVersion in Chart.yaml for zwave-js",
+      "fileMatch": ["^apps/zwave-js/Chart\\.yaml$"],
+      "matchStrings": ["appVersion:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "zwavejs/zwave-js-ui"
     }
   ],
   "packageRules": [
@@ -54,6 +106,102 @@
       "matchPackageNames": ["nginx"],
       "matchUpdateTypes": ["minor", "patch"],
       "automerge": true
+    },
+    {
+      "description": "Group budget-importer updates",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/markis/budget-importer"],
+      "groupName": "budget-importer",
+      "commitMessageTopic": "budget-importer",
+      "commitMessageExtra": "to {{newVersion}}",
+      "commitMessagePrefix": "chore:",
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash"
+    },
+    {
+      "description": "Group dark-detector updates",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/markis/dark-detector"],
+      "groupName": "dark-detector",
+      "commitMessageTopic": "dark-detector",
+      "commitMessageExtra": "to {{newVersion}}",
+      "commitMessagePrefix": "chore:",
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash"
+    },
+    {
+      "description": "Group dynasty updates",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/markis/dynasty"],
+      "groupName": "dynasty",
+      "commitMessageTopic": "dynasty",
+      "commitMessageExtra": "to {{newVersion}}",
+      "commitMessagePrefix": "chore:",
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash"
+    },
+    {
+      "description": "Group mqtt (emqx) updates",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["emqx/emqx"],
+      "groupName": "mqtt",
+      "commitMessageTopic": "mqtt (emqx)",
+      "commitMessageExtra": "to {{newVersion}}",
+      "commitMessagePrefix": "chore:",
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash"
+    },
+    {
+      "description": "Group redis updates for mqtt",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["redis"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash"
+    },
+    {
+      "description": "Group rtlsdr updates",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/markis/rtlsdr2mqtt"],
+      "groupName": "rtlsdr",
+      "commitMessageTopic": "rtlsdr",
+      "commitMessageExtra": "to {{newVersion}}",
+      "commitMessagePrefix": "chore:",
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash"
+    },
+    {
+      "description": "Group zigbee2mqtt updates",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["koenkk/zigbee2mqtt"],
+      "groupName": "zigbee2mqtt",
+      "commitMessageTopic": "zigbee2mqtt",
+      "commitMessageExtra": "to {{newVersion}}",
+      "commitMessagePrefix": "chore:",
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash"
+    },
+    {
+      "description": "Group zwave-js updates",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["zwavejs/zwave-js-ui"],
+      "groupName": "zwave-js",
+      "commitMessageTopic": "zwave-js",
+      "commitMessageExtra": "to {{newVersion}}",
+      "commitMessagePrefix": "chore:",
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash"
     }
   ],
   "prConcurrentLimit": 3,
