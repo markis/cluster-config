@@ -3,9 +3,8 @@ set -e
 
 echo "Generating vmq.passwd file from user credentials..."
 
-# Install Python and bcrypt if not present
-apk add --no-cache python3 py3-pip >/dev/null 2>&1 || true
-pip3 install --quiet bcrypt 2>/dev/null || true
+# Install bcrypt library
+pip3 install --quiet bcrypt
 
 # Clear/Init password file
 > /tmp/vmq.passwd
