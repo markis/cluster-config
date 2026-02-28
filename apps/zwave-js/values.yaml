@@ -13,7 +13,7 @@ serial:
 # MQTT connection
 mqtt:
   enabled: false # Disabled by default, can be enabled later
-  server: "mqtt://mqtt.default.svc.cluster.local:1883"
+  server: "mqtt://vernemq.default.svc.cluster.local:1883"
   baseTopic: "zwave"
   # username and password come from 1Password secret
 

@@ -9,7 +9,7 @@ nodeSelector:
   feature.node.kubernetes.io/usb-rtlsdr: "true"
 
 mqtt:
-  host: mqtt.default.svc.cluster.local
+  host: vernemq.default.svc.cluster.local
   port: 1883
   secretName: rtlsdr-secrets
 
