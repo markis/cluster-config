@@ -43,7 +43,10 @@
       "groupName": "hass-dashboard",
       "commitMessageTopic": "hass-dashboard",
       "commitMessageExtra": "to {{newVersion}}",
-      "commitMessagePrefix": "chore:"
+      "commitMessagePrefix": "chore:",
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash"
     },
     {
       "description": "Auto-merge nginx minor/patch updates",
