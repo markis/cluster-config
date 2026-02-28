@@ -16,7 +16,7 @@ resources:
 
 service:
   type: LoadBalancer
-  mqttPort: 1884  # Use 1884 for blue-green testing, change to 1883 after cutover
+  mqttPort: 1883  # Production MQTT port
   metricsPort: 8888
 
 # 1Password secret integration
