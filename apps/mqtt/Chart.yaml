@@ -3,4 +3,4 @@ name: mqtt
 description: EMQX MQTT broker cluster with Redis authentication
 type: application
 version: 0.1.0
-appVersion: "5.8.8"
+appVersion: "6.1.1"
