@@ -50,7 +50,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: mqtt
-              containerPort: 1883
+              containerPort: {{ .Values.service.mqttPort }}
               protocol: TCP
             - name: epmd
               containerPort: 4369
@@ -86,7 +86,7 @@ spec:
 
             # Listener configuration
             - name: DOCKER_VERNEMQ_LISTENER__TCP__DEFAULT
-              value: "0.0.0.0:1883"
+              value: "0.0.0.0:{{ .Values.service.mqttPort }}"
             - name: DOCKER_VERNEMQ_LISTENER__TCP__DEFAULT__MAX_CONNECTIONS
               value: "{{ .Values.config.maxConnections }}"
 
@@ -131,7 +131,7 @@ spec:
           # Health checks
           livenessProbe:
             tcpSocket:
-              port: 1883
+              port: {{ .Values.service.mqttPort }}
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
@@ -139,7 +139,7 @@ spec:
 
           readinessProbe:
             tcpSocket:
-              port: 1883
+              port: {{ .Values.service.mqttPort }}
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 5
@@ -147,7 +147,7 @@ spec:
 
           startupProbe:
             tcpSocket:
-              port: 1883
+              port: {{ .Values.service.mqttPort }}
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
