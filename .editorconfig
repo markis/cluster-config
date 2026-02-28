@@ -64,8 +64,9 @@ indent_size = 2
 # Markdown Files
 # =============================================================================
 [*.md]
-indent_style = space
-indent_size = 2
+# Don't enforce indentation rules for markdown (ASCII art, varied formatting)
+indent_style = unset
+indent_size = unset
 # Markdown uses trailing spaces for line breaks, so don't trim
 trim_trailing_whitespace = false
 insert_final_newline = true
