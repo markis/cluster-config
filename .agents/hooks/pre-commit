@@ -43,6 +43,30 @@ else
   echo "${YELLOW}⚠ shellcheck not found, skipping...${NC}"
 fi
 
+# Check if shfmt is available
+if command -v shfmt >/dev/null 2>&1; then
+  echo "${GREEN}✓${NC} Running shfmt..."
+  # Find all shell scripts (including those without .sh extension)
+  SHELL_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(sh|bash)$|^scripts/' || true)
+  if [ -n "$SHELL_FILES" ]; then
+    for file in $SHELL_FILES; do
+      if [ -f "$file" ]; then
+        # Check formatting (-d for diff, -l lists files that differ)
+        if ! shfmt -d -i 2 -ci -bn "$file"; then
+          echo "${RED}✗ shfmt failed for $file${NC}"
+          echo "  Run: shfmt -w -i 2 -ci -bn $file"
+          FAILED=1
+        fi
+      fi
+    done
+  else
+    echo "  No shell scripts to check"
+  fi
+else
+  echo "${YELLOW}⚠ shfmt not found, skipping...${NC}"
+  echo "  Install with: brew install shfmt"
+fi
+
 # Check if helm is available
 if command -v helm >/dev/null 2>&1; then
   echo "${GREEN}✓${NC} Running helm lint..."

@@ -15,6 +15,7 @@ This repository includes agent hooks to ensure code quality before commits. Inst
 The pre-commit hook automatically runs:
 - **editorconfig-checker**: Validates file formatting (.editorconfig compliance)
 - **shellcheck**: Lints shell scripts for common issues
+- **shfmt**: Formats shell scripts (2 spaces, indent case, binary ops at line start)
 - **helm lint --strict**: Validates all Helm chart syntax
 - **kubeconform**: Validates rendered Kubernetes manifests
 

@@ -4,7 +4,7 @@ set -e
 echo "Generating vmq.passwd file from user credentials..."
 
 # Clear/Init password file
-true > /tmp/vmq.passwd
+true >/tmp/vmq.passwd
 
 # Generate SHA-512 hashes using Python (VerneMQ's native format)
 python - <<'PYTHON_SCRIPT'
