@@ -51,10 +51,10 @@ if command -v shfmt >/dev/null 2>&1; then
   if [ -n "$SHELL_FILES" ]; then
     for file in $SHELL_FILES; do
       if [ -f "$file" ]; then
-        # Check formatting (-d for diff, -l lists files that differ)
-        if ! shfmt -d -i 2 -ci -bn "$file"; then
+        # Check formatting with default style (-d for diff)
+        if ! shfmt -d "$file"; then
           echo "${RED}✗ shfmt failed for $file${NC}"
-          echo "  Run: shfmt -w -i 2 -ci -bn $file"
+          echo "  Run: shfmt -w $file"
           FAILED=1
         fi
       fi
