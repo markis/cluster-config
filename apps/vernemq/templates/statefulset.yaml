@@ -31,8 +31,8 @@ spec:
       # Init container to generate vmq.passwd from plaintext credentials
       initContainers:
         - name: generate-passwd
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: python:3.11-alpine
+          imagePullPolicy: IfNotPresent
           command:
             - /bin/sh
             - /scripts/generate-passwd.sh
