@@ -28,7 +28,7 @@ resources:
 
 service:
   type: LoadBalancer
-  mqttPort: 1883
+  mqttPort: 1884  # Moved to 1884 to allow VerneMQ to take over 1883
   dashboardPort: 18083
 
 secretName: mqtt-secrets
