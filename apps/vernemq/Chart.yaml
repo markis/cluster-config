@@ -1,0 +1,6 @@
+apiVersion: v2
+name: vernemq
+description: VerneMQ MQTT broker cluster for k3s Raspberry Pi
+type: application
+version: 0.1.0
+appVersion: "2.0.1"

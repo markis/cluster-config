@@ -1,0 +1,16 @@
+# VerneMQ ACL configuration file
+# Format: pattern [read|write|all] <topic>
+#
+# Examples:
+#   pattern write home/%u/#      # Users can write to home/<username>/*
+#   pattern read sensors/#       # All users can read from sensors/*
+#
+# Variables:
+#   %u = username
+#   %c = client ID
+#   # = multi-level wildcard
+#   + = single-level wildcard
+
+# Allow all authenticated users to publish and subscribe to any topic
+# For production, restrict this based on your requirements
+pattern all #

@@ -1,0 +1,16 @@
+# This file is for reference only - NOT deployed
+# Shows the expected format for the "users" field in 1Password
+#
+# In 1Password (vaults/k8s-secrets/items/vernemq), add a field named "users"
+# with the following format (one user per line):
+#
+#   username:password
+#
+# Example:
+#   homeassistant:mySecurePassword123
+#   zigbee2mqtt:anotherPassword456
+#   zwave:yetAnotherPass789
+#   admin:adminPassword000
+#
+# The init container will read this and generate vmq.passwd with bcrypt hashes.
+# Do NOT include this file in the actual deployment - it's for documentation only.

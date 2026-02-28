@@ -1,0 +1,188 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+    app: {{ .Chart.Name }}
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/component: mqtt-broker
+    app.kubernetes.io/part-of: {{ .Chart.Name }}
+spec:
+  serviceName: "{{ .Chart.Name }}-headless"
+  updateStrategy:
+    type: RollingUpdate
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/onepassword-item.yaml") . | sha256sum }}
+    spec:
+      serviceAccountName: {{ .Chart.Name }}
+      # Schedule on ARM64 nodes only
+      nodeSelector:
+        kubernetes.io/arch: arm64
+
+      # Init container to generate vmq.passwd from plaintext credentials
+      initContainers:
+        - name: generate-passwd
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /bin/sh
+            - /scripts/generate-passwd.sh
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+            - name: secrets
+              mountPath: /secrets
+            - name: passwd-gen
+              mountPath: /tmp
+
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: mqtt
+              containerPort: 1883
+              protocol: TCP
+            - name: epmd
+              containerPort: 4369
+              protocol: TCP
+            - name: cluster
+              containerPort: 44053
+              protocol: TCP
+            - name: metrics
+              containerPort: 8888
+              protocol: TCP
+          env:
+            # Pod identity
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: MY_POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+
+            # VerneMQ node name (Erlang node name for clustering)
+            - name: DOCKER_VERNEMQ_NODENAME
+              value: "VerneMQ@$(MY_POD_NAME).{{ .Chart.Name }}-headless.$(MY_POD_NAMESPACE).svc.cluster.local"
+
+            # Kubernetes discovery
+            - name: DOCKER_VERNEMQ_DISCOVERY_KUBERNETES
+              value: "1"
+            - name: DOCKER_VERNEMQ_KUBERNETES_LABEL_SELECTOR
+              value: "app={{ .Chart.Name }}"
+            - name: DOCKER_VERNEMQ_KUBERNETES_NAMESPACE
+              value: "{{ .Values.cluster.namespace }}"
+
+            # Listener configuration
+            - name: DOCKER_VERNEMQ_LISTENER__TCP__DEFAULT
+              value: "0.0.0.0:1883"
+            - name: DOCKER_VERNEMQ_LISTENER__TCP__DEFAULT__MAX_CONNECTIONS
+              value: "{{ .Values.config.maxConnections }}"
+
+            # Authentication
+            - name: DOCKER_VERNEMQ_ALLOW_ANONYMOUS
+              value: "{{ if .Values.config.allowAnonymous }}on{{ else }}off{{ end }}"
+            - name: DOCKER_VERNEMQ_PLUGINS__VMQ_PASSWD
+              value: "on"
+
+            # Logging
+            - name: DOCKER_VERNEMQ_LOG__CONSOLE__LEVEL
+              value: "{{ .Values.config.logLevel }}"
+
+            # Accept Erlang license
+            - name: DOCKER_VERNEMQ_ACCEPT_EULA
+              value: "yes"
+
+            # Erlang cookie for clustering (from secret)
+            - name: DOCKER_VERNEMQ_ERLANG__DISTRIBUTION__PORT_RANGE__MINIMUM
+              value: "9100"
+            - name: DOCKER_VERNEMQ_ERLANG__DISTRIBUTION__PORT_RANGE__MAXIMUM
+              value: "9109"
+            - name: ERLANG_COOKIE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName }}
+                  key: erlang-cookie
+
+          volumeMounts:
+            - name: data
+              mountPath: /vernemq/data
+            - name: config
+              mountPath: /vernemq/etc/vmq.acl
+              subPath: vmq.acl
+            - name: passwd-gen
+              mountPath: /vernemq/etc/vmq.passwd
+              subPath: vmq.passwd
+
+          resources:
+            {{ toYaml .Values.resources | nindent 12 }}
+
+          # Health checks
+          livenessProbe:
+            tcpSocket:
+              port: 1883
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            tcpSocket:
+              port: 1883
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          startupProbe:
+            tcpSocket:
+              port: 1883
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
+
+      volumes:
+        - name: config
+          configMap:
+            name: "{{ .Chart.Name }}-config"
+        - name: scripts
+          configMap:
+            name: "{{ .Chart.Name }}-config"
+            defaultMode: 0755
+        - name: secrets
+          secret:
+            secretName: {{ .Values.secretName }}
+        - name: passwd-gen
+          emptyDir: {}
+        {{- if not .Values.config.persistentStorage.enabled }}
+        - name: data
+          emptyDir: {}
+        {{- end }}
+
+  {{- if .Values.config.persistentStorage.enabled }}
+  # Persistent volume claims for message and session storage
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        {{- if .Values.config.persistentStorage.storageClass }}
+        storageClassName: {{ .Values.config.persistentStorage.storageClass }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.config.persistentStorage.size }}
+  {{- end }}
