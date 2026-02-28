@@ -202,6 +202,16 @@
       "automerge": true,
       "automergeType": "pr",
       "automergeStrategy": "squash"
+    },
+    {
+      "description": "Pin VerneMQ to 2.0.x (2.1.1+ has clustering issues on ARM64)",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["vernemq/vernemq"],
+      "allowedVersions": "<2.1.0",
+      "groupName": "vernemq",
+      "commitMessageTopic": "vernemq",
+      "commitMessageExtra": "to {{newVersion}}",
+      "commitMessagePrefix": "chore:"
     }
   ],
   "prConcurrentLimit": 3,
