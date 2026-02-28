@@ -3,53 +3,46 @@ set -e
 
 echo "Generating vmq.passwd file from user credentials..."
 
+# Install Python and bcrypt if not present
+apk add --no-cache python3 py3-pip >/dev/null 2>&1 || true
+pip3 install --quiet bcrypt 2>/dev/null || true
+
 # Clear/Init password file
 > /tmp/vmq.passwd
 
-# Use a named pipe for vmq-passwd input
-mkfifo /tmp/vmq_pipe || true
+# Generate bcrypt hashes using Python
+python3 - <<'PYTHON_SCRIPT'
+import sys
+import bcrypt
 
-# Read users from secret (format: username:password per line)
-while IFS=: read -r username password || [ -n "$username" ]; do
-  # Skip empty lines and comments
-  [ -z "$username" ] && continue
-  echo "$username" | grep -q '^#' && continue
-  
-  # Strip trailing whitespace
-  username=$(echo "$username" | xargs)
-  password=$(echo "$password" | xargs)
-  
-  [ -z "$password" ] && continue
-  
-  echo "Generating hash for user: $username"
-  
-  # Background process to feed password to vmq-passwd via named pipe
-  (
-    sleep 0.1
-    echo "$password"
-    sleep 0.1
-    echo "$password"
-  ) > /tmp/vmq_pipe &
-  
-  # Run vmq-passwd with input from named pipe
-  if [ ! -f /tmp/vmq.passwd ]; then
-    vmq-passwd -c /tmp/vmq.passwd "$username" < /tmp/vmq_pipe || {
-      echo "Failed to add user: $username" >&2
-      exit 1
-    }
-  else
-    vmq-passwd /tmp/vmq.passwd "$username" < /tmp/vmq_pipe || {
-      echo "Failed to add user: $username" >&2
-      exit 1
-    }
-  fi
-  
-  wait
-done < /secrets/users
+with open('/secrets/users', 'r') as f:
+    for line in f:
+        line = line.strip()
+        if not line or line.startswith('#'):
+            continue
+        
+        if ':' not in line:
+            continue
+            
+        username, password = line.split(':', 1)
+        username = username.strip()
+        password = password.strip()
+        
+        if not username or not password:
+            continue
+        
+        print(f"Generating bcrypt hash for user: {username}")
+        
+        # Generate bcrypt hash (cost factor 12, standard for VerneMQ)
+        hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(rounds=12))
+        hash_str = hashed.decode('utf-8')
+        
+        # Write to password file
+        with open('/tmp/vmq.passwd', 'a') as out:
+            out.write(f"{username}:{hash_str}\n")
 
-# Clean up
-rm -f /tmp/vmq_pipe
+print("vmq.passwd file generated successfully")
+PYTHON_SCRIPT
 
 chmod 600 /tmp/vmq.passwd
-echo "vmq.passwd file generated successfully"
 cat /tmp/vmq.passwd
