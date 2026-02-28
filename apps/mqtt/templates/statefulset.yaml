@@ -24,7 +24,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: mqtt
-              containerPort: 1883
+              containerPort: {{ .Values.service.mqttPort }}
             - name: dashboard
               containerPort: 18083
             - name: erlang-epmd
@@ -74,7 +74,7 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           livenessProbe:
             tcpSocket:
-              port: 1883
+              port: {{ .Values.service.mqttPort }}
             initialDelaySeconds: 10
             periodSeconds: 10
             failureThreshold: 3
