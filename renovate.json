@@ -13,8 +13,9 @@
       "^apps/.+/values\\.yaml$"
     ]
   },
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "description": "Update appVersion in Chart.yaml to match image tags",
       "fileMatch": [
         "^apps/.+/Chart\\.yaml$"
