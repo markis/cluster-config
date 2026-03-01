@@ -24,6 +24,7 @@ data:
     mqtt:
       server: {{ .Values.mqtt.server }}
       base_topic: {{ .Values.mqtt.baseTopic }}
+      client_id: zigbee2mqtt
       user: ${MQTT_USERNAME}
       password: ${MQTT_PASSWORD}
       keepalive: {{ .Values.mqtt.keepalive }}
