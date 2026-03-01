@@ -49,8 +49,6 @@ frontend:
   enabled: true
   port: 8080
   auth: false # Authentication handled by Traefik/Caddy
-  url: "https://zigbee.markis.network" # Used for Home Assistant device config page
-  authToken: "" # Optional: set to enable frontend auth (add to 1Password if needed)
 
 # Logging
 log:
