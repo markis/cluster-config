@@ -93,5 +93,6 @@ data:
       qos: {{ .Values.deviceOptions.qos }}
       optimistic: {{ .Values.deviceOptions.optimistic }}
 
-    # Note: devices and groups are managed by Zigbee2MQTT and stored in configuration.yaml on the persistent volume
-    # The init-config.sh script preserves existing devices/groups when updating infrastructure settings
+    # Devices and groups are stored in separate files on the persistent volume
+    devices: devices.yaml
+    groups: groups.yaml
