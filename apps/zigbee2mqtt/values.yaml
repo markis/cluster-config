@@ -91,5 +91,5 @@ backup:
 
 # Restore configuration (manual - only enable when needed)
 restore:
-  enabled: false
-  backupFile: "" # e.g., "zigbee2mqtt-20260210-020000.tar.gz"
+  enabled: true
+  backupFile: "zigbee2mqtt-20260228-070009.tar.gz"
