@@ -50,3 +50,141 @@ data:
     device_options:
       # Devices will retain their friendly names between restarts
       retain: true
+
+    # Device friendly names
+    devices:
+      '0x001788010ef8e32c':
+        friendly_name: Kitchen Cabinet Top Lights
+      '0x001788010ef937d9':
+        friendly_name: Kitchen Cabinet Lights 1
+      '0x001788010ef943ad':
+        friendly_name: Kitchen Cabinet Lights 2
+      '0x001788010ec779bb':
+        friendly_name: Dining Room Sconce 1
+      '0x001788010ec77f6e':
+        friendly_name: Dining Room Sconce 2
+      '0x001788010eabdf6d':
+        friendly_name: Garage Light Bulb 1
+      '0x001788010ec78dac':
+        friendly_name: Office Sconce 1
+      '0x001788010ec7894d':
+        friendly_name: Office Sconce 2
+      '0x001788010c723958':
+        friendly_name: Living Room Sconce 1
+      '0x001788010b63ac4d':
+        friendly_name: Living Room Sconce 2
+      '0x001788010b5fa23d':
+        friendly_name: Living Room Sconce 3
+      '0x001788010462be94':
+        friendly_name: Sun Room Sconce 1
+      '0x00178801042b6574':
+        friendly_name: Sun Room Sconce 2
+      '0x001788010d5a830a':
+        friendly_name: Sun Room Fan Light Bulb 1
+      '0x001788010d5a7f57':
+        friendly_name: Sun Room Fan Light Bulb 2
+      '0x001788010d00783f':
+        friendly_name: Kitchen Light Bulb 1
+      '0x001788010d0078e1':
+        friendly_name: Kitchen Light Bulb 2
+      '0x001788010d0071ba':
+        friendly_name: Kitchen Light Bulb 3
+      '0x001788010d00604b':
+        friendly_name: Kitchen Light Bulb 4
+      '0x001788010ebff846':
+        friendly_name: Kitchen Sink Light
+      '0x001788010d00848a':
+        friendly_name: Kitchen Nook Light Bulb 2
+      '0x001788010d0080c6':
+        friendly_name: Kitchen Nook Light Bulb 1
+      '0x001788010ec00d09':
+        friendly_name: Living Room Light 1
+      '0x001788010ebff93b':
+        friendly_name: Living Room Light 2
+      '0x001788010e9f1c40':
+        friendly_name: Living Room Light 3
+      '0x001788010ebfd738':
+        friendly_name: Living Room Light 4
+      '0x001788010daaeff2':
+        friendly_name: Living Room Fan Light Bulb
+      '0x001788010d007fa3':
+        friendly_name: Mud Room Light Bulb 1
+      '0x001788010d005899':
+        friendly_name: Mud Room Light Bulb 2
+      '0x001788010d0083cb':
+        friendly_name: Main Hall Light Bulb 1
+      '0x001788010d0059ce':
+        friendly_name: Main Hall Light Bulb 2
+      '0x001788010d0052d7':
+        friendly_name: Main Hall Light Bulb 3
+      '0x001788010daaf138':
+        friendly_name: Main Floor Bathroom Light Bulb 1
+      '0x001788010daaf33d':
+        friendly_name: Main Floor Bathroom Light Bulb 2
+      '0x001788010dccb4a1':
+        friendly_name: Loft Stairs Light Bulb 1
+      '0x001788010dccb907':
+        friendly_name: Loft Stairs Light Bulb 2
+      '0x001788010674789b':
+        friendly_name: Kids Hall Light Bulb 1
+      '0x0017880106747955':
+        friendly_name: Kids Hall Light Bulb 2
+      '0x001788010cfebb1d':
+        friendly_name: Kids Room Light Bulb 1
+      '0x001788010d5a7f32':
+        friendly_name: Kids Room Light Bulb 2
+      '0x001788010e343756':
+        friendly_name: House Numbers Light
+      '0x001788010e371c1d':
+        friendly_name: Tree Spotlight 1
+      '0x001788010e371c4d':
+        friendly_name: Tree Spotlight 2
+      '0x001788010d252bf2':
+        friendly_name: Path Light 1
+      '0x001788010e370bc5':
+        friendly_name: Path Light 2
+      '0x001788010d252c84':
+        friendly_name: Path Light 3
+      '0x001788010d252c9e':
+        friendly_name: Path Light 4
+      '0x0017880106747bb2':
+        friendly_name: Upstairs Hall Light Bulb 1
+      '0x0017880106748174':
+        friendly_name: Upstairs Hall Light Bulb 2
+      '0x0017880106747736':
+        friendly_name: Upstairs Hall Light Bulb 3
+      '0x0017880104886b5f':
+        friendly_name: Main Bathroom Light Bulb 1
+      '0x00178801042b995a':
+        friendly_name: Main Bathroom Light Bulb 2
+      '0x0017880103b06d79':
+        friendly_name: Main Bathroom Light Bulb 3
+      '0x0017880104888939':
+        friendly_name: Main Bathroom Light Bulb 4
+      '0x0017880103ef3083':
+        friendly_name: Main Bathroom Light Bulb 5
+      '0x0017880103be3d83':
+        friendly_name: Main Bathroom Light Bulb 6
+      '0x282c02bfffe68f45':
+        friendly_name: Server Room Outlet 1
+      '0x282c02bfffe68387':
+        friendly_name: Server Room Outlet 2
+
+    # Groups
+    groups:
+      '1':
+        friendly_name: Main Floor Lights
+      '2':
+        friendly_name: Sconces
+      '3':
+        friendly_name: Kitchen Light Bulbs
+      '4':
+        friendly_name: Kitchen Cabinet Lights
+      '5':
+        friendly_name: Upstairs Light Bulbs
+      '6':
+        friendly_name: Kids Hall Light Bulbs
+      '7':
+        friendly_name: Kids Room Light Bulbs
+      '8':
+        friendly_name: Outdoor Lights
