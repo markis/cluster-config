@@ -6,6 +6,9 @@ metadata:
     app: {{ .Chart.Name }}
 data:
   configuration.yaml: |
+    # Configuration file version (prevents automatic migrations)
+    version: 5
+
     {{- if .Values.homeassistant.enabled }}
     # Home Assistant integration
     homeassistant:
