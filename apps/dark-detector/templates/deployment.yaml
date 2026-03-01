@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/component: detector
     app.kubernetes.io/part-of: {{ $chartName }}
 spec:
-  replicas: 1
+  replicas: {{ $values.replicaCount }}
   selector:
     matchLabels:
       app: {{ $chartName }}
