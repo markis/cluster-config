@@ -48,6 +48,20 @@ spec:
               readOnly: true
             - name: config
               mountPath: /config
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534  # nobody user
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi
 
       containers:
         - name: {{ .Chart.Name }}
@@ -67,10 +81,15 @@ spec:
               mountPath: /dev/bus/usb
             - name: healthcheck
               mountPath: /var/run
+            - name: tmp
+              mountPath: /tmp
           # Privileged required for libusb USB access
-          # SYS_RAWIO capability alone is insufficient
+          # SYS_RAWIO capability alone is insufficient for RTL-SDR device control
           securityContext:
             privileged: true
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
           # File-based health check matching Dockerfile HEALTHCHECK
           livenessProbe:
             exec:
@@ -94,6 +113,8 @@ spec:
         - name: config
           emptyDir: {}
         - name: healthcheck
+          emptyDir: {}
+        - name: tmp
           emptyDir: {}
         - name: usb
           hostPath:
