@@ -20,8 +20,8 @@ data:
     mqtt:
       server: {{ .Values.mqtt.server }}
       base_topic: {{ .Values.mqtt.baseTopic }}
-      user: ${MQTT_USERNAME}
-      password: ${MQTT_PASSWORD}
+      user: '!secret.yaml mqtt_username'
+      password: '!secret.yaml mqtt_password'
 
     # Serial settings
     serial:
@@ -34,10 +34,10 @@ data:
     # Advanced settings
     advanced:
       log_level: {{ .Values.log.level }}
-      pan_id: ${ZIGBEE_PAN_ID}
-      ext_pan_id: ${ZIGBEE_EXT_PAN_ID}
+      pan_id: '!secret.yaml zigbee_pan_id'
+      ext_pan_id: '!secret.yaml zigbee_ext_pan_id'
       channel: {{ .Values.advanced.channel }}
-      network_key: ${ZIGBEE_NETWORK_KEY}
+      network_key: '!secret.yaml zigbee_network_key'
       transmit_power: {{ .Values.advanced.transmitPower }}
       adapter_concurrent: {{ .Values.advanced.adapterConcurrent }}
       adapter_delay: 0
