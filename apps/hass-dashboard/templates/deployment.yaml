@@ -28,9 +28,13 @@ spec:
           image: "{{ .Values.generator.image.repository }}:{{ .Values.generator.image.tag }}"
           imagePullPolicy: {{ .Values.generator.image.pullPolicy }}
           securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
             capabilities:
-              add:
-                - SYS_ADMIN
+              drop:
+                - ALL
           env:
             # Disable Chrome crashpad handler completely
             - name: CHROME_CRASHPAD_HANDLER_DISABLE
@@ -55,6 +59,10 @@ spec:
               readOnly: true
             - name: dshm
               mountPath: /dev/shm
+            - name: tmp
+              mountPath: /tmp
+            - name: chrome-cache
+              mountPath: /home/node/.cache
           livenessProbe:
             exec:
               command:
@@ -65,12 +73,27 @@ spec:
             periodSeconds: 60
             timeoutSeconds: 5
             failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - /app/scripts/healthcheck.sh
+                - --config
+                - /app/config.yaml
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
         - name: nginx
           image: "{{ .Values.nginx.image.repository }}:{{ .Values.nginx.image.tag }}"
           imagePullPolicy: {{ .Values.nginx.image.pullPolicy }}
           securityContext:
+            runAsNonRoot: true
+            runAsUser: 101  # nginx user
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
           resources:
             requests:
               memory: {{ .Values.nginx.resources.requests.memory }}
@@ -117,6 +140,10 @@ spec:
         - name: nginx-cache
           emptyDir: {}
         - name: nginx-run
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+        - name: chrome-cache
           emptyDir: {}
         - name: dshm
           emptyDir:
