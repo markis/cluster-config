@@ -24,12 +24,19 @@ advanced:
   # panId: unique network identifier (0-65535)
   # extPanId: array of 8 bytes for extended network identifier
   channel: 15 # Different from other instance (channel 25)
+  # Add last_seen timestamp to device messages (ISO_8601, ISO_8601_local, epoch, or disable)
+  lastSeen: "ISO_8601"
+  # Add elapsed time in milliseconds since last message
+  elapsed: false
 
 # MQTT connection
 mqtt:
   server: "mqtt://vernemq.default.svc.cluster.local:1883"
   baseTopic: "zigbee2mqtt"
   # username and password come from 1Password secret
+  keepalive: 60
+  version: 4 # MQTT protocol version (4 = 3.1.1, 5 = 5.0)
+  includeDeviceInformation: true # Include device info in MQTT messages
 
 # Home Assistant integration
 homeassistant:
@@ -42,10 +49,29 @@ frontend:
   enabled: true
   port: 8080
   auth: false # Authentication handled by Traefik/Caddy
+  url: "https://zigbee.markis.network" # Used for Home Assistant device config page
+  authToken: "" # Optional: set to enable frontend auth (add to 1Password if needed)
 
 # Logging
 log:
   level: "info"
+
+# Device availability monitoring
+availability:
+  enabled: true
+  activeTimeout: 10 # Mark active devices offline after N minutes
+  passiveTimeout: 1500 # Mark passive devices offline after N minutes (25 hours)
+
+# OTA firmware updates
+ota:
+  updateCheckInterval: 1440 # Check for updates every N minutes (1440 = daily)
+  disableAutomaticUpdateCheck: false # Allow device-initiated update checks
+
+# Default device options (applied to all devices unless overridden)
+deviceOptions:
+  retain: true # Retain MQTT messages
+  qos: 1 # MQTT QoS level (0, 1, or 2)
+  optimistic: true # Publish optimistic state after set commands
 
 # Storage
 persistence:
