@@ -61,6 +61,7 @@ data:
 
     # Frontend settings
     frontend:
+      enabled: {{ .Values.frontend.enabled }}
       port: {{ .Values.frontend.port }}
       {{- if .Values.frontend.url }}
       url: {{ .Values.frontend.url }}
