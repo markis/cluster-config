@@ -22,6 +22,11 @@ data:
       base_topic: {{ .Values.mqtt.baseTopic }}
       user: ${MQTT_USERNAME}
       password: ${MQTT_PASSWORD}
+      keepalive: {{ .Values.mqtt.keepalive }}
+      version: {{ .Values.mqtt.version }}
+      {{- if .Values.mqtt.includeDeviceInformation }}
+      include_device_information: true
+      {{- end }}
 
     # Serial settings
     serial:
@@ -34,6 +39,8 @@ data:
     # Advanced settings
     advanced:
       log_level: {{ .Values.log.level }}
+      log_output: ['console']
+      log_rotation: false
       pan_id: ${ZIGBEE_PAN_ID}
       ext_pan_id: ${ZIGBEE_EXT_PAN_ID}
       channel: {{ .Values.advanced.channel }}
@@ -41,15 +48,44 @@ data:
       transmit_power: {{ .Values.advanced.transmitPower }}
       adapter_concurrent: {{ .Values.advanced.adapterConcurrent }}
       adapter_delay: 0
+      cache_state: true
+      cache_state_persistent: true
+      cache_state_send_on_startup: true
+      last_seen: {{ .Values.advanced.lastSeen }}
+      {{- if .Values.advanced.elapsed }}
+      elapsed: true
+      {{- end }}
 
     # Frontend settings
     frontend:
       port: {{ .Values.frontend.port }}
+      {{- if .Values.frontend.url }}
+      url: {{ .Values.frontend.url }}
+      {{- end }}
+      {{- if .Values.frontend.authToken }}
+      auth_token: ${FRONTEND_AUTH_TOKEN}
+      {{- end }}
+
+    # Device availability monitoring
+    {{- if .Values.availability.enabled }}
+    availability:
+      enabled: true
+      active:
+        timeout: {{ .Values.availability.activeTimeout }}
+      passive:
+        timeout: {{ .Values.availability.passiveTimeout }}
+    {{- end }}
+
+    # OTA firmware updates
+    ota:
+      update_check_interval: {{ .Values.ota.updateCheckInterval }}
+      disable_automatic_update_check: {{ .Values.ota.disableAutomaticUpdateCheck }}
 
     # Device options
     device_options:
-      # Devices will retain their friendly names between restarts
-      retain: true
+      retain: {{ .Values.deviceOptions.retain }}
+      qos: {{ .Values.deviceOptions.qos }}
+      optimistic: {{ .Values.deviceOptions.optimistic }}
 
     # Note: devices and groups are managed by Zigbee2MQTT and stored in configuration.yaml on the persistent volume
     # The init-config.sh script preserves existing devices/groups when updating infrastructure settings
