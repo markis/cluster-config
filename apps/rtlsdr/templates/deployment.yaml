@@ -49,8 +49,6 @@ spec:
             - name: config
               mountPath: /config
           securityContext:
-            runAsNonRoot: true
-            runAsUser: 65534  # nobody user
             allowPrivilegeEscalation: false
             capabilities:
               drop:
