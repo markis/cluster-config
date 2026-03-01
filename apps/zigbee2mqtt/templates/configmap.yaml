@@ -12,6 +12,7 @@ data:
     {{- if .Values.homeassistant.enabled }}
     # Home Assistant integration
     homeassistant:
+      enabled: true
       discovery_topic: {{ .Values.homeassistant.discoveryTopic }}
       status_topic: {{ .Values.homeassistant.statusTopic }}
     {{- else }}
