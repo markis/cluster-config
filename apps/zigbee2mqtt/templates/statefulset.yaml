@@ -14,6 +14,9 @@ spec:
     metadata:
       labels:
         app: {{ .Chart.Name }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/scripts: {{ include (print $.Template.BasePath "/scripts-configmap.yaml") . | sha256sum }}
     spec:
       initContainers:
       - name: config-init
