@@ -7,6 +7,10 @@ metadata:
     app.kubernetes.io/name: {{ .Chart.Name }}
     app.kubernetes.io/component: cronjob
     app.kubernetes.io/part-of: {{ .Chart.Name }}
+  annotations:
+    ignore-check.kube-linter.io/no-liveness-probe: "CronJob batch workload does not need liveness probe"
+    ignore-check.kube-linter.io/no-readiness-probe: "CronJob batch workload does not need readiness probe"
+    ignore-check.kube-linter.io/no-read-only-root-fs: "Streamlit app requires writable temp/cache directories"
 spec:
   schedule: {{ .Values.cronjob.schedule | quote }}
   concurrencyPolicy: Forbid

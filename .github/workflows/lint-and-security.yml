@@ -139,7 +139,6 @@ jobs:
           sudo mv kube-linter /usr/local/bin/
 
       - name: Run kube-linter
-        continue-on-error: true
         run: |
           echo "Security linting ${{ matrix.chart }}..."
           helm template "${{ matrix.chart }}" | kube-linter lint --config .kube-linter.yaml -
