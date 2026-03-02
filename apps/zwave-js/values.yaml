@@ -22,7 +22,7 @@ zwave:
   enabled: true
   logLevel: "debug"
   serverEnabled: true
-  serverPort: 8091  # Z-Wave JS UI serves WebSocket on same port as HTTP
+  serverPort: 3000  # Z-Wave JS WebSocket server port (separate from HTTP UI)
   # Security keys come from 1Password secret
 
 # Home Assistant integration
