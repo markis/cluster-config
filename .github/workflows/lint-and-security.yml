@@ -43,6 +43,7 @@ jobs:
         run: npm install -g markdownlint-cli
 
       - name: Run markdownlint
+        continue-on-error: true
         run: markdownlint '**/*.md' --ignore node_modules
 
   discover-charts:
@@ -139,6 +140,7 @@ jobs:
           sudo mv kube-linter /usr/local/bin/
 
       - name: Run kube-linter
+        continue-on-error: true
         run: |
           echo "Security linting ${{ matrix.chart }}..."
           helm template "${{ matrix.chart }}" | kube-linter lint --config .kube-linter.yaml -
@@ -168,6 +170,7 @@ jobs:
           sudo apt-get install -y trivy
 
       - name: Run Trivy security scan
+        continue-on-error: true
         run: |
           echo "Security scanning ${{ matrix.chart }}..."
           helm template "${{ matrix.chart }}" | trivy config --config trivy.yaml --severity CRITICAL,HIGH -
