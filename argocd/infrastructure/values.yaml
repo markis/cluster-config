@@ -247,5 +247,3 @@ infra:
       additionalArguments:
         - "--metrics.prometheus=true"
         - "--ping=true"
-
-
