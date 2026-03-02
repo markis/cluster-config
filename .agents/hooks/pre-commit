@@ -146,7 +146,7 @@ if command -v kube-linter >/dev/null 2>&1; then
   if [ -n "$CHART_DIRS" ]; then
     for chart_dir in $CHART_DIRS; do
       echo "  Linting $chart_dir..."
-      if ! helm template "$chart_dir" | kube-linter lint --config .kube-linter.yaml -; then
+      if ! helm template "$chart_dir" | kube-linter lint -; then
         echo "${RED}✗ kube-linter failed for $chart_dir${NC}"
         FAILED=1
       fi

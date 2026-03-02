@@ -38,7 +38,6 @@ git commit --no-verify
 
 - `.yamllint` - YAML formatting and syntax rules
 - `.markdownlint.yaml` - Markdown documentation style rules
-- `.kube-linter.yaml` - Kubernetes security checks configuration
 - `.editorconfig` - File formatting rules (indentation, line endings)
 
 ### Helm Linting
@@ -67,8 +66,8 @@ helm template apps/mqtt --set replicaCount=1 --debug
 ### Security & Quality Scanning
 
 ```bash
-# Run kube-linter security checks
-helm template apps/mqtt | kube-linter lint --config .kube-linter.yaml -
+# Run kube-linter security checks (uses default checks)
+helm template apps/mqtt | kube-linter lint -
 
 # Run yamllint on all YAML files
 yamllint .
