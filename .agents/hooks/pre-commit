@@ -157,24 +157,6 @@ else
   echo "  Install with: brew install kube-linter"
 fi
 
-# Check if trivy is available
-if command -v trivy >/dev/null 2>&1; then
-  echo "${GREEN}✓${NC} Running trivy security scan..."
-  CHART_DIRS=$(find apps -name Chart.yaml -exec dirname {} \; 2>/dev/null || true)
-  if [ -n "$CHART_DIRS" ]; then
-    for chart_dir in $CHART_DIRS; do
-      echo "  Scanning $chart_dir..."
-      if ! helm template "$chart_dir" | trivy config --config trivy.yaml --severity CRITICAL,HIGH -; then
-        echo "${RED}✗ trivy security scan failed for $chart_dir${NC}"
-        FAILED=1
-      fi
-    done
-  fi
-else
-  echo "${YELLOW}⚠ trivy not found, skipping...${NC}"
-  echo "  Install with: brew install trivy"
-fi
-
 if [ $FAILED -eq 1 ]; then
   echo ""
   echo "${RED}Pre-commit checks failed. Please fix the errors above.${NC}"

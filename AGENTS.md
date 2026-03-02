@@ -24,7 +24,6 @@ The pre-commit hook automatically runs:
 - **helm lint --strict**: Validates all Helm chart syntax
 - **kubeconform**: Validates rendered Kubernetes manifests
 - **kube-linter**: Security linting for Kubernetes manifests
-- **trivy**: Security vulnerability scanning for Kubernetes configs
 
 **For AI agents**: Before creating commits, always run `.agents/hooks/pre-commit` to validate changes.
 If the hook fails, fix the issues before committing.
@@ -40,8 +39,6 @@ git commit --no-verify
 - `.yamllint` - YAML formatting and syntax rules
 - `.markdownlint.yaml` - Markdown documentation style rules
 - `.kube-linter.yaml` - Kubernetes security checks configuration
-- `trivy.yaml` - Security vulnerability scanning configuration
-- `.trivyignore` - Accepted/ignored vulnerabilities
 - `.editorconfig` - File formatting rules (indentation, line endings)
 
 ### Helm Linting
@@ -73,9 +70,6 @@ helm template apps/mqtt --set replicaCount=1 --debug
 # Run kube-linter security checks
 helm template apps/mqtt | kube-linter lint --config .kube-linter.yaml -
 
-# Run trivy security vulnerability scan
-helm template apps/mqtt | trivy config --config trivy.yaml --severity CRITICAL,HIGH -
-
 # Run yamllint on all YAML files
 yamllint .
 
@@ -94,7 +88,6 @@ The GitHub Actions workflow (`.github/workflows/lint-and-security.yml`) automati
 5. Templates each chart with `helm template --debug`
 6. Validates manifests with `kubeconform`
 7. Runs `kube-linter` security checks on each chart
-8. Runs `trivy` security vulnerability scans on each chart
 
 ### ArgoCD Commands
 

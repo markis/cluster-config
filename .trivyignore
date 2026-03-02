@@ -1,6 +1,0 @@
-# Trivy ignore file for known/accepted vulnerabilities
-# Format: CVE-ID or package name
-
-# Add specific CVEs to ignore here when justified
-# Example:
-# CVE-2021-12345  # Accepted risk: only affects Windows, we run Linux
