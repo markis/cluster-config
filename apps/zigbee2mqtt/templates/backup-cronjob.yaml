@@ -10,6 +10,7 @@ metadata:
     ignore-check.kube-linter.io/no-liveness-probe: "CronJob batch workload does not need liveness probe"
     ignore-check.kube-linter.io/no-readiness-probe: "CronJob batch workload does not need readiness probe"
     ignore-check.kube-linter.io/no-read-only-root-fs: "Backup script needs writable temp directory for tar operations"
+    ignore-check.kube-linter.io/run-as-non-root: "Batch job needs root to install openssh-client via apk"
 spec:
   schedule: {{ .Values.backup.schedule | quote }}
   successfulJobsHistoryLimit: 3
@@ -29,8 +30,7 @@ spec:
             image: alpine:3.19
             command: ["/bin/sh", "/scripts/backup.sh"]
             securityContext:
-              runAsNonRoot: true
-              runAsUser: 1000
+              runAsUser: 0
               allowPrivilegeEscalation: false
               capabilities:
                 drop:
