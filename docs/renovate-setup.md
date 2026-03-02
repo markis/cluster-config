@@ -26,12 +26,14 @@ Renovate will:
 
 To allow Renovate to auto-merge minor/patch updates:
 
-**Option A: Enable Auto-Merge in GitHub Settings**
+#### Option A: Enable Auto-Merge in GitHub Settings
+
 1. Go to your repo Settings → General
 2. Scroll to "Pull Requests"
 3. Check "Allow auto-merge"
 
-**Option B: Use Renovate App Permissions**
+#### Option B: Use Renovate App Permissions
+
 - The Renovate app will auto-merge if you grant it permission
 - This is controlled by the `automerge: true` setting in `renovate.json`
 

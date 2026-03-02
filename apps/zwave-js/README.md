@@ -1,6 +1,7 @@
 # Z-Wave JS UI
 
-Z-Wave JS UI is a fully featured Z-Wave Control Panel and MQTT Gateway. This Helm chart deploys Z-Wave JS UI to your Kubernetes cluster.
+Z-Wave JS UI is a fully featured Z-Wave Control Panel and MQTT Gateway. This Helm chart deploys
+Z-Wave JS UI to your Kubernetes cluster.
 
 ## Prerequisites
 

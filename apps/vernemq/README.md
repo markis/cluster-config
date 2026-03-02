@@ -64,7 +64,8 @@ External Clients (10.0.0.1:1883)
 
 ### Creating Users
 
-Users are stored as **plaintext** `username:password` pairs in 1Password (which is already encrypted). An **init container** automatically generates bcrypt password hashes on pod startup.
+Users are stored as **plaintext** `username:password` pairs in 1Password (which is already encrypted).
+An **init container** automatically generates bcrypt password hashes on pod startup.
 
 **Create user credentials:**
 ```

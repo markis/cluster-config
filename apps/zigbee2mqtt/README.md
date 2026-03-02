@@ -129,7 +129,8 @@ kubectl logs -f job/zigbee2mqtt-restore
 kubectl scale statefulset zigbee2mqtt --replicas=1
 ```
 
-The StatefulSet will create a new PVC on whichever node it gets scheduled to, and the restore job will populate it with the backup data.
+The StatefulSet will create a new PVC on whichever node it gets scheduled to, and the restore job
+will populate it with the backup data.
 
 ### Moving to a Different Node
 
