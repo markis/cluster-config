@@ -128,6 +128,9 @@ tls.key
 # Tool-specific
 # =============================================================================
 
+# Trivy cache
+.trivycache/
+
 # Terraform (if used alongside)
 *.tfstate
 *.tfstate.*
