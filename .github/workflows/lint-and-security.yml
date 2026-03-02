@@ -1,0 +1,173 @@
+name: Lint and Security
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  yaml-lint:
+    name: YAML Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Run yamllint
+        run: yamllint .
+
+  markdown-lint:
+    name: Markdown Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install markdownlint
+        run: npm install -g markdownlint-cli
+
+      - name: Run markdownlint
+        run: markdownlint '**/*.md' --ignore node_modules
+
+  discover-charts:
+    name: Discover Helm Charts
+    runs-on: ubuntu-latest
+    outputs:
+      charts: ${{ steps.find-charts.outputs.charts }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Find all Helm charts
+        id: find-charts
+        run: |
+          # Find all directories containing Chart.yaml and output as JSON array
+          charts=$(find . -name Chart.yaml -exec dirname {} \; | jq -R -s -c 'split("\n")[:-1]')
+          echo "charts=$charts" >> $GITHUB_OUTPUT
+          echo "Found charts: $charts"
+
+  helm-lint:
+    name: Helm Lint
+    needs: discover-charts
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        chart: ${{ fromJson(needs.discover-charts.outputs.charts) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'latest'
+
+      - name: Lint chart
+        run: |
+          echo "Linting ${{ matrix.chart }}..."
+          helm lint "${{ matrix.chart }}" --strict
+
+      - name: Template chart
+        run: |
+          echo "Templating ${{ matrix.chart }}..."
+          helm template "${{ matrix.chart }}" --debug > /dev/null
+
+  kubeconform:
+    name: Kubernetes Manifest Validation
+    needs: discover-charts
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        chart: ${{ fromJson(needs.discover-charts.outputs.charts) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'latest'
+
+      - name: Install kubeconform
+        run: |
+          curl -L https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar xz
+          sudo mv kubeconform /usr/local/bin/
+
+      - name: Validate with kubeconform
+        run: |
+          echo "Validating ${{ matrix.chart }}..."
+          helm template "${{ matrix.chart }}" | kubeconform -strict -kubernetes-version 1.25.0 -summary -ignore-missing-schemas
+
+  kube-linter:
+    name: Kubernetes Security Linting
+    needs: discover-charts
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        chart: ${{ fromJson(needs.discover-charts.outputs.charts) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'latest'
+
+      - name: Install kube-linter
+        run: |
+          curl -L https://github.com/stackrox/kube-linter/releases/latest/download/kube-linter-linux.tar.gz | tar xz
+          sudo mv kube-linter /usr/local/bin/
+
+      - name: Run kube-linter
+        run: |
+          echo "Security linting ${{ matrix.chart }}..."
+          helm template "${{ matrix.chart }}" | kube-linter lint --config .kube-linter.yaml -
+
+  trivy:
+    name: Security Vulnerability Scanning
+    needs: discover-charts
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        chart: ${{ fromJson(needs.discover-charts.outputs.charts) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'latest'
+
+      - name: Install Trivy
+        run: |
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+
+      - name: Run Trivy security scan
+        run: |
+          echo "Security scanning ${{ matrix.chart }}..."
+          helm template "${{ matrix.chart }}" | trivy config --config trivy.yaml --severity CRITICAL,HIGH -

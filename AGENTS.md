@@ -13,11 +13,15 @@ This repository includes agent hooks to ensure code quality before commits. Inst
 ```
 
 The pre-commit hook automatically runs:
+- **yamllint**: Validates YAML formatting and syntax
+- **markdownlint**: Validates Markdown documentation consistency
 - **editorconfig-checker**: Validates file formatting (.editorconfig compliance)
 - **shellcheck**: Lints shell scripts for common issues
 - **shfmt**: Formats shell scripts (default style: tabs, posix)
 - **helm lint --strict**: Validates all Helm chart syntax
 - **kubeconform**: Validates rendered Kubernetes manifests
+- **kube-linter**: Security linting for Kubernetes manifests
+- **trivy**: Security vulnerability scanning for Kubernetes configs
 
 **For AI agents**: Before creating commits, always run `.agents/hooks/pre-commit` to validate changes. If the hook fails, fix the issues before committing.
 
@@ -25,6 +29,14 @@ To skip hooks temporarily (not recommended):
 ```bash
 git commit --no-verify
 ```
+
+### Linter Configuration Files
+- `.yamllint` - YAML formatting and syntax rules
+- `.markdownlint.yaml` - Markdown documentation style rules
+- `.kube-linter.yaml` - Kubernetes security checks configuration
+- `trivy.yaml` - Security vulnerability scanning configuration
+- `.trivyignore` - Accepted/ignored vulnerabilities
+- `.editorconfig` - File formatting rules (indentation, line endings)
 
 ### Helm Linting
 ```bash
@@ -47,12 +59,31 @@ helm template apps/mqtt | kubeconform -strict -kubernetes-version 1.25.0 -summar
 helm template apps/mqtt --set replicaCount=1 --debug
 ```
 
+### Security & Quality Scanning
+```bash
+# Run kube-linter security checks
+helm template apps/mqtt | kube-linter lint --config .kube-linter.yaml -
+
+# Run trivy security vulnerability scan
+helm template apps/mqtt | trivy config --config trivy.yaml --severity CRITICAL,HIGH -
+
+# Run yamllint on all YAML files
+yamllint .
+
+# Run markdownlint on all Markdown files
+markdownlint '**/*.md' --ignore node_modules
+```
+
 ### CI/CD Pipeline
-The GitHub Actions workflow (`.github/workflows/helm-lint.yml`) automatically:
-1. Discovers all Helm charts (by finding `Chart.yaml` files)
-2. Runs `helm lint --strict` on each chart
-3. Templates each chart with `helm template --debug`
-4. Validates manifests with `kubeconform`
+The GitHub Actions workflow (`.github/workflows/lint-and-security.yml`) automatically:
+1. Runs yamllint on all YAML files
+2. Runs markdownlint on all Markdown files
+3. Discovers all Helm charts (by finding `Chart.yaml` files)
+4. Runs `helm lint --strict` on each chart
+5. Templates each chart with `helm template --debug`
+6. Validates manifests with `kubeconform`
+7. Runs `kube-linter` security checks on each chart
+8. Runs `trivy` security vulnerability scans on each chart
 
 ### ArgoCD Commands
 ```bash
