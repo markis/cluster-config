@@ -109,8 +109,6 @@ spec:
           value: "America/New_York"
         - name: HOST
           value: "0.0.0.0"
-        - name: TRUST_PROXY
-          value: "true"
         - name: SESSION_SECRET
           valueFrom:
             secretKeyRef:
