@@ -30,6 +30,17 @@ spec:
       nodeSelector:
         kubernetes.io/arch: arm64
 
+      # Spread replicas across nodes for high availability
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: {{ .Chart.Name }}
+                topologyKey: kubernetes.io/hostname
+
       # Init container to generate vmq.passwd from plaintext credentials
       initContainers:
         - name: generate-passwd
