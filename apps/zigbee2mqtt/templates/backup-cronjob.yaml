@@ -24,6 +24,13 @@ spec:
           - name: backup
             image: alpine:3.19
             command: ["/bin/sh", "/scripts/backup.sh"]
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: 1000
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                  - ALL
             env:
             - name: BACKUP_HOST
               value: {{ .Values.backup.destination.host | quote }}
