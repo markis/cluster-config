@@ -1,5 +1,5 @@
 # Z-Wave JS UI deployment
-replicaCount: 0
+replicaCount: 1
 
 image:
   repository: zwavejs/zwave-js-ui
