@@ -49,9 +49,6 @@ spec:
         securityContext:
           runAsUser: 0
           allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
         resources:
           requests:
             cpu: 10m
