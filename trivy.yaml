@@ -1,0 +1,28 @@
+---
+# Trivy configuration for Kubernetes manifest scanning
+
+# Severity levels to report (CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN)
+severity:
+  - CRITICAL
+  - HIGH
+  - MEDIUM
+
+# Scan targets
+scan:
+  # Security issues in Kubernetes manifests
+  security-checks:
+    - config
+    - secret
+
+# Output format
+format: table
+
+# Exit code (1 if vulnerabilities found)
+exit-code: 1
+
+# Timeout for scanning
+timeout: 5m
+
+# Cache directory
+cache:
+  dir: .trivycache

@@ -1,0 +1,51 @@
+---
+extends: default
+
+rules:
+  # Line length - be flexible for Kubernetes YAML
+  line-length:
+    max: 120
+    level: warning
+
+  # Indentation - 2 spaces as per .editorconfig
+  indentation:
+    spaces: 2
+    indent-sequences: true
+
+  # Allow inline mappings for compact Kubernetes resources
+  braces:
+    max-spaces-inside: 1
+
+  # Allow inline sequences for compact arrays
+  brackets:
+    max-spaces-inside: 1
+
+  # Don't require document start markers (---)
+  document-start: disable
+
+  # Allow truthy values (yes/no, on/off) for Kubernetes booleans
+  truthy:
+    allowed-values: ['true', 'false', 'yes', 'no', 'on', 'off']
+    check-keys: false
+
+  # Comments should have space after #
+  comments:
+    min-spaces-from-content: 1
+
+  # Allow empty values (common in Kubernetes)
+  empty-values:
+    forbid-in-block-mappings: false
+    forbid-in-flow-mappings: false
+
+  # Trailing spaces not allowed (handled by .editorconfig)
+  trailing-spaces: enable
+
+  # Key duplicates are errors
+  key-duplicates: enable
+
+ignore: |
+  .git/
+  **/.git/
+  **/node_modules/
+  **/dist/
+  **/build/

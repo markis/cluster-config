@@ -1,0 +1,29 @@
+---
+# Markdownlint configuration for documentation consistency
+
+# MD013: Line length - be flexible for links and tables
+MD013:
+  line_length: 120
+  code_blocks: false
+  tables: false
+
+# MD033: Allow inline HTML (useful for complex tables/formatting)
+MD033: false
+
+# MD041: First line doesn't have to be top-level heading (allow frontmatter)
+MD041: false
+
+# MD034: Bare URLs are allowed (auto-linked in many renderers)
+MD034: false
+
+# MD046: Code block style - use fenced code blocks
+MD046:
+  style: fenced
+
+# MD024: Allow duplicate headings (common in changelogs)
+MD024:
+  siblings_only: true
+
+# MD007: Unordered list indentation - 2 spaces
+MD007:
+  indent: 2

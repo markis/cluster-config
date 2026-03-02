@@ -11,6 +11,40 @@ NC='\033[0m' # No Color
 
 FAILED=0
 
+# Check if yamllint is available
+if command -v yamllint >/dev/null 2>&1; then
+  echo "${GREEN}✓${NC} Running yamllint..."
+  YAML_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ya?ml)$' || true)
+  if [ -n "$YAML_FILES" ]; then
+    if ! yamllint $YAML_FILES; then
+      echo "${RED}✗ yamllint failed${NC}"
+      FAILED=1
+    fi
+  else
+    echo "  No YAML files to check"
+  fi
+else
+  echo "${YELLOW}⚠ yamllint not found, skipping...${NC}"
+  echo "  Install with: pip install yamllint"
+fi
+
+# Check if markdownlint is available
+if command -v markdownlint >/dev/null 2>&1; then
+  echo "${GREEN}✓${NC} Running markdownlint..."
+  MD_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.md$' || true)
+  if [ -n "$MD_FILES" ]; then
+    if ! markdownlint $MD_FILES; then
+      echo "${RED}✗ markdownlint failed${NC}"
+      FAILED=1
+    fi
+  else
+    echo "  No Markdown files to check"
+  fi
+else
+  echo "${YELLOW}⚠ markdownlint not found, skipping...${NC}"
+  echo "  Install with: npm install -g markdownlint-cli"
+fi
+
 # Check if editorconfig-checker is available
 if command -v editorconfig-checker >/dev/null 2>&1; then
   echo "${GREEN}✓${NC} Running editorconfig-checker..."
@@ -103,6 +137,42 @@ if command -v kubeconform >/dev/null 2>&1; then
 else
   echo "${YELLOW}⚠ kubeconform not found, skipping...${NC}"
   echo "  Install with: brew install kubeconform"
+fi
+
+# Check if kube-linter is available
+if command -v kube-linter >/dev/null 2>&1; then
+  echo "${GREEN}✓${NC} Running kube-linter..."
+  CHART_DIRS=$(find apps -name Chart.yaml -exec dirname {} \; 2>/dev/null || true)
+  if [ -n "$CHART_DIRS" ]; then
+    for chart_dir in $CHART_DIRS; do
+      echo "  Linting $chart_dir..."
+      if ! helm template "$chart_dir" | kube-linter lint --config .kube-linter.yaml -; then
+        echo "${RED}✗ kube-linter failed for $chart_dir${NC}"
+        FAILED=1
+      fi
+    done
+  fi
+else
+  echo "${YELLOW}⚠ kube-linter not found, skipping...${NC}"
+  echo "  Install with: brew install kube-linter"
+fi
+
+# Check if trivy is available
+if command -v trivy >/dev/null 2>&1; then
+  echo "${GREEN}✓${NC} Running trivy security scan..."
+  CHART_DIRS=$(find apps -name Chart.yaml -exec dirname {} \; 2>/dev/null || true)
+  if [ -n "$CHART_DIRS" ]; then
+    for chart_dir in $CHART_DIRS; do
+      echo "  Scanning $chart_dir..."
+      if ! helm template "$chart_dir" | trivy config --config trivy.yaml --severity CRITICAL,HIGH -; then
+        echo "${RED}✗ trivy security scan failed for $chart_dir${NC}"
+        FAILED=1
+      fi
+    done
+  fi
+else
+  echo "${YELLOW}⚠ trivy not found, skipping...${NC}"
+  echo "  Install with: brew install trivy"
 fi
 
 if [ $FAILED -eq 1 ]; then
