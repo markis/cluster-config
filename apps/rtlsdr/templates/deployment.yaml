@@ -7,6 +7,11 @@ metadata:
     app.kubernetes.io/name: {{ .Chart.Name }}
     app.kubernetes.io/component: meter-reader
     app.kubernetes.io/part-of: {{ .Chart.Name }}
+  annotations:
+    ignore-check.kube-linter.io/no-read-only-root-fs: "Init container needs to write config file to shared volume"
+    ignore-check.kube-linter.io/privileged-container: "Requires privileged mode for USB RTL-SDR device access"
+    ignore-check.kube-linter.io/privilege-escalation-container: "Privileged container requires privilege escalation for USB device control"
+    ignore-check.kube-linter.io/run-as-non-root: "Init container needs root to install packages (apk add gettext)"
 spec:
   replicas: 1
   strategy:

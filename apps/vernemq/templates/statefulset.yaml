@@ -7,6 +7,8 @@ metadata:
     app.kubernetes.io/name: {{ .Chart.Name }}
     app.kubernetes.io/component: mqtt-broker
     app.kubernetes.io/part-of: {{ .Chart.Name }}
+  annotations:
+    ignore-check.kube-linter.io/no-read-only-root-fs: "VerneMQ requires writable /vernemq/data and init container needs to generate passwd file"
 spec:
   serviceName: "{{ .Chart.Name }}-headless"
   updateStrategy:

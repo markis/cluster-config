@@ -7,6 +7,8 @@ metadata:
     app.kubernetes.io/name: {{ .Chart.Name }}
     app.kubernetes.io/component: web
     app.kubernetes.io/part-of: {{ .Chart.Name }}
+  annotations:
+    ignore-check.kube-linter.io/no-read-only-root-fs: "Streamlit app requires writable temp/cache directories"
 spec:
   replicas: 1
   selector:
