@@ -81,18 +81,22 @@ Store these keys securely in 1Password and never commit them to version control.
 ## Troubleshooting
 
 ### Check pod status
+
 ```bash
 kubectl get pods -l app=zwave-js
 kubectl logs -f zwave-js-0
 ```
 
 ### Check configuration
+
 ```bash
 kubectl exec -it zwave-js-0 -- cat /usr/src/app/store/settings.json
 ```
 
 ### Z-Wave adapter connection issues
+
 Ensure the SLZB-MRW10U network adapter is accessible at `10.0.0.8:6638` from within the cluster. Test connectivity:
+
 ```bash
 kubectl exec -it zwave-js-0 -- nc -zv 10.0.0.8 6638
 ```

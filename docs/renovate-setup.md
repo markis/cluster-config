@@ -5,6 +5,7 @@ This repository uses Renovate to automatically update container images in Helm c
 ## What It Does
 
 Renovate will:
+
 - Monitor `ghcr.io/markis/hass-dashboard` for new versions
 - Monitor `nginx` for new versions
 - Update `apps/hass-dashboard/values.yaml` (image tags)
@@ -17,7 +18,7 @@ Renovate will:
 
 ### 1. Enable Renovate on GitHub
 
-1. Go to https://github.com/apps/renovate
+1. Go to <https://github.com/apps/renovate>
 2. Click "Install" or "Configure"
 3. Select your `markis/cluster-config` repository
 4. Grant repository access
@@ -40,6 +41,7 @@ To allow Renovate to auto-merge minor/patch updates:
 ### 3. Test the Configuration
 
 Commit the `renovate.json` file:
+
 ```bash
 git add renovate.json docs/renovate-setup.md
 git commit -m "chore: add Renovate configuration for auto-updates"
@@ -49,6 +51,7 @@ git push
 ### 4. First Run
 
 After installation:
+
 1. Renovate will scan your repository
 2. It will create an "onboarding" PR to confirm setup
 3. Merge the onboarding PR
@@ -65,7 +68,8 @@ After installation:
 ### Commit Format
 
 Renovate follows conventional commits:
-```
+
+```text
 chore: update hass-dashboard to v2.5.4
 ```
 
@@ -80,6 +84,7 @@ This matches your existing commit style from manual updates.
 ## Customization
 
 Edit `renovate.json` to:
+
 - Change auto-merge rules
 - Add more apps
 - Adjust PR limits
@@ -88,10 +93,12 @@ Edit `renovate.json` to:
 ### Adding More Apps
 
 For each app, Renovate automatically detects:
+
 - Docker images in `apps/*/values.yaml`
 - Standard Helm chart patterns
 
 For `Chart.yaml` updates, add to `regexManagers`:
+
 ```json
 {
   "fileMatch": ["^apps/.+/Chart\\.yaml$"],
@@ -104,23 +111,27 @@ For `Chart.yaml` updates, add to `regexManagers`:
 ## Monitoring
 
 View Renovate activity:
+
 1. Check the "Dependency Graph" tab in your repo
 2. Watch for PRs labeled with `renovate`
-3. Review the Renovate dashboard at https://app.renovatebot.com/dashboard
+3. Review the Renovate dashboard at <https://app.renovatebot.com/dashboard>
 
 ## Troubleshooting
 
 **Renovate not creating PRs:**
+
 - Check the Renovate logs in the PR comments or dashboard
 - Verify the app has permission to create PRs
 - Ensure `renovate.json` is valid JSON
 
 **Auto-merge not working:**
+
 - Verify "Allow auto-merge" is enabled in repo settings
 - Check that all CI checks pass (if required)
 - Ensure branch protection rules allow auto-merge
 
 **Wrong versions detected:**
+
 - Renovate may detect non-semantic versions (sha- tags)
 - Our config filters to semantic versions only via datasource detection
 - Check the `versioning` field if issues persist
@@ -128,9 +139,10 @@ View Renovate activity:
 ## Alternative: ArgoCD Image Updater
 
 If you prefer ArgoCD-native updates without PRs:
+
 - ArgoCD Image Updater commits directly to git
 - Does NOT update `Chart.yaml` `appVersion` field
 - Requires additional setup for git write-back
-- See: https://argocd-image-updater.readthedocs.io/
+- See: <https://argocd-image-updater.readthedocs.io/>
 
 Renovate is recommended because it handles both files and provides PR-based review.

@@ -12,7 +12,7 @@ VerneMQ is a high-performance, distributed MQTT message broker designed for IoT 
 
 ## Architecture
 
-```
+```text
 External Clients (10.0.0.1:1883)
          ↓
     relayd (TCP relay)
@@ -68,7 +68,8 @@ Users are stored as **plaintext** `username:password` pairs in 1Password (which 
 An **init container** automatically generates bcrypt password hashes on pod startup.
 
 **Create user credentials:**
-```
+
+```text
 # Format: username:password (one per line)
 homeassistant:mySecurePassword123
 zigbee2mqtt:anotherPassword456
@@ -77,6 +78,7 @@ admin:adminPassword000
 ```
 
 **Add to 1Password:**
+
 1. Go to `vaults/k8s-secrets/items/vernemq`
 2. Add field `users` (type: password or text)
 3. Paste the user credentials (plaintext)
@@ -86,8 +88,10 @@ admin:adminPassword000
 ### Updating Users
 
 To add/remove/change users:
+
 1. Update the `users` field in 1Password
 2. Restart VerneMQ pods (or wait for automatic restart):
+
    ```bash
    kubectl rollout restart statefulset vernemq
    ```
@@ -98,7 +102,7 @@ To add/remove/change users:
 
 Modify `templates/configmap.yaml` to define topic permissions:
 
-```
+```text
 # Allow users to publish/subscribe to their own topics
 pattern write home/%u/#
 pattern read home/%u/#
@@ -112,6 +116,7 @@ pattern all #
 ```
 
 Syntax:
+
 - `%u` = username placeholder
 - `%c` = client ID placeholder
 - `#` = multi-level wildcard
@@ -122,6 +127,7 @@ Syntax:
 This chart is deployed via ArgoCD ApplicationSet (auto-discovery).
 
 **To deploy:**
+
 ```bash
 git add apps/vernemq/
 git commit -m "Add VerneMQ MQTT broker"
@@ -129,6 +135,7 @@ git push origin main
 ```
 
 ArgoCD will automatically:
+
 1. Detect the new chart in `apps/vernemq/`
 2. Create Application `app.vernemq`
 3. Deploy StatefulSet and Services

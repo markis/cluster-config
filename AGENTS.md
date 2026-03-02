@@ -6,6 +6,7 @@ pattern. This guide provides essential information for AI coding agents working 
 ## Build, Lint & Test Commands
 
 ### Agent Hooks Setup
+
 This repository includes agent hooks to ensure code quality before commits. Install them once after cloning:
 
 ```bash
@@ -14,6 +15,7 @@ This repository includes agent hooks to ensure code quality before commits. Inst
 ```
 
 The pre-commit hook automatically runs:
+
 - **yamllint**: Validates YAML formatting and syntax
 - **markdownlint**: Validates Markdown documentation consistency
 - **editorconfig-checker**: Validates file formatting (.editorconfig compliance)
@@ -28,11 +30,13 @@ The pre-commit hook automatically runs:
 If the hook fails, fix the issues before committing.
 
 To skip hooks temporarily (not recommended):
+
 ```bash
 git commit --no-verify
 ```
 
 ### Linter Configuration Files
+
 - `.yamllint` - YAML formatting and syntax rules
 - `.markdownlint.yaml` - Markdown documentation style rules
 - `.kube-linter.yaml` - Kubernetes security checks configuration
@@ -41,6 +45,7 @@ git commit --no-verify
 - `.editorconfig` - File formatting rules (indentation, line endings)
 
 ### Helm Linting
+
 ```bash
 # Lint all charts
 find . -name Chart.yaml -exec dirname {} \; | xargs -I {} helm lint {} --strict
@@ -50,6 +55,7 @@ helm lint apps/mqtt --strict
 ```
 
 ### Helm Templating & Validation
+
 ```bash
 # Template a single chart (check for errors)
 helm template apps/mqtt --debug
@@ -62,6 +68,7 @@ helm template apps/mqtt --set replicaCount=1 --debug
 ```
 
 ### Security & Quality Scanning
+
 ```bash
 # Run kube-linter security checks
 helm template apps/mqtt | kube-linter lint --config .kube-linter.yaml -
@@ -77,7 +84,9 @@ markdownlint '**/*.md' --ignore node_modules
 ```
 
 ### CI/CD Pipeline
+
 The GitHub Actions workflow (`.github/workflows/lint-and-security.yml`) automatically:
+
 1. Runs yamllint on all YAML files
 2. Runs markdownlint on all Markdown files
 3. Discovers all Helm charts (by finding `Chart.yaml` files)
@@ -88,6 +97,7 @@ The GitHub Actions workflow (`.github/workflows/lint-and-security.yml`) automati
 8. Runs `trivy` security vulnerability scans on each chart
 
 ### ArgoCD Commands
+
 ```bash
 # List all applications
 kubectl get applications -n argocd
@@ -108,6 +118,7 @@ kubectl logs -n argocd -l app.kubernetes.io/name=argocd-application-controller
 ## Code Style Guidelines
 
 ### File Format (.editorconfig)
+
 - **Encoding**: UTF-8
 - **Line endings**: LF (Unix-style)
 - **Indentation**: 2 spaces (YAML, JSON, shell scripts)
@@ -116,6 +127,7 @@ kubectl logs -n argocd -l app.kubernetes.io/name=argocd-application-controller
 - **Makefiles**: Use tabs with size 4
 
 ### YAML Style
+
 ```yaml
 # Indentation: 2 spaces
 # No tabs allowed
@@ -137,6 +149,7 @@ spec:
 ```
 
 ### Helm Templates
+
 ```yaml
 # Use .Chart.Name for resource names (not hardcoded)
 name: {{ .Chart.Name }}
@@ -157,6 +170,7 @@ resources:
 ```
 
 ### Naming Conventions
+
 - **Chart names**: Lowercase with hyphens (`mqtt`, `zwave-js`, `budget-importer`)
 - **Kubernetes resources**: Use `{{ .Chart.Name }}` for consistency
 - **ConfigMaps/Secrets**: Suffix with `-config` or `-secrets` (e.g., `mqtt-config`)
@@ -165,7 +179,8 @@ resources:
 - **Environment variables**: UPPERCASE_WITH_UNDERSCORES
 
 ### Directory Structure
-```
+
+```text
 apps/<app-name>/
 ├── Chart.yaml              # Required: Helm chart metadata
 ├── values.yaml             # Required: Default values
@@ -183,6 +198,7 @@ apps/<app-name>/
 ```
 
 ### Shell Script Style
+
 ```bash
 #!/bin/sh
 set -e  # Exit on error
@@ -199,6 +215,7 @@ BACKUP_NAME="app-${TIMESTAMP}.tar.gz"
 ```
 
 ### Values.yaml Structure
+
 ```yaml
 # Image configuration
 image:
@@ -233,7 +250,9 @@ config:
 ## Error Handling & Validation
 
 ### Required Health Checks
+
 All deployments/statefulsets MUST include:
+
 ```yaml
 livenessProbe:
   # TCP or HTTP based on application
@@ -255,9 +274,11 @@ startupProbe:  # Optional for slow-starting apps
 ```
 
 ### Secret Management
+
 - **Never hardcode secrets** in YAML files
 - Use 1Password Connect for secret injection
 - Reference secrets via `secretKeyRef`:
+
 ```yaml
 env:
   - name: DB_PASSWORD
@@ -270,6 +291,7 @@ env:
 ## Git Workflow
 
 ### Commit Messages
+
 - Keep concise (1-2 lines preferred)
 - Focus on "why" rather than "what"
 - Examples from repo history:
@@ -278,6 +300,7 @@ env:
   - "Fix backup script SSH key permissions"
 
 ### Branch Strategy
+
 - Main branch: `main`
 - Direct commits allowed (no PR requirement visible)
 - ArgoCD syncs from `main` branch
@@ -285,16 +308,20 @@ env:
 ## ArgoCD Integration
 
 ### Auto-Discovery
+
 Applications in `apps/` are automatically discovered via ApplicationSet. No manual registration needed.
 
 ### Sync Policy
+
 All applications use:
+
 - **Automated sync** enabled
 - **prune: true** - removes deleted resources
 - **selfHeal: true** - reverts manual changes
 - **CreateNamespace=true** - auto-creates namespaces
 
 ### Adding New Apps
+
 1. Create Helm chart in `apps/<name>/`
 2. Include `Chart.yaml` and `values.yaml`
 3. Add templates in `templates/` directory
@@ -306,6 +333,7 @@ All applications use:
 
 For ConfigMaps containing config files, use external files and load them into the ConfigMap rather
 than embedding content directly:
+
 ```yaml
 # templates/configmap.yaml
 apiVersion: v1
@@ -317,7 +345,8 @@ data:
 ```
 
 Store config files in a `config/` directory within the chart:
-```
+
+```text
 apps/<app-name>/
 ├── config/
 │   ├── app.conf
@@ -329,7 +358,9 @@ apps/<app-name>/
 This keeps templates clean and makes config files easier to edit and maintain.
 
 ### 1Password Integration
+
 All apps use 1Password Connect for secrets:
+
 ```yaml
 # templates/onepassword-item.yaml
 apiVersion: onepassword.com/v1
@@ -341,19 +372,25 @@ spec:
 ```
 
 ### Multi-Container Pods
+
 When using sidecars (e.g., MQTT with Redis):
+
 - Name containers clearly
 - Separate resource limits per container
 - Use lifecycle hooks for initialization
 
 ### StatefulSets
+
 For stateful applications (databases, message brokers):
+
 - Use `serviceName` field for headless service
 - Include proper clustering configuration
 - Implement backup/restore jobs
 
 ### Ingress Configuration
+
 Use external hostnames matching OPNsense Caddy/relayd setup:
+
 ```yaml
 spec:
   ingressClassName: traefik
@@ -364,6 +401,7 @@ spec:
 ## Testing Checklist
 
 Before committing Helm chart changes:
+
 - [ ] Run `helm lint <chart> --strict`
 - [ ] Run `helm template <chart> --debug` (no errors)
 - [ ] Validate with `kubeconform`

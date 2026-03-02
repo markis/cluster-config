@@ -6,7 +6,7 @@ cert-manager, 1Password Connect) and application workloads deployed as Helm char
 
 ## Repository Structure
 
-```
+```text
 .
 ├── bootstrap/                    # Bootstrap manifests (apply manually once)
 │   └── apps.yaml                # Root Application that manages all other apps
@@ -75,7 +75,8 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 kubectl port-forward svc/argocd-server -n argocd 8080:443
 ```
 
-Open https://localhost:8080 and login with:
+Open <https://localhost:8080> and login with:
+
 - Username: `admin`
 - Password: (from the command above)
 
@@ -83,7 +84,7 @@ Open https://localhost:8080 and login with:
 
 ### App of Apps Pattern
 
-```
+```text
                          ┌─────────────────────┐
                          │      cluster        │
                          │   (bootstrap/)      │
@@ -107,6 +108,7 @@ Open https://localhost:8080 and login with:
 ### Sync Configuration
 
 All Applications use automated sync with:
+
 - **prune**: Removes resources deleted from Git
 - **selfHeal**: Reverts manual cluster changes
 - **CreateNamespace=true**: Auto-creates target namespaces
@@ -138,7 +140,7 @@ All applications are Helm charts in the `apps/` directory, automatically discove
 
 The ApplicationSet automatically discovers Helm charts in `apps/`. Simply create a new directory:
 
-```
+```text
 apps/my-app/
 ├── Chart.yaml
 ├── values.yaml
@@ -281,7 +283,7 @@ certificates.
 
 ### Architecture
 
-```
+```text
 External:  https://grafana.markis.network
               ↓
            Unbound DNS → 10.0.0.1 (OPNsense)
