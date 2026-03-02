@@ -43,7 +43,6 @@ jobs:
         run: npm install -g markdownlint-cli
 
       - name: Run markdownlint
-        continue-on-error: true
         run: markdownlint '**/*.md' --ignore node_modules
 
   discover-charts:
