@@ -21,7 +21,7 @@
     "store": true
   },
   "gateway": {
-    "type": 1,
+    "type": {{ .Values.homeassistant.gatewayType }},
     "plugins": [],
     "authEnabled": false,
     "payloadType": 0,

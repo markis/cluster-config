@@ -29,6 +29,8 @@ zwave:
 homeassistant:
   enabled: true
   discoveryPrefix: "homeassistant"
+  # Gateway type: 0=Disabled, 1=MQTT, 2=MQTT+WS (legacy), 3=WS Server only
+  gatewayType: 3  # Home Assistant WebSocket server
 
 # UI settings
 ui:
