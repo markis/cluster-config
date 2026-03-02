@@ -1,6 +1,8 @@
 # Cluster Config - ArgoCD App of Apps Pattern
 
-ArgoCD GitOps repository using the App of Apps pattern for Kubernetes cluster management. Uses ApplicationSets for automatic app discovery. Includes infrastructure components (ArgoCD, Traefik, cert-manager, 1Password Connect) and application workloads deployed as Helm charts.
+ArgoCD GitOps repository using the App of Apps pattern for Kubernetes cluster management. Uses
+ApplicationSets for automatic app discovery. Includes infrastructure components (ArgoCD, Traefik,
+cert-manager, 1Password Connect) and application workloads deployed as Helm charts.
 
 ## Repository Structure
 
@@ -273,7 +275,9 @@ kubectl logs -n argocd -l app.kubernetes.io/name=argocd-server
 
 ## Exposing Services via OPNsense (Caddy + relayd)
 
-Services in the k3s cluster are exposed externally through OPNsense using Caddy (reverse proxy with TLS) and relayd (load balancing). This provides a single entry point with automatic TLS certificates.
+Services in the k3s cluster are exposed externally through OPNsense using Caddy (reverse proxy
+with TLS) and relayd (load balancing). This provides a single entry point with automatic TLS
+certificates.
 
 ### Architecture
 
@@ -299,7 +303,7 @@ When adding a new service (e.g., `argocd`), configure the following:
 
 #### 1. Unbound DNS Override
 
-**Services → Unbound DNS → Host Overrides → Add**
+Navigate to: **Services → Unbound DNS → Host Overrides → Add**
 
 | Setting | Value |
 |---------|-------|
@@ -313,7 +317,7 @@ This routes the hostname to Caddy on OPNsense.
 
 #### 2. Caddy - Domain
 
-**Services → Caddy Web Server → Reverse Proxy → Domains → Add**
+Navigate to: **Services → Caddy Web Server → Reverse Proxy → Domains → Add**
 
 | Setting | Value |
 |---------|-------|
@@ -322,7 +326,7 @@ This routes the hostname to Caddy on OPNsense.
 
 #### 3. Caddy - Handler
 
-**Services → Caddy Web Server → Reverse Proxy → Handlers → Add**
+Navigate to: **Services → Caddy Web Server → Reverse Proxy → Handlers → Add**
 
 | Setting | Value |
 |---------|-------|

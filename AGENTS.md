@@ -1,6 +1,7 @@
 # AGENTS.md - Developer Guide for AI Coding Agents
 
-This repository is a Kubernetes GitOps cluster configuration using ArgoCD, Helm, and the App of Apps pattern. This guide provides essential information for AI coding agents working in this repository.
+This repository is a Kubernetes GitOps cluster configuration using ArgoCD, Helm, and the App of Apps
+pattern. This guide provides essential information for AI coding agents working in this repository.
 
 ## Build, Lint & Test Commands
 
@@ -23,7 +24,8 @@ The pre-commit hook automatically runs:
 - **kube-linter**: Security linting for Kubernetes manifests
 - **trivy**: Security vulnerability scanning for Kubernetes configs
 
-**For AI agents**: Before creating commits, always run `.agents/hooks/pre-commit` to validate changes. If the hook fails, fix the issues before committing.
+**For AI agents**: Before creating commits, always run `.agents/hooks/pre-commit` to validate changes.
+If the hook fails, fix the issues before committing.
 
 To skip hooks temporarily (not recommended):
 ```bash
@@ -301,7 +303,9 @@ All applications use:
 ## Special Considerations
 
 ### ConfigMaps with External Files
-For ConfigMaps containing config files, use external files and load them into the ConfigMap rather than embedding content directly:
+
+For ConfigMaps containing config files, use external files and load them into the ConfigMap rather
+than embedding content directly:
 ```yaml
 # templates/configmap.yaml
 apiVersion: v1
