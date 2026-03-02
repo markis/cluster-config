@@ -7,27 +7,6 @@ MD013:
   code_blocks: false
   tables: false
 
-# MD022: Headings should be surrounded by blank lines
-MD022: false
-
-# MD031: Fenced code blocks should be surrounded by blank lines
-MD031: false
-
-# MD032: Lists should be surrounded by blank lines
-MD032: false
-
-# MD033: Allow inline HTML (useful for complex tables/formatting)
-MD033: false
-
-# MD040: Fenced code blocks should have a language specified
-MD040: false
-
-# MD041: First line doesn't have to be top-level heading (allow frontmatter)
-MD041: false
-
-# MD034: Bare URLs are allowed (auto-linked in many renderers)
-MD034: false
-
 # MD046: Code block style - use fenced code blocks
 MD046:
   style: fenced
