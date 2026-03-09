@@ -162,26 +162,29 @@ spec:
           resources:
             {{ toYaml .Values.resources | nindent 12 }}
 
-          # Health checks
+          # Health checks using VerneMQ HTTP endpoints
           livenessProbe:
-            tcpSocket:
-              port: {{ .Values.service.mqttPort }}
+            httpGet:
+              path: /health/ping
+              port: metrics
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
 
           readinessProbe:
-            tcpSocket:
-              port: {{ .Values.service.mqttPort }}
+            httpGet:
+              path: /health/listeners
+              port: metrics
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
 
           startupProbe:
-            tcpSocket:
-              port: {{ .Values.service.mqttPort }}
+            httpGet:
+              path: /health/ping
+              port: metrics
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
