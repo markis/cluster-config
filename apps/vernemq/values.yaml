@@ -8,10 +8,10 @@ image:
 # Resource limits tuned for Raspberry Pi 4/5
 resources:
   requests:
-    memory: "256Mi"
+    memory: "512Mi"
     cpu: "200m"
   limits:
-    memory: "512Mi"
+    memory: "1Gi"
     cpu: "400m"
 
 service:
