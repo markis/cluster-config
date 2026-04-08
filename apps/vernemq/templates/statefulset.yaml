@@ -138,6 +138,15 @@ spec:
             - name: DOCKER_VERNEMQ_ACCEPT_EULA
               value: "yes"
 
+            # LevelDB memory limits to prevent OOM kills
+            # Default is 70% of container memory - causes OOM when limit exceeded
+            - name: DOCKER_VERNEMQ_LEVELDB__MAXIMUM_MEMORY__PERCENT
+              value: "3"
+            - name: DOCKER_VERNEMQ_LEVELDB__WRITE_BUFFER_SIZE_MIN
+              value: "1048576"
+            - name: DOCKER_VERNEMQ_LEVELDB__WRITE_BUFFER_SIZE_MAX
+              value: "2097152"
+
             # Erlang cookie for clustering (from secret)
             - name: DOCKER_VERNEMQ_ERLANG__DISTRIBUTION__PORT_RANGE__MINIMUM
               value: "9100"
