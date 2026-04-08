@@ -16,7 +16,7 @@ resources:
 
 service:
   type: LoadBalancer
-  mqttPort: 1883  # Production MQTT port - ready for cutover
+  mqttPort: 1883 # Production MQTT port - ready for cutover
   metricsPort: 8888
 
 # 1Password secret integration
@@ -33,9 +33,7 @@ config:
   allowAnonymous: false
   # Persistent storage for messages and sessions
   persistentStorage:
-    enabled: true
-    size: 1Gi
-    storageClass: ""  # Use default storage class
+    enabled: false
 
 # VerneMQ clustering configuration
 cluster:
