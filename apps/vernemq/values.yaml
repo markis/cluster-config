@@ -6,6 +6,9 @@ image:
   pullPolicy: IfNotPresent
 
 # Resource limits tuned for Raspberry Pi 4/5
+# Note: VerneMQ uses LevelDB for storage which can use significant buffer cache.
+# Set DOCKER_VERNEMQ_LEVELDB__MAXIMUM_MEMORY__PERCENT in statefulset to limit this.
+# With 3% limit, 1Gi should be sufficient for typical workloads.
 resources:
   requests:
     memory: "512Mi"
