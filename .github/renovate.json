@@ -204,6 +204,18 @@
       "automergeStrategy": "squash"
     },
     {
+      "description": "Group nullclaw updates",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/markis/nullclaw-container"],
+      "groupName": "nullclaw",
+      "commitMessageTopic": "nullclaw",
+      "commitMessageExtra": "to {{newVersion}}",
+      "commitMessagePrefix": "chore:",
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash"
+    },
+    {
       "description": "Pin VerneMQ to 2.0.x (2.1.1+ has clustering issues on ARM64)",
       "matchDatasources": ["docker"],
       "matchPackageNames": ["vernemq/vernemq"],
@@ -212,6 +224,13 @@
       "commitMessageTopic": "vernemq",
       "commitMessageExtra": "to {{newVersion}}",
       "commitMessagePrefix": "chore:"
+    }
+  ],
+  "hostRules": [
+    {
+      "matchHost": "ghcr.io",
+      "username": "x-access-token",
+      "password": "{{ secrets.GHCR_TOKEN }}"
     }
   ],
   "prConcurrentLimit": 3,
