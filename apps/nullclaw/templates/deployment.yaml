@@ -23,6 +23,8 @@ spec:
         app: {{ .Chart.Name }}
     spec:
       restartPolicy: Always
+      imagePullSecrets:
+        - name: {{ .Values.imagePullSecret }}
       initContainers:
         - name: config-init
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -36,7 +38,7 @@ spec:
               chmod 600 /nullclaw-data/.ssh/id_ed25519 && \
               printf 'Host *\n  StrictHostKeyChecking accept-new\n  IdentityFile ~/.ssh/id_ed25519\n' > /nullclaw-data/.ssh/config && \
               chmod 600 /nullclaw-data/.ssh/config && \
-              git clone git@github.com:markis/nullclaw-markis-bot.git /nullclaw-data/workspace && \
+              HOME=/nullclaw-data git clone git@github.com:markis/nullclaw-markis-bot.git /nullclaw-data/workspace && \
               envsubst '$OPENCODE_API_KEY $DISCORD_TOKEN $DISCORD_GUILD_ID $DISCORD_ALLOW_FROM $GATEWAY_PAIRED_TOKEN' \
                 < /config-template/config.json > /nullclaw-data/config.json && \
               chown -R 1000:1000 /nullclaw-data
