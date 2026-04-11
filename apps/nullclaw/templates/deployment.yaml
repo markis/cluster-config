@@ -1,0 +1,119 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+    app: {{ .Chart.Name }}
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/component: web
+    app.kubernetes.io/part-of: {{ .Chart.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+    spec:
+      restartPolicy: Always
+      initContainers:
+        - name: config-init
+          image: alpine:3.20
+          command:
+            - sh
+            - -c
+            - |
+              apk add --no-cache gettext git openssh && \
+              mkdir -p /nullclaw-data/.ssh && \
+              chmod 700 /nullclaw-data/.ssh && \
+              echo "$SSH_PRIVATE_KEY" > /nullclaw-data/.ssh/id_ed25519 && \
+              chmod 600 /nullclaw-data/.ssh/id_ed25519 && \
+              printf 'Host *\n  StrictHostKeyChecking accept-new\n  IdentityFile ~/.ssh/id_ed25519\n' > /nullclaw-data/.ssh/config && \
+              chmod 600 /nullclaw-data/.ssh/config && \
+              git clone git@github.com:markis/nullclaw-markis-bot.git /nullclaw-data/workspace && \
+              envsubst '$OPENCODE_API_KEY $DISCORD_TOKEN $DISCORD_GUILD_ID $DISCORD_ALLOW_FROM $GATEWAY_PAIRED_TOKEN' \
+                < /config-template/config.json > /nullclaw-data/config.json
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+          envFrom:
+            - secretRef:
+                name: {{ .Values.secretName }}
+          volumeMounts:
+            - name: config-template
+              mountPath: /config-template
+            - name: nullclaw-data
+              mountPath: /nullclaw-data
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+          env:
+            - name: NULLCLAW_HOME
+              value: /nullclaw-data
+            - name: NULLCLAW_WORKSPACE
+              value: /nullclaw-data/workspace
+            - name: HOME
+              value: /nullclaw-data
+          resources:
+            requests:
+              memory: {{ .Values.deployment.resources.requests.memory }}
+              cpu: {{ .Values.deployment.resources.requests.cpu }}
+            limits:
+              memory: {{ .Values.deployment.resources.limits.memory }}
+              cpu: {{ .Values.deployment.resources.limits.cpu | quote }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.service.targetPort }}
+              scheme: HTTP
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.service.targetPort }}
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          volumeMounts:
+            - name: nullclaw-data
+              mountPath: /nullclaw-data
+      volumes:
+        - name: config-template
+          configMap:
+            name: {{ .Chart.Name }}-config-template
+        - name: nullclaw-data
+          emptyDir: {}
