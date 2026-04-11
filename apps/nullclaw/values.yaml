@@ -21,3 +21,4 @@ ingress:
   host: nullclaw.markis.network
 
 secretName: nullclaw-secrets
+imagePullSecret: ghcr-pull-secret
