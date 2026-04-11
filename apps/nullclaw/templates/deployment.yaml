@@ -83,6 +83,10 @@ spec:
             - name: http
               containerPort: {{ .Values.service.targetPort }}
           env:
+            - name: NULLCLAW_HOME
+              value: /home/agent
+            - name: NULLCLAW_WORKSPACE
+              value: /home/agent/workspace
             - name: KUBECONFIG
               value: /home/agent/.kube/config
           resources:
