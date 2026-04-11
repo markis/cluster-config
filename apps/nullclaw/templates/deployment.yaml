@@ -45,6 +45,7 @@ spec:
             runAsNonRoot: true
             runAsUser: 1000
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
             capabilities:
               drop:
                 - ALL
@@ -71,6 +72,7 @@ spec:
             runAsNonRoot: true
             runAsUser: 1000
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
             capabilities:
               drop:
                 - ALL
@@ -112,9 +114,14 @@ spec:
           volumeMounts:
             - name: nullclaw-data
               mountPath: /nullclaw-data
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: config-template
           configMap:
             name: {{ .Chart.Name }}-config-template
         - name: nullclaw-data
           emptyDir: {}
+        - name: tmp
+          emptyDir:
+            medium: Memory
