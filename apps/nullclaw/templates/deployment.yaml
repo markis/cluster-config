@@ -32,6 +32,7 @@ spec:
             - sh
             - -c
             - |
+              cd / && \
               mkdir -p /home/agent/.ssh /home/agent/.kube && \
               echo "$KUBECONFIG_CONTENT" > /home/agent/.kube/config && \
               chmod 600 /home/agent/.kube/config && \
