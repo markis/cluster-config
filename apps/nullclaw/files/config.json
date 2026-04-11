@@ -1,5 +1,5 @@
 {
-  "workspace": "/nullclaw-data/workspace",
+  "workspace": "/home/agent/workspace",
   "default_temperature": 0.7,
   "models": {
     "providers": {
@@ -75,7 +75,7 @@
     ],
     "allow_raw_url_chars": false,
     "allowed_paths": [
-      "/nullclaw-data/"
+      "/home/agent/"
     ]
   },
   "runtime": {
