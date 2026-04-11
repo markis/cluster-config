@@ -39,10 +39,10 @@ spec:
               chmod 600 /nullclaw-data/.ssh/config && \
               git clone git@github.com:markis/nullclaw-markis-bot.git /nullclaw-data/workspace && \
               envsubst '$OPENCODE_API_KEY $DISCORD_TOKEN $DISCORD_GUILD_ID $DISCORD_ALLOW_FROM $GATEWAY_PAIRED_TOKEN' \
-                < /config-template/config.json > /nullclaw-data/config.json
+                < /config-template/config.json > /nullclaw-data/config.json && \
+              chown -R 1000:1000 /nullclaw-data
           securityContext:
-            runAsNonRoot: true
-            runAsUser: 1000
+            runAsUser: 0
             allowPrivilegeEscalation: false
             capabilities:
               drop:
