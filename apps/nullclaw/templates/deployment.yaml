@@ -32,18 +32,18 @@ spec:
             - sh
             - -c
             - |
-              mkdir -p /nullclaw-data/.ssh /nullclaw-data/.kube && \
-              echo "$KUBECONFIG_CONTENT" > /nullclaw-data/.kube/config && \
-              chmod 600 /nullclaw-data/.kube/config && \
-              chmod 700 /nullclaw-data/.ssh && \
-              echo "$SSH_PRIVATE_KEY" > /nullclaw-data/.ssh/id_ed25519 && \
-              chmod 600 /nullclaw-data/.ssh/id_ed25519 && \
-              printf 'Host *\n  StrictHostKeyChecking accept-new\n  IdentityFile /nullclaw-data/.ssh/id_ed25519\n  UserKnownHostsFile /nullclaw-data/.ssh/known_hosts\n' > /nullclaw-data/.ssh/config && \
-              chmod 600 /nullclaw-data/.ssh/config && \
-              GIT_SSH_COMMAND="ssh -i /nullclaw-data/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/nullclaw-data/.ssh/known_hosts" \
-                git clone git@github.com:markis/nullclaw-markis-bot.git /nullclaw-data/workspace && \
+              mkdir -p /home/agent/.ssh /home/agent/.kube && \
+              echo "$KUBECONFIG_CONTENT" > /home/agent/.kube/config && \
+              chmod 600 /home/agent/.kube/config && \
+              chmod 700 /home/agent/.ssh && \
+              echo "$SSH_PRIVATE_KEY" > /home/agent/.ssh/id_ed25519 && \
+              chmod 600 /home/agent/.ssh/id_ed25519 && \
+              printf 'Host *\n  StrictHostKeyChecking accept-new\n  IdentityFile /home/agent/.ssh/id_ed25519\n  UserKnownHostsFile /home/agent/.ssh/known_hosts\n' > /home/agent/.ssh/config && \
+              chmod 600 /home/agent/.ssh/config && \
+              GIT_SSH_COMMAND="ssh -i /home/agent/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/home/agent/.ssh/known_hosts" \
+                git clone git@github.com:markis/nullclaw-markis-bot.git /home/agent/workspace && \
               envsubst '$OPENCODE_API_KEY $DISCORD_TOKEN $DISCORD_GUILD_ID $DISCORD_ALLOW_FROM $GATEWAY_PAIRED_TOKEN' \
-                < /config-template/config.json > /nullclaw-data/config.json
+                < /config-template/config.json > /home/agent/config.json
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
@@ -65,8 +65,8 @@ spec:
           volumeMounts:
             - name: config-template
               mountPath: /config-template
-            - name: nullclaw-data
-              mountPath: /nullclaw-data
+            - name: home
+              mountPath: /home/agent
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -83,14 +83,8 @@ spec:
             - name: http
               containerPort: {{ .Values.service.targetPort }}
           env:
-            - name: NULLCLAW_HOME
-              value: /nullclaw-data
-            - name: NULLCLAW_WORKSPACE
-              value: /nullclaw-data/workspace
-            - name: HOME
-              value: /nullclaw-data
             - name: KUBECONFIG
-              value: /nullclaw-data/.kube/config
+              value: /home/agent/.kube/config
           resources:
             requests:
               memory: {{ .Values.deployment.resources.requests.memory }}
@@ -117,15 +111,15 @@ spec:
             timeoutSeconds: 3
             failureThreshold: 3
           volumeMounts:
-            - name: nullclaw-data
-              mountPath: /nullclaw-data
+            - name: home
+              mountPath: /home/agent
             - name: tmp
               mountPath: /tmp
       volumes:
         - name: config-template
           configMap:
             name: {{ .Chart.Name }}-config-template
-        - name: nullclaw-data
+        - name: home
           emptyDir: {}
         - name: tmp
           emptyDir:
