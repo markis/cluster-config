@@ -32,7 +32,9 @@ spec:
             - sh
             - -c
             - |
-              mkdir -p /nullclaw-data/.ssh && \
+              mkdir -p /nullclaw-data/.ssh /nullclaw-data/.kube && \
+              echo "$KUBECONFIG_CONTENT" > /nullclaw-data/.kube/config && \
+              chmod 600 /nullclaw-data/.kube/config && \
               chmod 700 /nullclaw-data/.ssh && \
               echo "$SSH_PRIVATE_KEY" > /nullclaw-data/.ssh/id_ed25519 && \
               chmod 600 /nullclaw-data/.ssh/id_ed25519 && \
@@ -87,6 +89,8 @@ spec:
               value: /nullclaw-data/workspace
             - name: HOME
               value: /nullclaw-data
+            - name: KUBECONFIG
+              value: /nullclaw-data/.kube/config
           resources:
             requests:
               memory: {{ .Values.deployment.resources.requests.memory }}
