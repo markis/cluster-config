@@ -67,16 +67,14 @@
   "autonomy": {
     "level": "full",
     "workspace_only": false,
-    "max_actions_per_hour": 500,
-    "require_approval_for_medium_risk": false,
-    "block_high_risk_commands": true,
+    "allowed_paths": [
+      "*"
+    ],
     "allowed_commands": [
       "*"
     ],
-    "allow_raw_url_chars": false,
-    "allowed_paths": [
-      "/home/agent/"
-    ]
+    "block_high_risk_commands": true,
+    "max_actions_per_hour": 500
   },
   "runtime": {
     "kind": "native",
