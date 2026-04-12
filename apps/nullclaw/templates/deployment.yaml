@@ -43,6 +43,8 @@ spec:
               chmod 600 /home/agent/.ssh/id_ed25519 && \
               printf 'Host *\n  StrictHostKeyChecking accept-new\n  IdentityFile /home/agent/.ssh/id_ed25519\n  UserKnownHostsFile /home/agent/.ssh/known_hosts\n' > /home/agent/.ssh/config && \
               chmod 600 /home/agent/.ssh/config && \
+              git config --global user.name "$GIT_USER_NAME" && \
+              git config --global user.email "$GIT_USER_EMAIL" && \
               rm -rf /home/agent/workspace && \
               GIT_SSH_COMMAND="ssh -i /home/agent/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/home/agent/.ssh/known_hosts" \
                 git clone git@github.com:markis/nullclaw-markis-bot.git /home/agent/workspace && \
