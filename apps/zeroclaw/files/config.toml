@@ -1,0 +1,61 @@
+default_provider = "opencode"
+default_model = "minimax-m2.5"
+default_temperature = 0.7
+
+[agent]
+compact_context = false
+max_tool_iterations = 1000
+max_history_messages = 100
+parallel_tools = false
+tool_dispatcher = "auto"
+message_timeout_secs = 600
+
+[autonomy]
+level = "full"
+workspace_only = false
+
+[channels_config.discord]
+bot_token = "$DISCORD_TOKEN"
+guild_id = "$DISCORD_GUILD_ID"
+allowed_users = ["$DISCORD_ALLOW_FROM"]
+mention_only = true
+
+[gateway]
+port = 42617
+host = "::"
+allow_public_bind = true
+require_pairing = true
+paired_tokens = ["$GATEWAY_PAIRED_TOKEN"]
+
+[reliability]
+provider_retries = 2
+provider_backoff_ms = 500
+channel_initial_backoff_secs = 2
+channel_max_backoff_secs = 60
+
+[scheduler]
+enabled = true
+max_tasks = 64
+max_concurrent = 4
+
+[security.audit]
+enabled = true
+log_path = "audit.log"
+
+[browser]
+enabled = true
+backend = "agent_browser"
+native_headless = true
+native_chrome_path = "$CHROMIUM_PATH"
+
+[identity]
+format = "openclaw"
+
+[http_request]
+enabled = true
+timeout_secs = 30
+
+[cost]
+enabled = false
+daily_limit_usd = 10
+monthly_limit_usd = 100
