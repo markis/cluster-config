@@ -22,7 +22,7 @@ mention_only = true
 
 [gateway]
 port = 42617
-host = "::"
+host = "0.0.0.0"
 allow_public_bind = true
 require_pairing = true
 paired_tokens = ["$GATEWAY_PAIRED_TOKEN"]
