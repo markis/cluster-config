@@ -59,6 +59,7 @@ enabled = true
 backend = "agent_browser"
 native_headless = true
 native_chrome_path = "$CHROMIUM_PATH"
+allowed_domains = ["*"]
 
 [identity]
 format = "openclaw"
