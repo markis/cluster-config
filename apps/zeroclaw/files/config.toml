@@ -13,6 +13,10 @@ message_timeout_secs = 600
 [autonomy]
 level = "full"
 workspace_only = false
+allowed_commands = ["*"]
+
+[runtime]
+kind = "native" # "native" or "docker"
 
 [channels_config.discord]
 bot_token = "$DISCORD_TOKEN"
@@ -33,6 +37,13 @@ provider_retries = 2
 provider_backoff_ms = 500
 channel_initial_backoff_secs = 2
 channel_max_backoff_secs = 60
+
+[memory]
+backend = "markdown"        # sqlite | lucid | postgres | markdown | none
+auto_save = true
+embedding_provider = "none" # none | openai | custom:https://...
+vector_weight = 0.7
+keyword_weight = 0.3
 
 [scheduler]
 enabled = true
