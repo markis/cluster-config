@@ -1,0 +1,139 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+    app: {{ .Chart.Name }}
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/component: web
+    app.kubernetes.io/part-of: {{ .Chart.Name }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+      annotations:
+        checksum/config: {{ .Files.Get "files/config.json" | sha256sum }}
+    spec:
+      restartPolicy: Always
+      imagePullSecrets:
+        - name: {{ .Values.imagePullSecret }}
+      initContainers:
+        - name: config-init
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command:
+            - sh
+            - -c
+            - |
+              cd / && \
+              mkdir -p /home/agent/.ssh /home/agent/.kube && \
+              echo "$KUBECONFIG_CONTENT" > /home/agent/.kube/config && \
+              chmod 600 /home/agent/.kube/config && \
+              chmod 700 /home/agent/.ssh && \
+              echo "$SSH_PRIVATE_KEY" > /home/agent/.ssh/id_ed25519 && \
+              chmod 600 /home/agent/.ssh/id_ed25519 && \
+              printf 'Host *\n  StrictHostKeyChecking accept-new\n  IdentityFile /home/agent/.ssh/id_ed25519\n  UserKnownHostsFile /home/agent/.ssh/known_hosts\n' > /home/agent/.ssh/config && \
+              chmod 600 /home/agent/.ssh/config && \
+              git config --global user.name "$GIT_USER_NAME" && \
+              git config --global user.email "$GIT_USER_EMAIL" && \
+              rm -rf /home/agent/workspace && \
+              GIT_SSH_COMMAND="ssh -i /home/agent/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/home/agent/.ssh/known_hosts" \
+                git clone git@github.com:markis/zeroclaw-markis-bot.git /home/agent/workspace && \
+              envsubst '$OPENCODE_API_KEY $DISCORD_TOKEN $DISCORD_GUILD_ID $DISCORD_ALLOW_FROM $GATEWAY_PAIRED_TOKEN $CHROMIUM_PATH' \
+                < /config-template/config.json > /home/agent/config.json
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+          env:
+            - name: CHROMIUM_PATH
+              value: /usr/local/bin/chromium
+          envFrom:
+            - secretRef:
+                name: {{ .Values.secretName }}
+          volumeMounts:
+            - name: config-template
+              mountPath: /config-template
+            - name: home
+              mountPath: /home/agent
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+          env:
+            - name: NULLCLAW_HOME
+              value: /home/agent
+            - name: NULLCLAW_WORKSPACE
+              value: /home/agent/workspace
+            - name: KUBECONFIG
+              value: /home/agent/.kube/config
+          resources:
+            requests:
+              memory: {{ .Values.deployment.resources.requests.memory }}
+              cpu: {{ .Values.deployment.resources.requests.cpu }}
+            limits:
+              memory: {{ .Values.deployment.resources.limits.memory }}
+              cpu: {{ .Values.deployment.resources.limits.cpu | quote }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.service.targetPort }}
+              scheme: HTTP
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.service.targetPort }}
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          volumeMounts:
+            - name: home
+              mountPath: /home/agent
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: config-template
+          configMap:
+            name: {{ .Chart.Name }}-config-template
+        - name: home
+          emptyDir: {}
+        - name: tmp
+          emptyDir:
+            medium: Memory
