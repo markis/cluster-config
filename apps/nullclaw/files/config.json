@@ -343,7 +343,7 @@
     "backend": "agent_browser",
     "native_headless": true,
     "native_webdriver_url": "http://127.0.0.1:9515",
-    "native_chrome_path": "/usr/bin/chromium",
+    "native_chrome_path": "$CHROMIUM_PATH",
     "allowed_domains": [
       "*"
     ]
