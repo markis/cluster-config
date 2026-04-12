@@ -1,4 +1,4 @@
-default_provider = "opencode"
+default_provider = "opencode-go"
 default_model = "minimax-m2.5"
 default_temperature = 0.7
 
@@ -28,6 +28,7 @@ require_pairing = true
 paired_tokens = ["$GATEWAY_PAIRED_TOKEN"]
 
 [reliability]
+fallback_providers = ["opencode"]
 provider_retries = 2
 provider_backoff_ms = 500
 channel_initial_backoff_secs = 2

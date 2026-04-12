@@ -68,6 +68,11 @@ spec:
           env:
             - name: CHROMIUM_PATH
               value: /usr/local/bin/chromium
+            - name: OPENCODE_GO_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName }}
+                  key: OPENCODE_API_KEY
           envFrom:
             - secretRef:
                 name: {{ .Values.secretName }}
@@ -100,6 +105,11 @@ spec:
               value: /home/agent/.kube/config
             - name: HOME
               value: /home/agent
+            - name: OPENCODE_GO_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName }}
+                  key: OPENCODE_API_KEY
           resources:
             requests:
               memory: {{ .Values.deployment.resources.requests.memory }}
