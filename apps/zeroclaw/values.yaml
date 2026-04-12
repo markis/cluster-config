@@ -17,7 +17,7 @@ deployment:
 service:
   type: ClusterIP
   port: 80
-  targetPort: 3000
+  targetPort: 42617
 
 ingress:
   host: zeroclaw.markis.network
