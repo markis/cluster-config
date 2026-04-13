@@ -43,8 +43,6 @@ spec:
               envsubst '$DISCORD_TOKEN $DISCORD_GUILD_ID $DISCORD_ALLOW_FROM $GATEWAY_PAIRED_TOKEN $CHROMIUM_PATH' \
                 < /config-template/config.toml > /home/agent/.zeroclaw/config.toml && \
               chmod 600 /home/agent/.zeroclaw/config.toml && \
-              zeroclaw config set --no-interactive channels.discord.bot-token "$DISCORD_TOKEN" && \
-              zeroclaw config set --no-interactive gateway.paired-tokens "$GATEWAY_PAIRED_TOKEN" && \
               echo "$KUBECONFIG_CONTENT" > /home/agent/.kube/config && \
               chmod 600 /home/agent/.kube/config && \
               chmod 700 /home/agent/.ssh && \
