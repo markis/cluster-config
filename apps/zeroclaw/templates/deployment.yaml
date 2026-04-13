@@ -159,5 +159,8 @@ spec:
             medium: Memory
         - name: secret-key
           secret:
-            secretName: SECRET_KEY
+            secretName: {{ .Values.secretName }}
+            items:
+              - key: SECRET_KEY
+                path: secret_key
             defaultMode: 0600
