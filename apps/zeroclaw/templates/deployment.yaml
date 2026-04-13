@@ -51,6 +51,7 @@ spec:
               GIT_SSH_COMMAND="ssh -i /home/agent/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/home/agent/.ssh/known_hosts" \
                 git clone git@github.com:markis/zeroclaw-markis-bot.git /home/agent/workspace && \
               restic restore latest --target / --include '/home/agent/workspace' || true && \
+              mkdir -p /home/agent/.zeroclaw && \
               envsubst '$DISCORD_TOKEN $DISCORD_GUILD_ID $DISCORD_ALLOW_FROM $GATEWAY_PAIRED_TOKEN $CHROMIUM_PATH' \
                 < /config-template/config.toml > /home/agent/.zeroclaw/config.toml && \
               chmod 600 /home/agent/.zeroclaw/config.toml && \
