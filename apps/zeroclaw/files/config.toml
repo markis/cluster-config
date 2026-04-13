@@ -1,5 +1,5 @@
 default_provider = "opencode-go"
-default_model = "minimax-m2.5"
+default_model = "glm-5.1"
 default_temperature = 0.7
 
 [agent]
