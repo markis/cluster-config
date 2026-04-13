@@ -15,6 +15,12 @@ level = "full"
 workspace_only = false
 allowed_commands = ["*"]
 max_actions_per_hour = 500
+shell_env_passthrough = [
+  "KUBECONFIG",
+  "RESTIC_REPOSITORY",
+  "RESTIC_PASSWORD",
+  "RESTIC_HOST",
+]
 
 [runtime]
 kind = "native" # "native" or "docker"
