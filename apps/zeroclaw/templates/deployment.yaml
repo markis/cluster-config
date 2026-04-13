@@ -68,8 +68,6 @@ spec:
               memory: "128Mi"
               cpu: "100m"
           env:
-            - name: RESTIC_HOST
-              value: zeroclaw
             - name: CHROMIUM_PATH
               value: /usr/local/bin/chromium
             - name: OPENCODE_GO_API_KEY
@@ -102,6 +100,8 @@ spec:
             - name: http
               containerPort: {{ .Values.service.targetPort }}
           env:
+            - name: RESTIC_HOST
+              value: zeroclaw
             - name: ZEROCLAW_HOME
               value: /home/agent
             - name: ZEROCLAW_WORKSPACE
