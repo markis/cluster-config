@@ -68,6 +68,8 @@ spec:
               memory: "128Mi"
               cpu: "100m"
           env:
+            - name: RESTIC_HOST
+              value: zeroclaw
             - name: CHROMIUM_PATH
               value: /usr/local/bin/chromium
             - name: OPENCODE_GO_API_KEY
