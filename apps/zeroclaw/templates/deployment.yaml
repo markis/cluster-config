@@ -37,7 +37,12 @@ spec:
             - -c
             - |
               cd / && \
-              mkdir -p /home/agent/.ssh /home/agent/.kube /home/agent/.zeroclaw && \
+              mkdir -p /home/agent/.ssh /home/agent/.kube /home/agent/.zeroclaw /home/agent/workspace && \
+              envsubst '$DISCORD_TOKEN $DISCORD_GUILD_ID $DISCORD_ALLOW_FROM $GATEWAY_PAIRED_TOKEN $CHROMIUM_PATH' \
+                < /config-template/config.toml > /home/agent/.zeroclaw/config.toml && \
+              chmod 600 /home/agent/.zeroclaw/config.toml && \
+              zeroclaw config set --no-interactive channels.discord.bot-token "$DISCORD_TOKEN" && \
+              zeroclaw config set --no-interactive gateway.paired-tokens "$GATEWAY_PAIRED_TOKEN" && \
               echo "$KUBECONFIG_CONTENT" > /home/agent/.kube/config && \
               chmod 600 /home/agent/.kube/config && \
               chmod 700 /home/agent/.ssh && \
@@ -51,13 +56,7 @@ spec:
               GIT_SSH_COMMAND="ssh -i /home/agent/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/home/agent/.ssh/known_hosts" \
                 git clone git@github.com:markis/zeroclaw-markis-bot.git /home/agent/workspace && \
               mkdir -p /home/agent/workspace && \
-              restic restore latest:/home/agent/workspace --target /home/agent/workspace || true && \
-              mkdir -p /home/agent/.zeroclaw && \
-              envsubst '$DISCORD_TOKEN $DISCORD_GUILD_ID $DISCORD_ALLOW_FROM $GATEWAY_PAIRED_TOKEN $CHROMIUM_PATH' \
-                < /config-template/config.toml > /home/agent/.zeroclaw/config.toml && \
-              chmod 600 /home/agent/.zeroclaw/config.toml && \
-              zeroclaw config set --no-interactive channels.discord.bot-token "$DISCORD_TOKEN" && \
-              zeroclaw config set --no-interactive gateway.paired-tokens "$GATEWAY_PAIRED_TOKEN"
+              restic restore latest:/home/agent/workspace --target /home/agent/workspace || true
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
