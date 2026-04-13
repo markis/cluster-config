@@ -129,14 +129,14 @@ spec:
             exec:
               command: ["zeroclaw", "status", "--format=exit-code"]
             initialDelaySeconds: 10
-            periodSeconds: 60
+            periodSeconds: 10
             timeoutSeconds: 10
             failureThreshold: 3
           readinessProbe:
             exec:
               command: ["zeroclaw", "status", "--format=exit-code"]
             initialDelaySeconds: 10
-            periodSeconds: 60
+            periodSeconds: 10
             timeoutSeconds: 10
             failureThreshold: 3
           volumeMounts:
