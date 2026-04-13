@@ -36,6 +36,7 @@ spec:
             - sh
             - -c
             - |
+              echo "===Starting Init Config===" && \
               cd / && \
               mkdir -p /home/agent/.ssh /home/agent/.kube /home/agent/.zeroclaw /home/agent/workspace && \
               echo "$SECRET_KEY" > /home/agent/.zeroclaw/.secret_key && \
@@ -57,7 +58,8 @@ spec:
               GIT_SSH_COMMAND="ssh -i /home/agent/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/home/agent/.ssh/known_hosts" \
                 git clone git@github.com:markis/zeroclaw-markis-bot.git /home/agent/workspace && \
               mkdir -p /home/agent/workspace && \
-              restic restore latest:/home/agent/workspace --target /home/agent/workspace
+              restic restore latest:/home/agent/workspace --target /home/agent/workspace && \
+              echo "===Done Init Config==="
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
