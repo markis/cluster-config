@@ -39,6 +39,7 @@ spec:
               echo "===Starting Init Config===" && \
               cd / && \
               mkdir -p /home/agent/.ssh /home/agent/.kube /home/agent/.zeroclaw /home/agent/workspace && \
+              restic restore latest:/home/agent/workspace --target /home/agent --delete && \
               echo "$SECRET_KEY" > /home/agent/.zeroclaw/.secret_key && \
               envsubst '$DISCORD_TOKEN_ENCRYPTED $DISCORD_GUILD_ID $DISCORD_ALLOW_FROM $GATEWAY_PAIRED_TOKEN_ENCRYPTED $CHROMIUM_PATH' \
                 < /config-template/config.toml > /home/agent/.zeroclaw/config.toml && \
@@ -54,7 +55,6 @@ spec:
               cd /home/agent && \
               chmod 700 .zeroclaw/ .kube/ .ssh/ && \
               chmod 400 .zeroclaw/.secret_key .zeroclaw/config.toml .kube/config .ssh/id_ed25519 .ssh/config .gitconfig && \
-              restic restore latest:/home/agent/workspace --target /home/agent/workspace --delete && \
               echo "===Done Init Config==="
           securityContext:
             runAsNonRoot: true
