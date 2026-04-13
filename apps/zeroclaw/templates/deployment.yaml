@@ -112,6 +112,9 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.secretName }}
                   key: OPENCODE_API_KEY
+          envFrom:
+            - secretRef:
+                name: {{ .Values.secretName }}
           resources:
             requests:
               memory: {{ .Values.deployment.resources.requests.memory }}
