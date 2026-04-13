@@ -51,10 +51,10 @@ spec:
               git config --global commit.gpgsign true && \
               git config --global gpg.format ssh && \
               git config --global user.signingkey /home/agent/.ssh/id_ed25519 && \
-              restic restore latest:/home/agent/workspace --target /home/agent/workspace --delete && \
               cd /home/agent && \
               chmod 700 .zeroclaw/ .kube/ .ssh/ && \
               chmod 400 .zeroclaw/.secret_key .zeroclaw/config.toml .kube/config .ssh/id_ed25519 .ssh/config .gitconfig && \
+              restic restore latest:/home/agent/workspace --target /home/agent/workspace --delete && \
               echo "===Done Init Config==="
           securityContext:
             runAsNonRoot: true
