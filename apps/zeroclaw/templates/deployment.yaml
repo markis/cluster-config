@@ -53,7 +53,9 @@ spec:
               restic restore latest --target / || true && \
               envsubst '$DISCORD_TOKEN $DISCORD_GUILD_ID $DISCORD_ALLOW_FROM $GATEWAY_PAIRED_TOKEN $CHROMIUM_PATH' \
                 < /config-template/config.toml > /home/agent/.zeroclaw/config.toml && \
-              chmod 600 /home/agent/.zeroclaw/config.toml
+              chmod 600 /home/agent/.zeroclaw/config.toml && \
+              zeroclaw config set --no-interactive channels.discord.bot-token "$DISCORD_TOKEN" && \
+              zeroclaw config set --no-interactive gateway.paired-tokens "$GATEWAY_PAIRED_TOKEN"
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
@@ -70,6 +72,8 @@ spec:
               memory: "128Mi"
               cpu: "100m"
           env:
+            - name: HOME
+              value: /home/agent
             - name: CHROMIUM_PATH
               value: /usr/local/bin/chromium
             - name: OPENCODE_GO_API_KEY
@@ -85,6 +89,12 @@ spec:
               mountPath: /config-template
             - name: home
               mountPath: /home/agent
+            - name: secret-key
+              mountPath: /home/agent/.zeroclaw/.secret_key
+              subPath: secret_key
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
