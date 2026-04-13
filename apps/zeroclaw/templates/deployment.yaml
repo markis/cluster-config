@@ -25,6 +25,8 @@ spec:
         checksum/config: {{ .Files.Get "files/config.toml" | sha256sum }}
     spec:
       restartPolicy: Always
+      securityContext:
+        fsGroup: 1000
       imagePullSecrets:
         - name: {{ .Values.imagePullSecret }}
       initContainers:
