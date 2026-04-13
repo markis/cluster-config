@@ -34,7 +34,7 @@ shell_env_passthrough = [
 kind = "native" # "native" or "docker"
 
 [channels_config.discord]
-bot_token = "$DISCORD_TOKEN"
+bot_token = "$DISCORD_TOKEN_ENCRYPTED"
 guild_id = "$DISCORD_GUILD_ID"
 allowed_users = ["$DISCORD_ALLOW_FROM"]
 mention_only = true
@@ -44,7 +44,7 @@ port = 42617
 host = "0.0.0.0"
 allow_public_bind = true
 require_pairing = true
-paired_tokens = ["$GATEWAY_PAIRED_TOKEN"]
+paired_tokens = ["$GATEWAY_PAIRED_TOKEN_ENCRYPTED"]
 pair_rate_limit_per_minute = 30
 webhook_rate_limit_per_minute = 300
 
