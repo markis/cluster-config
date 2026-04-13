@@ -144,6 +144,10 @@ spec:
               mountPath: /home/agent
             - name: tmp
               mountPath: /tmp
+            - name: secret-key
+              mountPath: /home/agent/.zeroclaw/.secret_key
+              subPath: secret_key
+              readOnly: true
       volumes:
         - name: config-template
           configMap:
@@ -153,3 +157,7 @@ spec:
         - name: tmp
           emptyDir:
             medium: Memory
+        - name: secret-key
+          secret:
+            secretName: SECRET_KEY
+            defaultMode: 0600
