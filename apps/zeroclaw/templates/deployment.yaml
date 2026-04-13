@@ -39,22 +39,25 @@ spec:
               echo "===Starting Init Config===" && \
               cd / && \
               mkdir -p /home/agent/.ssh /home/agent/.kube /home/agent/.zeroclaw /home/agent/workspace && \
-              restic restore latest:/home/agent/workspace --target /home/agent --delete && \
               echo "$SECRET_KEY" > /home/agent/.zeroclaw/.secret_key && \
               envsubst '$DISCORD_TOKEN_ENCRYPTED $DISCORD_GUILD_ID $DISCORD_ALLOW_FROM $GATEWAY_PAIRED_TOKEN_ENCRYPTED $CHROMIUM_PATH' \
                 < /config-template/config.toml > /home/agent/.zeroclaw/config.toml && \
+              chmod 400 /home/agent/.zeroclaw/.secret_key && \
+              chmod 400 /home/agent/.zeroclaw/config.toml && \
               echo "$KUBECONFIG_CONTENT" > /home/agent/.kube/config && \
+              chmod 400 /home/agent/.kube/config && \
+              chmod 700 /home/agent/.ssh && \
               echo "$SSH_PRIVATE_KEY" > /home/agent/.ssh/id_ed25519 && \
+              chmod 400 /home/agent/.ssh/id_ed25519 && \
               printf 'Host *\n  StrictHostKeyChecking accept-new\n  IdentityFile /home/agent/.ssh/id_ed25519\n  UserKnownHostsFile /home/agent/.ssh/known_hosts\n' > /home/agent/.ssh/config && \
+              chmod 400 /home/agent/.ssh/config && \
               git config --global user.name "$GIT_USER_NAME" && \
               git config --global user.email "$GIT_USER_EMAIL" && \
-              git config --global core.sshCommand "ssh -i /home/agent/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/home/agent/.ssh/known_hosts" && \
-              git config --global commit.gpgsign true && \
-              git config --global gpg.format ssh && \
-              git config --global user.signingkey /home/agent/.ssh/id_ed25519 && \
-              cd /home/agent && \
-              chmod 700 .zeroclaw/ .kube/ .ssh/ && \
-              chmod 400 .zeroclaw/.secret_key .zeroclaw/config.toml .kube/config .ssh/id_ed25519 .ssh/config .gitconfig && \
+              rm -rf /home/agent/workspace && \
+              GIT_SSH_COMMAND="ssh -i /home/agent/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/home/agent/.ssh/known_hosts" \
+                git clone git@github.com:markis/zeroclaw-markis-bot.git /home/agent/workspace && \
+              mkdir -p /home/agent/workspace && \
+              restic restore latest:/home/agent/workspace --target /home/agent/workspace && \
               echo "===Done Init Config==="
           securityContext:
             runAsNonRoot: true
