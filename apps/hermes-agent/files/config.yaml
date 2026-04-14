@@ -1,0 +1,46 @@
+# Hermes Agent Configuration
+# This file is managed by Kubernetes ConfigMap
+
+# Terminal backend configuration
+terminal:
+  backend: local
+
+# Gateway configuration
+gateway:
+  enabled: true
+  platforms:
+    telegram:
+      enabled: false
+    discord:
+      enabled: true
+    slack:
+      enabled: false
+
+# Model configuration (override with environment variables)
+model:
+  provider: opencode-go
+  model: minimax-m2.7
+
+# Discord-specific settings
+discord:
+  require_mention: true
+  auto_thread: true
+  reactions: true
+
+# Session isolation
+group_sessions_per_user: true
+
+# Memory configuration
+memory:
+  enabled: true
+  max_tokens: 100000
+
+# Skills configuration
+skills:
+  enabled: true
+  auto_create: true
+  auto_improve: true
+
+# Logging
+logging:
+  level: INFO
