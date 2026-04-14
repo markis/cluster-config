@@ -159,22 +159,20 @@ spec:
           livenessProbe:
             exec:
               command: 
-                - /bin/bash
+                - /bin/sh
                 - -c
-                - "source /opt/hermes/.venv/bin/activate && hermes status"
+                - "pgrep -f 'hermes gateway'"
             initialDelaySeconds: 30
             periodSeconds: 30
-            timeoutSeconds: 10
+            timeoutSeconds: 5
             failureThreshold: 3
           readinessProbe:
-            exec:
-              command:
-                - /bin/bash
-                - -c
-                - "source /opt/hermes/.venv/bin/activate && hermes status"
+            httpGet:
+              path: /health
+              port: 8080
             initialDelaySeconds: 10
             periodSeconds: 10
-            timeoutSeconds: 10
+            timeoutSeconds: 5
             failureThreshold: 3
           volumeMounts:
             - name: data
