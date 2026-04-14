@@ -26,7 +26,7 @@ spec:
     spec:
       restartPolicy: Always
       securityContext:
-        fsGroup: 1000
+        fsGroup: 10000
       initContainers:
         - name: restore-backup
           image: restic/restic:latest
