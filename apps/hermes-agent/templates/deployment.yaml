@@ -127,10 +127,10 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ["hermes", "gateway", "run"]
+          args: ["gateway", "run"]
           securityContext:
-            runAsNonRoot: true
-            runAsUser: 1000
+            runAsNonRoot: false
+            runAsUser: 0
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
             capabilities:
@@ -154,14 +154,20 @@ spec:
               cpu: {{ .Values.deployment.resources.limits.cpu | quote }}
           livenessProbe:
             exec:
-              command: ["hermes", "status"]
+              command: 
+                - /bin/sh
+                - -c
+                - "source /opt/hermes/.venv/bin/activate && hermes status"
             initialDelaySeconds: 30
             periodSeconds: 30
             timeoutSeconds: 10
             failureThreshold: 3
           readinessProbe:
             exec:
-              command: ["hermes", "status"]
+              command:
+                - /bin/sh
+                - -c
+                - "source /opt/hermes/.venv/bin/activate && hermes status"
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 10
