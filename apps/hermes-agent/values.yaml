@@ -1,0 +1,27 @@
+image:
+  repository: nousresearch/hermes-agent
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+replicas: 1
+
+deployment:
+  resources:
+    requests:
+      memory: "2Gi"
+      cpu: "500m"
+    limits:
+      memory: "4Gi"
+      cpu: "2000m"
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+ingress:
+  host: hermes.markis.network
+
+secretName: hermes-agent-secrets
+onepassword:
+  itemPath: "vaults/k8s-secrets/items/hermes-agent"
