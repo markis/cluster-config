@@ -134,6 +134,8 @@ spec:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
             capabilities:
+              add:
+                - CHOWN
               drop:
                 - ALL
           ports:
