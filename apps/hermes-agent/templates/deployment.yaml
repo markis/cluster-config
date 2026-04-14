@@ -167,9 +167,11 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 3
           readinessProbe:
-            httpGet:
-              path: /health
-              port: 8080
+            exec:
+              command: 
+                - /bin/sh
+                - -c
+                - "pgrep -f 'hermes gateway'"
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 5
