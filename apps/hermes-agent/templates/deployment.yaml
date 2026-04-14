@@ -131,11 +131,13 @@ spec:
           securityContext:
             runAsNonRoot: false
             runAsUser: 0
-            allowPrivilegeEscalation: false
+            allowPrivilegeEscalation: true
             readOnlyRootFilesystem: false
             capabilities:
               add:
                 - CHOWN
+                - SETUID
+                - SETGID
               drop:
                 - ALL
           ports:
