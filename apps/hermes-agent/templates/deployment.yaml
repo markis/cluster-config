@@ -106,7 +106,7 @@ spec:
               echo "===Configuration setup complete==="
           securityContext:
             runAsNonRoot: true
-            runAsUser: 1000
+            runAsUser: 10000
             allowPrivilegeEscalation: false
             capabilities:
               drop:
