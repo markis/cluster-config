@@ -142,15 +142,16 @@ spec:
           command: ["/bin/bash", "-c"]
           args:
             - |
+              # Background process to keep workspace readable for backup sidecar
+              (
+                while true; do
+                  chmod 755 /home/agent/workspace 2>/dev/null || true
+                  sleep 60
+                done
+              ) &
+              
               source /opt/venv/bin/activate && \
               exec hermes gateway run
-          lifecycle:
-            postStart:
-              exec:
-                command:
-                  - /bin/bash
-                  - -c
-                  - "chmod 755 /home/agent/workspace || true"
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
