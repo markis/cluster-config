@@ -78,7 +78,21 @@ spec:
             - -c
           args:
             - |
-              # Entrypoint.sh handles all workspace setup: restore, directory creation, and config
+              # Test fixes before entrypoint runs
+              mkdir -p "$HERMES_HOME"
+              chmod -R u+w "$HERMES_HOME" 2>/dev/null || true
+              
+              # Force copy config template (remove old one first if exists)
+              if [[ -n "${HERMES_CONFIG_TEMPLATE:-}" ]] && [[ -f "$HERMES_CONFIG_TEMPLATE" ]]; then
+                rm -f "$HERMES_HOME/config.yaml" 2>/dev/null || true
+                cp "$HERMES_CONFIG_TEMPLATE" "$HERMES_HOME/config.yaml" || echo "ERROR: Failed to copy config"
+              fi
+              
+              # Create required directories
+              mkdir -p "$HERMES_HOME"/{sessions,memories,skills,cron,hooks,logs,pairing,image_cache,audio_cache,cache/images,cache/documents}
+              touch "$HERMES_HOME/.env"
+              
+              # Now run entrypoint (which will do restore and start hermes)
               exec /entrypoint.sh hermes gateway run
           securityContext:
             runAsNonRoot: true
