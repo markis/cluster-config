@@ -25,6 +25,7 @@ spec:
         checksum/config: {{ .Files.Get "files/config.yaml" | sha256sum }}
     spec:
       restartPolicy: Always
+      shareProcessNamespace: true
       securityContext:
         fsGroup: 1000
       initContainers:
