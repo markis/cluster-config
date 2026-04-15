@@ -110,16 +110,30 @@ spec:
               git config --global user.name "$GIT_USER_NAME"
               git config --global user.email "$GIT_USER_EMAIL"
               
-              # Copy default config if no config exists
+              # Copy default config if no config exists (both locations for compatibility)
               if [ ! -f /home/agent/workspace/config.yaml ]; then
-                echo "No config.yaml found, copying template..."
+                echo "No config.yaml found in workspace, copying template..."
                 cp /config-template/config.yaml /home/agent/workspace/config.yaml
+                chmod 644 /home/agent/workspace/config.yaml
               else
                 echo "Using existing config.yaml from backup"
               fi
               
+              # Also ensure config exists at ~/.hermes/config.yaml (Hermes default location)
+              mkdir -p /home/agent/.hermes
+              if [ ! -f /home/agent/.hermes/config.yaml ]; then
+                echo "Copying config to ~/.hermes/config.yaml..."
+                cp /config-template/config.yaml /home/agent/.hermes/config.yaml
+                chmod 644 /home/agent/.hermes/config.yaml
+              fi
+              
               if [ ! -f /home/agent/workspace/.env ]; then
                 touch /home/agent/workspace/.env
+              fi
+              
+              # Also create .env at ~/.hermes/.env  
+              if [ ! -f /home/agent/.hermes/.env ]; then
+                touch /home/agent/.hermes/.env
               fi
               
               echo "===Configuration setup complete==="
