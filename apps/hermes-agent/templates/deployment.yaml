@@ -36,48 +36,33 @@ spec:
             - /bin/bash
             - -c
             - |
-              # Setup SSH and kube config first (before restore)
+              # Setup SSH and kubeconfig
               mkdir -p /home/agent/.ssh /home/agent/.kube
               chmod 700 /home/agent/.ssh
               echo "$SSH_PRIVATE_KEY" > /home/agent/.ssh/id_ed25519
               chmod 400 /home/agent/.ssh/id_ed25519
               printf 'Host *\n  StrictHostKeyChecking accept-new\n  IdentityFile /home/agent/.ssh/id_ed25519\n  UserKnownHostsFile /home/agent/.ssh/known_hosts\n' > /home/agent/.ssh/config
               chmod 400 /home/agent/.ssh/config
-              
               echo "$KUBECONFIG_CONTENT" > /home/agent/.kube/config
               chmod 400 /home/agent/.kube/config
-              
               git config --global user.name "$GIT_USER_NAME"
               git config --global user.email "$GIT_USER_EMAIL"
               
-              # Restore from backup using restic (BEFORE creating workspace directories)
+              # Initialize restic repo if needed
               restic snapshots > /dev/null 2>&1 || restic init || true
               
-              # Find latest snapshot with substantial content (> 10 MB indicates jobs.json exists)
-              # Unset RESTIC_HOST to search across all pod hostnames
+              # Find latest snapshot with full content (>10MB indicates complete backup)
               SNAPSHOT_ID=$(unset RESTIC_HOST && restic snapshots --path /home/agent/workspace --compact 2>/dev/null | \
                 awk '$NF ~ /MiB$/ && $(NF-1) > 10 {id=$1} END {print id}')
               
+              # Restore to temp location (workspace has VOLUME directive that creates separate mount)
               if [ -n "$SNAPSHOT_ID" ]; then
-                echo "Restoring from snapshot $SNAPSHOT_ID"
-                # Restore to temp location to avoid VOLUME directive conflict
-                RESTORE_TMP=/home/agent/.restore-tmp
-                mkdir -p "$RESTORE_TMP"
-                unset RESTIC_HOST && restic restore "$SNAPSHOT_ID" --path /home/agent/workspace --target "$RESTORE_TMP" \
-                  --exclude /home/agent/workspace/config.yaml \
-                  || true
-                echo "Restored to temporary location"
+                unset RESTIC_HOST && restic restore "$SNAPSHOT_ID" --path /home/agent/workspace --target /home/agent/.restore-tmp \
+                  --exclude /home/agent/workspace/config.yaml || true
               elif unset RESTIC_HOST && restic snapshots --path /home/agent/workspace --quiet --latest 1 > /dev/null 2>&1; then
-                echo "Restoring from latest snapshot to temp location"
-                RESTORE_TMP=/home/agent/.restore-tmp
-                mkdir -p "$RESTORE_TMP"
-                unset RESTIC_HOST && restic restore latest --path /home/agent/workspace --target "$RESTORE_TMP" \
-                  --exclude /home/agent/workspace/config.yaml \
-                  || true
+                unset RESTIC_HOST && restic restore latest --path /home/agent/workspace --target /home/agent/.restore-tmp \
+                  --exclude /home/agent/workspace/config.yaml || true
               fi
-              
-              # Don't create directories in workspace from init - let main container do it
-              echo "Init container complete - files ready in /home/agent/.restore-tmp/"
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
@@ -112,20 +97,17 @@ spec:
             - -c
           args:
             - |
-              # Move restored files from temp location to workspace
-              if [ -d /home/agent/.restore-tmp/home/agent/workspace ]; then
+              # Restore workspace from temp location (avoids VOLUME directive conflict)
+              [ -d /home/agent/.restore-tmp/home/agent/workspace ] && \
                 cp -a /home/agent/.restore-tmp/home/agent/workspace/* /home/agent/workspace/ 2>/dev/null || true
-                rm -rf /home/agent/.restore-tmp
-              fi
+              rm -rf /home/agent/.restore-tmp
               
-              # Copy config from ConfigMap mount
+              # Copy config and create missing directories
               cp /tmp/hermes-config.yaml /home/agent/workspace/config.yaml
-              
-              # Create any missing directories
               mkdir -p /home/agent/workspace/{sessions,memories,skills,cron,hooks,logs,pairing,image_cache,audio_cache}
               touch /home/agent/workspace/.env
               
-              # Start Hermes via entrypoint
+              # Start Hermes
               exec /entrypoint.sh hermes gateway run
           securityContext:
             runAsNonRoot: true
