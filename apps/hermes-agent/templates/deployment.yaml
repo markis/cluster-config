@@ -23,15 +23,14 @@ spec:
         app: {{ .Chart.Name }}
       annotations:
         checksum/config: {{ .Files.Get "files/config.yaml" | sha256sum }}
-        # Kube-linter suppressions for init containers that require write access
-        ignore-check.kube-linter.io/no-read-only-root-fs: "Init containers need write access to setup SSH, git config, and restore backups"
-        ignore-check.kube-linter.io/run-as-non-root: "restore-backup init container runs as root to modify /etc/passwd for SSH compatibility"
+        # Kube-linter suppressions for init container that requires write access
+        ignore-check.kube-linter.io/no-read-only-root-fs: "Init container needs write access to setup SSH, git config, and restore backups"
     spec:
       restartPolicy: Always
       securityContext:
         fsGroup: 1000
       initContainers:
-        - name: setup-config
+        - name: setup-and-restore
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           command:
             - /bin/bash
@@ -58,6 +57,15 @@ spec:
               
               # Create .env file
               touch /home/agent/workspace/.env
+              
+              # Restore from backup using restic
+              restic snapshots > /dev/null 2>&1 || restic init || true
+              
+              if restic snapshots --quiet --latest 1 > /dev/null 2>&1; then
+                restic restore latest:/home/agent/workspace --target /home/agent/workspace \
+                  --exclude /home/agent/workspace/config.yaml \
+                  || true
+              fi
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
@@ -68,61 +76,6 @@ spec:
           env:
             - name: HOME
               value: /home/agent
-          envFrom:
-            - secretRef:
-                name: {{ .Values.secretName }}
-          volumeMounts:
-            - name: home
-              mountPath: /home/agent
-          resources:
-            requests:
-              memory: "64Mi"
-              cpu: "50m"
-            limits:
-              memory: "128Mi"
-              cpu: "100m"
-        - name: restore-backup
-          image: restic/restic:0.18.1
-          command:
-            - sh
-            - -c
-            - |
-              # Add user entry for UID 1000 (running as root initially)
-              echo "agent:x:1000:1000:agent:/tmp:/bin/sh" >> /etc/passwd
-              
-              # Setup SSH for SFTP
-              mkdir -p /tmp/.ssh
-              chmod 700 /tmp/.ssh
-              echo "$SSH_PRIVATE_KEY" > /tmp/.ssh/id_ed25519
-              chmod 600 /tmp/.ssh/id_ed25519
-              printf 'Host *\n  StrictHostKeyChecking accept-new\n  IdentityFile /tmp/.ssh/id_ed25519\n  UserKnownHostsFile /tmp/.ssh/known_hosts\n' > /tmp/.ssh/config
-              chmod 600 /tmp/.ssh/config
-              chown -R 1000:1000 /tmp/.ssh
-              export HOME=/tmp
-              
-              # Switch to user 1000 and run restic commands
-              su -s /bin/sh agent -c '
-                export HOME=/tmp
-                restic snapshots > /dev/null 2>&1 || restic init || true
-                
-                if restic snapshots --quiet --latest 1 > /dev/null 2>&1; then
-                  restic restore latest --target / \
-                    --exclude /home/agent/workspace/config.yaml \
-                    || true
-                fi
-              '
-          securityContext:
-            runAsUser: 0
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: false
-            capabilities:
-              drop:
-                - ALL
-              add:
-                - CHOWN
-                - SETGID
-                - SETUID
-          env:
             - name: RESTIC_HOST
               value: hermes-agent
           envFrom:
