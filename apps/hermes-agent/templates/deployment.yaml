@@ -76,12 +76,10 @@ spec:
             - -c
           args:
             - |
-              # Copy config and create missing directories
+              # Copy config template (entrypoint.sh handles restore and directory creation)
               cp /tmp/hermes-config.yaml /home/agent/workspace/config.yaml
-              mkdir -p /home/agent/workspace/{sessions,memories,skills,cron,hooks,logs,pairing,image_cache,audio_cache}
-              touch /home/agent/workspace/.env
               
-              # Start Hermes (entrypoint.sh handles snapshot restore)
+              # Start Hermes (entrypoint.sh handles snapshot restore and setup)
               exec /entrypoint.sh hermes gateway run
           securityContext:
             runAsNonRoot: true
