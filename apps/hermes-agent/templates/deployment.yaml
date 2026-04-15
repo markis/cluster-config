@@ -50,11 +50,11 @@ spec:
               # Restore latest snapshot if any exist
               if restic snapshots --quiet --latest 1 > /dev/null 2>&1; then
                 echo "Found existing snapshots, restoring latest..."
-                restic restore latest:/opt/data --target /opt/data || echo "Restore failed or no data, continuing..."
-                echo "Restored $(du -sh /opt/data 2>/dev/null | cut -f1 || echo '0') from backup"
+                restic restore latest:/home/agent/workspace --target /home/agent/workspace || echo "Restore failed or no data, continuing..."
+                echo "Restored $(du -sh /home/agent/workspace 2>/dev/null | cut -f1 || echo '0') from backup"
               else
                 echo "No snapshots found, starting fresh"
-                mkdir -p /opt/data
+                mkdir -p /home/agent/workspace
               fi
               
               echo "===Restore complete==="
@@ -74,7 +74,7 @@ spec:
                 name: {{ .Values.secretName }}
           volumeMounts:
             - name: data
-              mountPath: /opt/data
+              mountPath: /home/agent/workspace
           resources:
             requests:
               memory: "128Mi"
@@ -89,18 +89,18 @@ spec:
             - -c
             - |
               echo "===Setting up Hermes configuration==="
-              mkdir -p /opt/data/{sessions,memories,skills,cron,hooks,logs,pairing,image_cache,audio_cache}
+              mkdir -p /home/agent/workspace/{sessions,memories,skills,cron,hooks,logs,pairing,image_cache,audio_cache}
               
               # Only copy default config if no config exists (fresh install or restore didn't have it)
-              if [ ! -f /opt/data/config.yaml ]; then
+              if [ ! -f /home/agent/workspace/config.yaml ]; then
                 echo "No config.yaml found, copying template..."
-                cp /config-template/config.yaml /opt/data/config.yaml
+                cp /config-template/config.yaml /home/agent/workspace/config.yaml
               else
                 echo "Using existing config.yaml from backup"
               fi
               
-              if [ ! -f /opt/data/.env ]; then
-                touch /opt/data/.env
+              if [ ! -f /home/agent/workspace/.env ]; then
+                touch /home/agent/workspace/.env
               fi
               
               echo "===Configuration setup complete==="
@@ -113,7 +113,7 @@ spec:
                 - ALL
           volumeMounts:
             - name: data
-              mountPath: /opt/data
+              mountPath: /home/agent/workspace
             - name: config-template
               mountPath: /config-template
           resources:
@@ -145,7 +145,9 @@ spec:
               containerPort: {{ .Values.service.targetPort }}
           env:
             - name: HOME
-              value: /opt/data
+              value: /home/agent
+            - name: HERMES_HOME
+              value: /home/agent/workspace
           envFrom:
             - secretRef:
                 name: {{ .Values.secretName }}
@@ -178,7 +180,7 @@ spec:
             failureThreshold: 3
           volumeMounts:
             - name: data
-              mountPath: /opt/data
+              mountPath: /home/agent/workspace
             - name: shm
               mountPath: /dev/shm
         - name: restic-backup
@@ -204,13 +206,13 @@ spec:
               while true; do
                 echo "$(date): Starting backup..."
                 
-                # Backup with timestamp tag
-                restic backup /opt/data \
-                  --tag hermes-agent \
-                  --tag "pod:$HOSTNAME" \
-                  --exclude /opt/data/logs \
-                  --exclude /opt/data/image_cache \
-                  --exclude /opt/data/audio_cache
+              # Backup with timestamp tag
+              restic backup /home/agent/workspace \
+                --tag hermes-agent \
+                --tag "pod:$HOSTNAME" \
+                --exclude /home/agent/workspace/logs \
+                --exclude /home/agent/workspace/image_cache \
+                --exclude /home/agent/workspace/audio_cache
                 
                 if [ $? -eq 0 ]; then
                   echo "$(date): Backup completed successfully"
@@ -245,7 +247,7 @@ spec:
                 name: {{ .Values.secretName }}
           volumeMounts:
             - name: data
-              mountPath: /opt/data
+              mountPath: /home/agent/workspace
               readOnly: true
           resources:
             requests:
