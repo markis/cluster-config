@@ -79,7 +79,7 @@ spec:
               memory: "128Mi"
               cpu: "100m"
         - name: restore-backup
-          image: restic/restic:latest
+          image: restic/restic:0.18.1
           command:
             - sh
             - -c
