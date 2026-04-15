@@ -84,9 +84,6 @@ spec:
             - sh
             - -c
             - |
-              # Create user entry for UID 1000 (required for SSH client)
-              echo "agent:x:1000:1000:agent:/tmp:/bin/sh" >> /etc/passwd
-              
               # Setup SSH for SFTP
               mkdir -p /tmp/.ssh
               chmod 700 /tmp/.ssh
@@ -95,6 +92,8 @@ spec:
               printf 'Host *\n  StrictHostKeyChecking accept-new\n  IdentityFile /tmp/.ssh/id_ed25519\n  UserKnownHostsFile /tmp/.ssh/known_hosts\n' > /tmp/.ssh/config
               chmod 600 /tmp/.ssh/config
               export HOME=/tmp
+              export USER=agent
+              export LOGNAME=agent
               
               # Initialize repo if it doesn't exist
               restic snapshots > /dev/null 2>&1 || restic init || true
@@ -201,9 +200,6 @@ spec:
             - sh
             - -c
             - |
-              # Create user entry for UID 1000 (required for SSH client)
-              echo "agent:x:1000:1000:agent:/tmp:/bin/sh" >> /etc/passwd
-              
               # Setup SSH for SFTP
               mkdir -p /tmp/.ssh
               chmod 700 /tmp/.ssh
@@ -212,6 +208,8 @@ spec:
               printf 'Host *\n  StrictHostKeyChecking accept-new\n  IdentityFile /tmp/.ssh/id_ed25519\n  UserKnownHostsFile /tmp/.ssh/known_hosts\n' > /tmp/.ssh/config
               chmod 600 /tmp/.ssh/config
               export HOME=/tmp
+              export USER=agent
+              export LOGNAME=agent
               
               # Initialize repo if needed
               restic snapshots > /dev/null 2>&1 || restic init || true
