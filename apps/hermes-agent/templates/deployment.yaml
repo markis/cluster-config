@@ -115,6 +115,10 @@ spec:
             capabilities:
               drop:
                 - ALL
+              add:
+                - CHOWN
+                - SETGID
+                - SETUID
           env:
             - name: RESTIC_HOST
               value: hermes-agent
@@ -248,6 +252,10 @@ spec:
             capabilities:
               drop:
                 - ALL
+              add:
+                - CHOWN
+                - SETGID
+                - SETUID
           env:
             - name: RESTIC_HOST
               value: hermes-agent
