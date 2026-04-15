@@ -85,7 +85,7 @@ spec:
         - name: setup-config
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           command:
-            - sh
+            - /bin/bash
             - -c
             - |
               echo "===Setting up Hermes configuration==="
