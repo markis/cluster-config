@@ -74,8 +74,8 @@ spec:
             - secretRef:
                 name: {{ .Values.secretName }}
           volumeMounts:
-            - name: data
-              mountPath: /home/agent/workspace
+            - name: home
+              mountPath: /home/agent
           resources:
             requests:
               memory: "128Mi"
@@ -90,9 +90,27 @@ spec:
             - -c
             - |
               echo "===Setting up Hermes configuration==="
-              mkdir -p /home/agent/workspace/{sessions,memories,skills,cron,hooks,logs,pairing,image_cache,audio_cache}
               
-              # Only copy default config if no config exists (fresh install or restore didn't have it)
+              # Create directory structure
+              mkdir -p /home/agent/workspace/{sessions,memories,skills,cron,hooks,logs,pairing,image_cache,audio_cache}
+              mkdir -p /home/agent/.ssh /home/agent/.kube
+              
+              # Setup SSH keys
+              chmod 700 /home/agent/.ssh
+              echo "$SSH_PRIVATE_KEY" > /home/agent/.ssh/id_ed25519
+              chmod 400 /home/agent/.ssh/id_ed25519
+              printf 'Host *\n  StrictHostKeyChecking accept-new\n  IdentityFile /home/agent/.ssh/id_ed25519\n  UserKnownHostsFile /home/agent/.ssh/known_hosts\n' > /home/agent/.ssh/config
+              chmod 400 /home/agent/.ssh/config
+              
+              # Setup kubeconfig
+              echo "$KUBECONFIG_CONTENT" > /home/agent/.kube/config
+              chmod 400 /home/agent/.kube/config
+              
+              # Setup git config
+              git config --global user.name "$GIT_USER_NAME"
+              git config --global user.email "$GIT_USER_EMAIL"
+              
+              # Copy default config if no config exists
               if [ ! -f /home/agent/workspace/config.yaml ]; then
                 echo "No config.yaml found, copying template..."
                 cp /config-template/config.yaml /home/agent/workspace/config.yaml
@@ -112,9 +130,15 @@ spec:
             capabilities:
               drop:
                 - ALL
+          env:
+            - name: HOME
+              value: /home/agent
+          envFrom:
+            - secretRef:
+                name: {{ .Values.secretName }}
           volumeMounts:
-            - name: data
-              mountPath: /home/agent/workspace
+            - name: home
+              mountPath: /home/agent
             - name: config-template
               mountPath: /config-template
           resources:
@@ -149,6 +173,8 @@ spec:
               value: /home/agent
             - name: HERMES_HOME
               value: /home/agent/workspace
+            - name: KUBECONFIG
+              value: /home/agent/.kube/config
           envFrom:
             - secretRef:
                 name: {{ .Values.secretName }}
@@ -180,8 +206,8 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 3
           volumeMounts:
-            - name: data
-              mountPath: /home/agent/workspace
+            - name: home
+              mountPath: /home/agent
             - name: shm
               mountPath: /dev/shm
         - name: restic-backup
@@ -248,8 +274,8 @@ spec:
             - secretRef:
                 name: {{ .Values.secretName }}
           volumeMounts:
-            - name: data
-              mountPath: /home/agent/workspace
+            - name: home
+              mountPath: /home/agent
               readOnly: true
           resources:
             requests:
@@ -259,7 +285,7 @@ spec:
               memory: "256Mi"
               cpu: "200m"
       volumes:
-        - name: data
+        - name: home
           emptyDir: {}
         - name: shm
           emptyDir:
