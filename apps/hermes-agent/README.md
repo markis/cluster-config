@@ -1,6 +1,7 @@
 # Hermes Agent
 
-Hermes Agent is a self-improving AI agent built by [Nous Research](https://nousresearch.com). It features a built-in learning loop with skills creation, memory management, and multi-platform messaging support.
+Hermes Agent is a self-improving AI agent built by [Nous Research](https://nousresearch.com). It features a
+built-in learning loop with skills creation, memory management, and multi-platform messaging support.
 
 ## Features
 
@@ -19,16 +20,19 @@ This deployment uses **OpenCode Go** as the AI provider and **Discord** as the m
 Create a 1Password item at `vaults/k8s-secrets/items/hermes-agent` with the following fields:
 
 #### Required
+
 - `OPENCODE_GO_API_KEY` - OpenCode Go API key
 - `DISCORD_BOT_TOKEN` - Discord bot token from the Discord Developer Portal
 - `DISCORD_ALLOWED_USERS` - Comma-separated Discord user IDs allowed to interact with the bot
 
 #### Backup & Restore (Restic - SFTP)
+
 - `RESTIC_REPOSITORY` - Restic repository URL (e.g., `sftp:user@host:/path/to/backups/hermes-agent`)
 - `RESTIC_PASSWORD` - Restic repository encryption password
 - `SSH_PRIVATE_KEY` - SSH private key for SFTP authentication (PEM format)
 
 #### Optional
+
 - `DISCORD_HOME_CHANNEL` - Channel ID for proactive messages (cron jobs, notifications)
 - `FIRECRAWL_API_KEY` - For web search and scraping
 - `FAL_KEY` - For image generation (FLUX)
@@ -97,7 +101,8 @@ Before deploying, you need to create a Discord bot and get the required credenti
    - In Developer Portal, go to Installation tab
    - Enable "Guild Install" and select "Discord Provided Link"
    - Scopes: `bot` and `applications.commands`
-   - Permissions: `274878286912` (View Channels, Send Messages, Embed Links, Attach Files, Read Message History, Send Messages in Threads, Add Reactions)
+   - Permissions: `274878286912` (View Channels, Send Messages, Embed Links, Attach Files, Read Message
+     History, Send Messages in Threads, Add Reactions)
    - Use the generated link to invite the bot to your server
 
 For full setup instructions, see the [Discord Setup Guide](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord).
@@ -174,7 +179,7 @@ SSH_PRIVATE_KEY=<ed25519-private-key-pem>
 
 **SSH Key Format**: The `SSH_PRIVATE_KEY` should be in PEM format (Ed25519 recommended):
 
-```
+```text
 -----BEGIN OPENSSH PRIVATE KEY-----
 b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
 ...
