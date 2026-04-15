@@ -110,23 +110,14 @@ spec:
               git config --global user.name "$GIT_USER_NAME"
               git config --global user.email "$GIT_USER_EMAIL"
               
-              # Always copy config from ConfigMap (ArgoCD manages this)
-              echo "Copying config.yaml from ConfigMap..."
+              # Always copy config from ConfigMap to workspace (ArgoCD manages this)
+              echo "Copying config.yaml from ConfigMap to workspace..."
               cp /config-template/config.yaml /home/agent/workspace/config.yaml
               chmod 644 /home/agent/workspace/config.yaml
               
-              # Also copy to ~/.hermes/config.yaml (Hermes default location)
-              mkdir -p /home/agent/.hermes
-              cp /config-template/config.yaml /home/agent/.hermes/config.yaml
-              chmod 644 /home/agent/.hermes/config.yaml
-              
+              # Create .env if it doesn't exist
               if [ ! -f /home/agent/workspace/.env ]; then
                 touch /home/agent/workspace/.env
-              fi
-              
-              # Also create .env at ~/.hermes/.env  
-              if [ ! -f /home/agent/.hermes/.env ]; then
-                touch /home/agent/.hermes/.env
               fi
               
               echo "===Configuration setup complete==="
