@@ -28,6 +28,8 @@ spec:
     spec:
       restartPolicy: Always
       securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
         fsGroup: 1000
         fsGroupChangePolicy: "OnRootMismatch"
       initContainers:
@@ -78,15 +80,8 @@ spec:
             - -c
           args:
             - |
-              # Create workspace with group write permissions (owned by root:agent due to fsGroup)
-              mkdir -p "$HERMES_HOME"
-              chmod 775 "$HERMES_HOME"
-              
-              echo "Workspace perms after setup:"
-              ls -la /home/agent/ | grep workspace
-              echo "test" > "$HERMES_HOME/test.txt" && echo "SUCCESS: Can write" || echo "FAIL: Cannot write"
-              
-              # Now run entrypoint
+              # Don't create workspace - let entrypoint handle it
+              # Just run entrypoint which will restore/create workspace
               exec /entrypoint.sh hermes gateway run
           securityContext:
             runAsNonRoot: true
