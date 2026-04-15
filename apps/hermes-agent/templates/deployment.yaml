@@ -26,7 +26,7 @@ spec:
     spec:
       restartPolicy: Always
       securityContext:
-        fsGroup: 10000
+        fsGroup: 1000
       initContainers:
         - name: restore-backup
           image: restic/restic:latest
@@ -106,7 +106,7 @@ spec:
               echo "===Configuration setup complete==="
           securityContext:
             runAsNonRoot: true
-            runAsUser: 10000
+            runAsUser: 1000
             allowPrivilegeEscalation: false
             capabilities:
               drop:
