@@ -59,37 +59,25 @@ spec:
                 awk '$NF ~ /MiB$/ && $(NF-1) > 10 {id=$1} END {print id}')
               
               if [ -n "$SNAPSHOT_ID" ]; then
-                echo "DEBUG: Restoring from snapshot $SNAPSHOT_ID"
-                unset RESTIC_HOST && restic restore "$SNAPSHOT_ID" --path /home/agent/workspace --target / \
+                echo "Restoring from snapshot $SNAPSHOT_ID"
+                # Restore to temp location to avoid VOLUME directive conflict
+                RESTORE_TMP=/home/agent/.restore-tmp
+                mkdir -p "$RESTORE_TMP"
+                unset RESTIC_HOST && restic restore "$SNAPSHOT_ID" --path /home/agent/workspace --target "$RESTORE_TMP" \
                   --exclude /home/agent/workspace/config.yaml \
                   || true
-                echo "DEBUG: Restore complete, checking files..."
-                echo "DEBUG: Workspace root:"
-                ls -la /home/agent/workspace/ 2>&1 | head -15
-                echo "DEBUG: Cron directory after restore:"
-                ls -la /home/agent/workspace/cron/ 2>&1 || echo "DEBUG: cron dir does not exist after restore"
+                echo "Restored to temporary location"
               elif unset RESTIC_HOST && restic snapshots --path /home/agent/workspace --quiet --latest 1 > /dev/null 2>&1; then
-                echo "DEBUG: Restoring from latest snapshot"
-                unset RESTIC_HOST && restic restore latest --path /home/agent/workspace --target / \
+                echo "Restoring from latest snapshot to temp location"
+                RESTORE_TMP=/home/agent/.restore-tmp
+                mkdir -p "$RESTORE_TMP"
+                unset RESTIC_HOST && restic restore latest --path /home/agent/workspace --target "$RESTORE_TMP" \
                   --exclude /home/agent/workspace/config.yaml \
                   || true
               fi
               
-              echo "DEBUG: Creating missing directories..."
-              mkdir -p /home/agent/workspace/{sessions,memories,skills,cron,hooks,logs,pairing,image_cache,audio_cache}
-              
-              echo "DEBUG: After mkdir, workspace root:"
-              ls -la /home/agent/workspace/ 2>&1 | head -15
-              echo "DEBUG: Cron directory after mkdir:"
-              ls -la /home/agent/workspace/cron/ 2>&1 || echo "DEBUG: cron dir missing after mkdir"
-              
-              touch /home/agent/workspace/.env
-              
-              # Create test file outside workspace
-              echo "test from init" > /home/agent/test-init.txt
-              echo "DEBUG: Created test file at /home/agent/test-init.txt"
-              
-              echo "DEBUG: Init container complete"
+              # Don't create directories in workspace from init - let main container do it
+              echo "Init container complete - files ready in /home/agent/.restore-tmp/"
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
@@ -124,9 +112,27 @@ spec:
             - -c
           args:
             - |
-              # Copy config from temp location to workspace
+              echo "Main container starting..."
+              
+              # Move restored files from temp location to workspace
+              if [ -d /home/agent/.restore-tmp/home/agent/workspace ]; then
+                echo "Restoring workspace files..."
+                cp -a /home/agent/.restore-tmp/home/agent/workspace/* /home/agent/workspace/ 2>/dev/null || true
+                rm -rf /home/agent/.restore-tmp
+                echo "Workspace restored"
+              fi
+              
+              # Copy config from ConfigMap mount
               cp /tmp/hermes-config.yaml /home/agent/workspace/config.yaml
-              # Run sleep for debugging
+              
+              # Create any missing directories
+              mkdir -p /home/agent/workspace/{sessions,memories,skills,cron,hooks,logs,pairing,image_cache,audio_cache}
+              touch /home/agent/workspace/.env
+              
+              echo "Checking restored files..."
+              ls -la /home/agent/workspace/cron/ 2>&1 || echo "cron directory empty/missing"
+              
+              # For debugging - sleep instead of running hermes
               sleep infinity
           securityContext:
             runAsNonRoot: true
