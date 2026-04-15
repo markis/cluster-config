@@ -61,10 +61,9 @@ spec:
               # Restore from backup using restic
               restic snapshots > /dev/null 2>&1 || restic init || true
               
-              # Restore from latest snapshot tagged with hermes-agent (from any pod)
-              if restic snapshots --tag hermes-agent --quiet --latest 1 > /dev/null 2>&1; then
-                restic restore latest --tag hermes-agent --target / \
-                  --path /home/agent/workspace \
+              # Restore from latest snapshot with /home/agent/workspace path (from any pod/host)
+              if restic snapshots --path /home/agent/workspace --quiet --latest 1 > /dev/null 2>&1; then
+                restic restore latest --path /home/agent/workspace --target / \
                   --exclude /home/agent/workspace/config.yaml \
                   || true
               fi
