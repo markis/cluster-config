@@ -78,9 +78,7 @@ spec:
             - -c
           args:
             - |
-              # Create workspace directory before entrypoint restore (fsGroup ensures ownership)
-              mkdir -p "$HERMES_HOME"
-              # Entrypoint.sh handles snapshot restore, directory creation, and config setup
+              # Entrypoint.sh handles all workspace setup: restore, directory creation, and config
               exec /entrypoint.sh hermes gateway run
           securityContext:
             runAsNonRoot: true
