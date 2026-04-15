@@ -95,41 +95,10 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ["/bin/bash", "-c"]
           args:
-            - |
-              # Background restic backup process
-              (
-                # Wait for Hermes to start and create workspace files
-                sleep 60
-                
-                # Initialize repo if needed (uses /home/agent/.ssh/ setup by init container)
-                restic snapshots > /dev/null 2>&1 || restic init || true
-                
-                # Backup loop every 15 minutes
-                while true; do
-                  restic backup /home/agent/workspace \
-                    --tag hermes-agent \
-                    --tag "pod:$HOSTNAME" \
-                    --exclude /home/agent/workspace/config.yaml \
-                    --exclude /home/agent/workspace/logs \
-                    --exclude /home/agent/workspace/image_cache \
-                    --exclude /home/agent/workspace/audio_cache \
-                    --quiet
-                  
-                  restic forget \
-                    --keep-last 48 \
-                    --keep-daily 7 \
-                    --keep-weekly 4 \
-                    --prune \
-                    --quiet
-                  
-                  sleep 900
-                done
-              ) &
-              
-              source /opt/venv/bin/activate && \
-              exec hermes gateway run
+            - hermes
+            - gateway
+            - run
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
