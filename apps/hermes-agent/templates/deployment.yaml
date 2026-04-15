@@ -273,7 +273,6 @@ spec:
           volumeMounts:
             - name: home
               mountPath: /home/agent
-              readOnly: true
           resources:
             requests:
               memory: "64Mi"
