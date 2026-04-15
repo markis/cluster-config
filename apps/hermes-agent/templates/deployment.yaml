@@ -23,6 +23,9 @@ spec:
         app: {{ .Chart.Name }}
       annotations:
         checksum/config: {{ .Files.Get "files/config.yaml" | sha256sum }}
+        # Kube-linter suppressions for init containers that require write access
+        ignore-check.kube-linter.io/no-read-only-root-fs: "Init containers need write access to setup SSH, git config, and restore backups"
+        ignore-check.kube-linter.io/run-as-non-root: "restore-backup init container runs as root to modify /etc/passwd for SSH compatibility"
     spec:
       restartPolicy: Always
       securityContext:
