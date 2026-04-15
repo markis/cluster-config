@@ -28,7 +28,7 @@ spec:
       securityContext:
         fsGroup: 1000
       initContainers:
-        - name: restore-backup
+        - name: setup-config
           image: restic/restic:latest
           command:
             - sh
@@ -83,7 +83,7 @@ spec:
             limits:
               memory: "512Mi"
               cpu: "500m"
-        - name: setup-config
+        - name: restore-backup
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           command:
             - /bin/bash
@@ -110,22 +110,15 @@ spec:
               git config --global user.name "$GIT_USER_NAME"
               git config --global user.email "$GIT_USER_EMAIL"
               
-              # Copy default config if no config exists (both locations for compatibility)
-              if [ ! -f /home/agent/workspace/config.yaml ]; then
-                echo "No config.yaml found in workspace, copying template..."
-                cp /config-template/config.yaml /home/agent/workspace/config.yaml
-                chmod 644 /home/agent/workspace/config.yaml
-              else
-                echo "Using existing config.yaml from backup"
-              fi
+              # Always copy config from ConfigMap (ArgoCD manages this)
+              echo "Copying config.yaml from ConfigMap..."
+              cp /config-template/config.yaml /home/agent/workspace/config.yaml
+              chmod 644 /home/agent/workspace/config.yaml
               
-              # Also ensure config exists at ~/.hermes/config.yaml (Hermes default location)
+              # Also copy to ~/.hermes/config.yaml (Hermes default location)
               mkdir -p /home/agent/.hermes
-              if [ ! -f /home/agent/.hermes/config.yaml ]; then
-                echo "Copying config to ~/.hermes/config.yaml..."
-                cp /config-template/config.yaml /home/agent/.hermes/config.yaml
-                chmod 644 /home/agent/.hermes/config.yaml
-              fi
+              cp /config-template/config.yaml /home/agent/.hermes/config.yaml
+              chmod 644 /home/agent/.hermes/config.yaml
               
               if [ ! -f /home/agent/workspace/.env ]; then
                 touch /home/agent/workspace/.env
@@ -248,10 +241,11 @@ spec:
               while true; do
                 echo "$(date): Starting backup..."
                 
-              # Backup with timestamp tag
+              # Backup with timestamp tag (exclude config - managed by ArgoCD)
               restic backup /home/agent/workspace \
                 --tag hermes-agent \
                 --tag "pod:$HOSTNAME" \
+                --exclude /home/agent/workspace/config.yaml \
                 --exclude /home/agent/workspace/logs \
                 --exclude /home/agent/workspace/image_cache \
                 --exclude /home/agent/workspace/audio_cache
