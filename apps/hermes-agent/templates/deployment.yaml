@@ -29,13 +29,61 @@ spec:
         fsGroup: 1000
       initContainers:
         - name: setup-config
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command:
+            - /bin/bash
+            - -c
+            - |
+              # Create directory structure
+              mkdir -p /home/agent/workspace/{sessions,memories,skills,cron,hooks,logs,pairing,image_cache,audio_cache}
+              mkdir -p /home/agent/.ssh /home/agent/.kube
+              
+              # Setup SSH keys
+              chmod 700 /home/agent/.ssh
+              echo "$SSH_PRIVATE_KEY" > /home/agent/.ssh/id_ed25519
+              chmod 400 /home/agent/.ssh/id_ed25519
+              printf 'Host *\n  StrictHostKeyChecking accept-new\n  IdentityFile /home/agent/.ssh/id_ed25519\n  UserKnownHostsFile /home/agent/.ssh/known_hosts\n' > /home/agent/.ssh/config
+              chmod 400 /home/agent/.ssh/config
+              
+              # Setup kubeconfig
+              echo "$KUBECONFIG_CONTENT" > /home/agent/.kube/config
+              chmod 400 /home/agent/.kube/config
+              
+              # Setup git config
+              git config --global user.name "$GIT_USER_NAME"
+              git config --global user.email "$GIT_USER_EMAIL"
+              
+              # Create .env file
+              touch /home/agent/workspace/.env
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          env:
+            - name: HOME
+              value: /home/agent
+          envFrom:
+            - secretRef:
+                name: {{ .Values.secretName }}
+          volumeMounts:
+            - name: home
+              mountPath: /home/agent
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+        - name: restore-backup
           image: restic/restic:latest
           command:
             - sh
             - -c
             - |
-              echo "===Restoring Hermes state from restic backup==="
-              
               # Setup SSH for SFTP (use /tmp since running as non-root)
               mkdir -p /tmp/.ssh
               chmod 700 /tmp/.ssh
@@ -45,20 +93,15 @@ spec:
               chmod 600 /tmp/.ssh/config
               export HOME=/tmp
               
-              # Initialize repo if it doesn't exist (creates empty repo on first run)
+              # Initialize repo if it doesn't exist
               restic snapshots > /dev/null 2>&1 || restic init || true
               
-              # Restore latest snapshot if any exist
+              # Restore latest snapshot if any exist (exclude config.yaml - managed by ArgoCD)
               if restic snapshots --quiet --latest 1 > /dev/null 2>&1; then
-                echo "Found existing snapshots, restoring latest..."
-                restic restore latest:/home/agent/workspace --target /home/agent/workspace || echo "Restore failed or no data, continuing..."
-                echo "Restored $(du -sh /home/agent/workspace 2>/dev/null | cut -f1 || echo '0') from backup"
-              else
-                echo "No snapshots found, starting fresh"
-                mkdir -p /home/agent/workspace
+                restic restore latest --target / \
+                  --exclude /home/agent/workspace/config.yaml \
+                  || true
               fi
-              
-              echo "===Restore complete==="
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
@@ -83,69 +126,6 @@ spec:
             limits:
               memory: "512Mi"
               cpu: "500m"
-        - name: restore-backup
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          command:
-            - /bin/bash
-            - -c
-            - |
-              echo "===Setting up Hermes configuration==="
-              
-              # Create directory structure
-              mkdir -p /home/agent/workspace/{sessions,memories,skills,cron,hooks,logs,pairing,image_cache,audio_cache}
-              mkdir -p /home/agent/.ssh /home/agent/.kube
-              
-              # Setup SSH keys
-              chmod 700 /home/agent/.ssh
-              echo "$SSH_PRIVATE_KEY" > /home/agent/.ssh/id_ed25519
-              chmod 400 /home/agent/.ssh/id_ed25519
-              printf 'Host *\n  StrictHostKeyChecking accept-new\n  IdentityFile /home/agent/.ssh/id_ed25519\n  UserKnownHostsFile /home/agent/.ssh/known_hosts\n' > /home/agent/.ssh/config
-              chmod 400 /home/agent/.ssh/config
-              
-              # Setup kubeconfig
-              echo "$KUBECONFIG_CONTENT" > /home/agent/.kube/config
-              chmod 400 /home/agent/.kube/config
-              
-              # Setup git config
-              git config --global user.name "$GIT_USER_NAME"
-              git config --global user.email "$GIT_USER_EMAIL"
-              
-              # Always copy config from ConfigMap to workspace (ArgoCD manages this)
-              echo "Copying config.yaml from ConfigMap to workspace..."
-              cp /config-template/config.yaml /home/agent/workspace/config.yaml
-              chmod 644 /home/agent/workspace/config.yaml
-              
-              # Create .env if it doesn't exist
-              if [ ! -f /home/agent/workspace/.env ]; then
-                touch /home/agent/workspace/.env
-              fi
-              
-              echo "===Configuration setup complete==="
-          securityContext:
-            runAsNonRoot: true
-            runAsUser: 1000
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
-          env:
-            - name: HOME
-              value: /home/agent
-          envFrom:
-            - secretRef:
-                name: {{ .Values.secretName }}
-          volumeMounts:
-            - name: home
-              mountPath: /home/agent
-            - name: config-template
-              mountPath: /config-template
-          resources:
-            requests:
-              memory: "64Mi"
-              cpu: "50m"
-            limits:
-              memory: "128Mi"
-              cpu: "100m"
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -208,14 +188,16 @@ spec:
               mountPath: /home/agent
             - name: shm
               mountPath: /dev/shm
+            - name: config-template
+              mountPath: /home/agent/workspace/config.yaml
+              subPath: config.yaml
+              readOnly: true
         - name: restic-backup
           image: restic/restic:latest
           command:
             - sh
             - -c
             - |
-              echo "===Starting restic backup sidecar==="
-              
               # Setup SSH for SFTP (use /tmp since running as non-root)
               mkdir -p /tmp/.ssh
               chmod 700 /tmp/.ssh
@@ -230,30 +212,23 @@ spec:
               
               # Backup loop every 15 minutes
               while true; do
-                echo "$(date): Starting backup..."
+                # Backup with timestamp tag (exclude config - managed by ArgoCD)
+                restic backup /home/agent/workspace \
+                  --tag hermes-agent \
+                  --tag "pod:$HOSTNAME" \
+                  --exclude /home/agent/workspace/config.yaml \
+                  --exclude /home/agent/workspace/logs \
+                  --exclude /home/agent/workspace/image_cache \
+                  --exclude /home/agent/workspace/audio_cache \
+                  --quiet
                 
-              # Backup with timestamp tag (exclude config - managed by ArgoCD)
-              restic backup /home/agent/workspace \
-                --tag hermes-agent \
-                --tag "pod:$HOSTNAME" \
-                --exclude /home/agent/workspace/config.yaml \
-                --exclude /home/agent/workspace/logs \
-                --exclude /home/agent/workspace/image_cache \
-                --exclude /home/agent/workspace/audio_cache
-                
-                if [ $? -eq 0 ]; then
-                  echo "$(date): Backup completed successfully"
-                  
-                  # Keep last 48 backups (12 hours at 15min intervals), last 7 days, last 4 weeks
-                  restic forget \
-                    --keep-last 48 \
-                    --keep-daily 7 \
-                    --keep-weekly 4 \
-                    --prune \
-                    --quiet
-                else
-                  echo "$(date): Backup failed!"
-                fi
+                # Keep last 48 backups (12 hours at 15min intervals), last 7 days, last 4 weeks
+                restic forget \
+                  --keep-last 48 \
+                  --keep-daily 7 \
+                  --keep-weekly 4 \
+                  --prune \
+                  --quiet
                 
                 # Wait 15 minutes
                 sleep 900
