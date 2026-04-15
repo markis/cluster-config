@@ -80,9 +80,22 @@ spec:
             - -c
           args:
             - |
-              # Don't create workspace - let entrypoint handle it
-              # Just run entrypoint which will restore/create workspace
-              exec /entrypoint.sh hermes gateway run
+              # Debug: check what entrypoint creates
+              echo "=== Before entrypoint ==="
+              ls -la /home/agent/ || true
+              
+              # Run entrypoint
+              /entrypoint.sh hermes gateway run &
+              ENTRYPOINT_PID=$!
+              
+              # Give it a moment to create workspace
+              sleep 2
+              
+              echo "=== After entrypoint starts ==="
+              ls -la /home/agent/ | grep workspace || echo "No workspace yet"
+              
+              # Wait for entrypoint
+              wait $ENTRYPOINT_PID
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
