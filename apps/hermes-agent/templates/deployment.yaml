@@ -144,23 +144,15 @@ spec:
             - |
               # Background restic backup process
               (
-                # Setup SSH for SFTP
-                mkdir -p /tmp/.ssh
-                chmod 700 /tmp/.ssh
-                echo "$SSH_PRIVATE_KEY" > /tmp/.ssh/id_ed25519
-                chmod 600 /tmp/.ssh/id_ed25519
-                printf 'Host *\n  StrictHostKeyChecking accept-new\n  IdentityFile /tmp/.ssh/id_ed25519\n  UserKnownHostsFile /tmp/.ssh/known_hosts\n' > /tmp/.ssh/config
-                chmod 600 /tmp/.ssh/config
-                
-                # Initialize repo if needed
-                HOME=/tmp restic snapshots > /dev/null 2>&1 || HOME=/tmp restic init || true
-                
                 # Wait for Hermes to start and create workspace files
                 sleep 60
                 
+                # Initialize repo if needed (uses /home/agent/.ssh/ setup by init container)
+                restic snapshots > /dev/null 2>&1 || restic init || true
+                
                 # Backup loop every 15 minutes
                 while true; do
-                  HOME=/tmp restic backup /home/agent/workspace \
+                  restic backup /home/agent/workspace \
                     --tag hermes-agent \
                     --tag "pod:$HOSTNAME" \
                     --exclude /home/agent/workspace/config.yaml \
@@ -169,7 +161,7 @@ spec:
                     --exclude /home/agent/workspace/audio_cache \
                     --quiet
                   
-                  HOME=/tmp restic forget \
+                  restic forget \
                     --keep-last 48 \
                     --keep-daily 7 \
                     --keep-weekly 4 \
