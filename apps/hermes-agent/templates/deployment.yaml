@@ -51,6 +51,13 @@ spec:
               # Initialize restic repo if needed
               restic snapshots > /dev/null 2>&1 || restic init || true
               
+              # Clean up old snapshots with pod-name hostnames (keep only hermes-agent)
+              unset RESTIC_HOST
+              for host in $(restic snapshots --json 2>/dev/null | jq -r '.[].hostname' | sort -u | grep -v '^hermes-agent$'); do
+                echo "Removing snapshots from old hostname: $host"
+                restic forget --host "$host" --prune --quiet || true
+              done
+              
               # Find latest snapshot with full content (>10MB indicates complete backup)
               # Unset RESTIC_HOST to search all hostnames (old backups used pod names)
               SNAPSHOT_ID=$(unset RESTIC_HOST && restic snapshots --path /home/agent/workspace --compact 2>/dev/null | \
