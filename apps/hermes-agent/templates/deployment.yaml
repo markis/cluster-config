@@ -84,7 +84,10 @@ spec:
             - sh
             - -c
             - |
-              # Setup SSH for SFTP (use /tmp since running as non-root)
+              # Create user entry for UID 1000 (required for SSH client)
+              echo "agent:x:1000:1000:agent:/tmp:/bin/sh" >> /etc/passwd
+              
+              # Setup SSH for SFTP
               mkdir -p /tmp/.ssh
               chmod 700 /tmp/.ssh
               echo "$SSH_PRIVATE_KEY" > /tmp/.ssh/id_ed25519
@@ -198,7 +201,10 @@ spec:
             - sh
             - -c
             - |
-              # Setup SSH for SFTP (use /tmp since running as non-root)
+              # Create user entry for UID 1000 (required for SSH client)
+              echo "agent:x:1000:1000:agent:/tmp:/bin/sh" >> /etc/passwd
+              
+              # Setup SSH for SFTP
               mkdir -p /tmp/.ssh
               chmod 700 /tmp/.ssh
               echo "$SSH_PRIVATE_KEY" > /tmp/.ssh/id_ed25519
