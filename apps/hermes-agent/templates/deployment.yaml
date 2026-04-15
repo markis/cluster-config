@@ -52,6 +52,7 @@ spec:
               restic snapshots > /dev/null 2>&1 || restic init || true
               
               # Find latest snapshot with full content (>10MB indicates complete backup)
+              # Unset RESTIC_HOST to search all hostnames (old backups used pod names)
               SNAPSHOT_ID=$(unset RESTIC_HOST && restic snapshots --path /home/agent/workspace --compact 2>/dev/null | \
                 awk '$NF ~ /MiB$/ && $(NF-1) > 10 {id=$1} END {print id}')
               
