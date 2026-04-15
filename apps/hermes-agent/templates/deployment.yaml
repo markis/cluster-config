@@ -84,6 +84,11 @@ spec:
               ls -la /home/agent/workspace/cron/ 2>&1 || echo "DEBUG: cron dir missing after mkdir"
               
               touch /home/agent/workspace/.env
+              
+              # Create test file outside workspace
+              echo "test from init" > /home/agent/test-init.txt
+              echo "DEBUG: Created test file at /home/agent/test-init.txt"
+              
               echo "DEBUG: Init container complete"
           securityContext:
             runAsNonRoot: true
