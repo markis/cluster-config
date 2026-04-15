@@ -62,7 +62,8 @@ spec:
               restic snapshots > /dev/null 2>&1 || restic init || true
               
               if restic snapshots --quiet --latest 1 > /dev/null 2>&1; then
-                restic restore latest:/home/agent/workspace --target /home/agent/workspace \
+                restic restore latest --target / \
+                  --path /home/agent/workspace \
                   --exclude /home/agent/workspace/config.yaml \
                   || true
               fi
