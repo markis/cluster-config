@@ -36,13 +36,14 @@ spec:
             - |
               echo "===Restoring Hermes state from restic backup==="
               
-              # Setup SSH for SFTP
-              mkdir -p /root/.ssh
-              chmod 700 /root/.ssh
-              echo "$SSH_PRIVATE_KEY" > /root/.ssh/id_ed25519
-              chmod 600 /root/.ssh/id_ed25519
-              printf 'Host *\n  StrictHostKeyChecking accept-new\n  IdentityFile /root/.ssh/id_ed25519\n  UserKnownHostsFile /root/.ssh/known_hosts\n' > /root/.ssh/config
-              chmod 600 /root/.ssh/config
+              # Setup SSH for SFTP (use /tmp since running as non-root)
+              mkdir -p /tmp/.ssh
+              chmod 700 /tmp/.ssh
+              echo "$SSH_PRIVATE_KEY" > /tmp/.ssh/id_ed25519
+              chmod 600 /tmp/.ssh/id_ed25519
+              printf 'Host *\n  StrictHostKeyChecking accept-new\n  IdentityFile /tmp/.ssh/id_ed25519\n  UserKnownHostsFile /tmp/.ssh/known_hosts\n' > /tmp/.ssh/config
+              chmod 600 /tmp/.ssh/config
+              export HOME=/tmp
               
               # Initialize repo if it doesn't exist (creates empty repo on first run)
               restic snapshots > /dev/null 2>&1 || restic init || true
@@ -59,8 +60,8 @@ spec:
               
               echo "===Restore complete==="
           securityContext:
-            runAsNonRoot: false
-            runAsUser: 0
+            runAsNonRoot: true
+            runAsUser: 1000
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
             capabilities:
@@ -191,13 +192,14 @@ spec:
             - |
               echo "===Starting restic backup sidecar==="
               
-              # Setup SSH for SFTP
-              mkdir -p /root/.ssh
-              chmod 700 /root/.ssh
-              echo "$SSH_PRIVATE_KEY" > /root/.ssh/id_ed25519
-              chmod 600 /root/.ssh/id_ed25519
-              printf 'Host *\n  StrictHostKeyChecking accept-new\n  IdentityFile /root/.ssh/id_ed25519\n  UserKnownHostsFile /root/.ssh/known_hosts\n' > /root/.ssh/config
-              chmod 600 /root/.ssh/config
+              # Setup SSH for SFTP (use /tmp since running as non-root)
+              mkdir -p /tmp/.ssh
+              chmod 700 /tmp/.ssh
+              echo "$SSH_PRIVATE_KEY" > /tmp/.ssh/id_ed25519
+              chmod 600 /tmp/.ssh/id_ed25519
+              printf 'Host *\n  StrictHostKeyChecking accept-new\n  IdentityFile /tmp/.ssh/id_ed25519\n  UserKnownHostsFile /tmp/.ssh/known_hosts\n' > /tmp/.ssh/config
+              chmod 600 /tmp/.ssh/config
+              export HOME=/tmp
               
               # Initialize repo if needed
               restic snapshots > /dev/null 2>&1 || restic init || true
@@ -232,8 +234,8 @@ spec:
                 sleep 900
               done
           securityContext:
-            runAsNonRoot: false
-            runAsUser: 0
+            runAsNonRoot: true
+            runAsUser: 1000
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
             capabilities:
