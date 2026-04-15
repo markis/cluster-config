@@ -127,17 +127,17 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          args: ["gateway", "run"]
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              source /opt/venv/bin/activate && \
+              exec hermes gateway run
           securityContext:
-            runAsNonRoot: false
-            runAsUser: 0
-            allowPrivilegeEscalation: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
             capabilities:
-              add:
-                - CHOWN
-                - SETUID
-                - SETGID
               drop:
                 - ALL
           ports:
