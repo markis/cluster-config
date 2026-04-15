@@ -1,6 +1,6 @@
 image:
   repository: ghcr.io/markis/hermes-agent-container
-  tag: "v0.1.0"
+  tag: "v0.2.0"
   pullPolicy: IfNotPresent
 
 replicas: 1
