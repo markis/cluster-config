@@ -10,7 +10,7 @@ This guide walks you through setting up Hermes Agent with OpenCode Go and Discor
 
 ## Step 1: Create Discord Bot
 
-1. Go to https://discord.com/developers/applications
+1. Go to <https://discord.com/developers/applications>
 2. Click "New Application" → Name it "Hermes Agent" → Create
 3. Navigate to **Bot** section → Click "Create Bot"
 4. Enable these **Privileged Gateway Intents**:
@@ -41,7 +41,8 @@ This guide walks you through setting up Hermes Agent with OpenCode Go and Discor
 4. Use the generated link to invite the bot
 
 **Shortcut URL format:**
-```
+
+```text
 https://discord.com/oauth2/authorize?client_id=YOUR_APP_ID&scope=bot+applications.commands&permissions=274878286912
 ```
 
@@ -104,17 +105,19 @@ kubectl logs -n hermes-agent deployment/hermes-agent -f
 ## Using the Bot
 
 ### Direct Messages (DMs)
+
 - Simply message the bot - no @mention required
 - Each DM is a separate conversation
 
 ### Server Channels
+
 - **Requires @mention**: `@Hermes Agent what time is it?`
 - **Auto-threads**: Bot creates a new thread for each conversation
 - **No mention needed in threads**: Once thread is created, just reply
 
 ### Useful Commands
 
-```
+```text
 /new              - Start fresh conversation
 /model            - Show/change AI model
 /status           - Show session info
@@ -127,6 +130,7 @@ kubectl logs -n hermes-agent deployment/hermes-agent -f
 ### Tool Progress
 
 The bot sends progress updates as it works:
+
 - 💻 Running terminal commands
 - 🔍 Searching the web
 - 📄 Reading files
@@ -140,7 +144,8 @@ Control verbosity with `/verbose` (cycles: off → new → all → verbose)
 
 **Problem**: Message Content Intent is disabled
 
-**Fix**: 
+**Fix**:
+
 1. Go to Discord Developer Portal → Your App → Bot
 2. Scroll to "Privileged Gateway Intents"
 3. Enable **Message Content Intent**
@@ -151,6 +156,7 @@ Control verbosity with `/verbose` (cycles: off → new → all → verbose)
 **Problem**: Your Discord User ID isn't in `DISCORD_ALLOWED_USERS`
 
 **Fix**:
+
 1. Update 1Password item with your correct User ID
 2. Wait for 1Password Operator to sync (~1 minute)
 3. Restart pod: `kubectl rollout restart deployment/hermes-agent -n hermes-agent`
@@ -160,6 +166,7 @@ Control verbosity with `/verbose` (cycles: off → new → all → verbose)
 **Problem**: Bot lacks channel permissions
 
 **Fix**:
+
 1. Right-click channel → Edit Channel → Permissions
 2. Add the bot's role with "View Channel" and "Read Message History"
 
@@ -167,9 +174,11 @@ Control verbosity with `/verbose` (cycles: off → new → all → verbose)
 
 **Problem**: Multiple users in the same channel sharing conversation history
 
-**Fix**: This is normal with `group_sessions_per_user: true` (default). Each user gets their own isolated session even in shared channels.
+**Fix**: This is normal with `group_sessions_per_user: true` (default). Each user gets their own isolated
+session even in shared channels.
 
 To make a channel truly collaborative (one shared conversation), set in `config.yaml`:
+
 ```yaml
 group_sessions_per_user: false
 ```
@@ -184,7 +193,8 @@ model:
   model: claude-sonnet-4-5
 ```
 
-The `OPENCODE_GO_API_KEY` environment variable is used for authentication. OpenCode Go is a natively supported provider in Hermes Agent.
+The `OPENCODE_GO_API_KEY` environment variable is used for authentication. OpenCode Go is a natively
+supported provider in Hermes Agent.
 
 ### Discord Settings
 
