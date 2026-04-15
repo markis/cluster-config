@@ -84,6 +84,9 @@ spec:
             - sh
             - -c
             - |
+              # Add user entry for UID 1000 (running as root initially)
+              echo "agent:x:1000:1000:agent:/tmp:/bin/sh" >> /etc/passwd
+              
               # Setup SSH for SFTP
               mkdir -p /tmp/.ssh
               chmod 700 /tmp/.ssh
@@ -91,22 +94,22 @@ spec:
               chmod 600 /tmp/.ssh/id_ed25519
               printf 'Host *\n  StrictHostKeyChecking accept-new\n  IdentityFile /tmp/.ssh/id_ed25519\n  UserKnownHostsFile /tmp/.ssh/known_hosts\n' > /tmp/.ssh/config
               chmod 600 /tmp/.ssh/config
+              chown -R 1000:1000 /tmp/.ssh
               export HOME=/tmp
-              export USER=agent
-              export LOGNAME=agent
               
-              # Initialize repo if it doesn't exist
-              restic snapshots > /dev/null 2>&1 || restic init || true
-              
-              # Restore latest snapshot if any exist (exclude config.yaml - managed by ArgoCD)
-              if restic snapshots --quiet --latest 1 > /dev/null 2>&1; then
-                restic restore latest --target / \
-                  --exclude /home/agent/workspace/config.yaml \
-                  || true
-              fi
+              # Switch to user 1000 and run restic commands
+              su -s /bin/sh agent -c '
+                export HOME=/tmp
+                restic snapshots > /dev/null 2>&1 || restic init || true
+                
+                if restic snapshots --quiet --latest 1 > /dev/null 2>&1; then
+                  restic restore latest --target / \
+                    --exclude /home/agent/workspace/config.yaml \
+                    || true
+                fi
+              '
           securityContext:
-            runAsNonRoot: true
-            runAsUser: 1000
+            runAsUser: 0
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
             capabilities:
@@ -200,6 +203,9 @@ spec:
             - sh
             - -c
             - |
+              # Add user entry for UID 1000 (running as root initially)
+              echo "agent:x:1000:1000:agent:/tmp:/bin/sh" >> /etc/passwd
+              
               # Setup SSH for SFTP
               mkdir -p /tmp/.ssh
               chmod 700 /tmp/.ssh
@@ -207,39 +213,36 @@ spec:
               chmod 600 /tmp/.ssh/id_ed25519
               printf 'Host *\n  StrictHostKeyChecking accept-new\n  IdentityFile /tmp/.ssh/id_ed25519\n  UserKnownHostsFile /tmp/.ssh/known_hosts\n' > /tmp/.ssh/config
               chmod 600 /tmp/.ssh/config
+              chown -R 1000:1000 /tmp/.ssh
               export HOME=/tmp
-              export USER=agent
-              export LOGNAME=agent
               
-              # Initialize repo if needed
-              restic snapshots > /dev/null 2>&1 || restic init || true
-              
-              # Backup loop every 15 minutes
-              while true; do
-                # Backup with timestamp tag (exclude config - managed by ArgoCD)
-                restic backup /home/agent/workspace \
-                  --tag hermes-agent \
-                  --tag "pod:$HOSTNAME" \
-                  --exclude /home/agent/workspace/config.yaml \
-                  --exclude /home/agent/workspace/logs \
-                  --exclude /home/agent/workspace/image_cache \
-                  --exclude /home/agent/workspace/audio_cache \
-                  --quiet
+              # Switch to user 1000 and run backup loop
+              su -s /bin/sh agent -c '
+                export HOME=/tmp
+                restic snapshots > /dev/null 2>&1 || restic init || true
                 
-                # Keep last 48 backups (12 hours at 15min intervals), last 7 days, last 4 weeks
-                restic forget \
-                  --keep-last 48 \
-                  --keep-daily 7 \
-                  --keep-weekly 4 \
-                  --prune \
-                  --quiet
-                
-                # Wait 15 minutes
-                sleep 900
-              done
+                while true; do
+                  restic backup /home/agent/workspace \
+                    --tag hermes-agent \
+                    --tag "pod:$HOSTNAME" \
+                    --exclude /home/agent/workspace/config.yaml \
+                    --exclude /home/agent/workspace/logs \
+                    --exclude /home/agent/workspace/image_cache \
+                    --exclude /home/agent/workspace/audio_cache \
+                    --quiet
+                  
+                  restic forget \
+                    --keep-last 48 \
+                    --keep-daily 7 \
+                    --keep-weekly 4 \
+                    --prune \
+                    --quiet
+                  
+                  sleep 900
+                done
+              '
           securityContext:
-            runAsNonRoot: true
-            runAsUser: 1000
+            runAsUser: 0
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
             capabilities:
