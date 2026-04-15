@@ -29,6 +29,7 @@ spec:
       restartPolicy: Always
       securityContext:
         fsGroup: 1000
+        fsGroupChangePolicy: "OnRootMismatch"
       initContainers:
         - name: setup-ssh-kubeconfig
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -50,6 +51,7 @@ spec:
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
+            runAsGroup: 1000
             allowPrivilegeEscalation: false
             capabilities:
               drop:
@@ -81,6 +83,7 @@ spec:
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
+            runAsGroup: 1000
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
             capabilities:
