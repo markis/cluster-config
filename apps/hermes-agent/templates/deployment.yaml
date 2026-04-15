@@ -59,24 +59,32 @@ spec:
                 awk '$NF ~ /MiB$/ && $(NF-1) > 10 {id=$1} END {print id}')
               
               if [ -n "$SNAPSHOT_ID" ]; then
-                echo "Restoring from snapshot $SNAPSHOT_ID (latest with full content)"
-                # Restore directly to target - this should work with emptyDir volumes
+                echo "DEBUG: Restoring from snapshot $SNAPSHOT_ID"
                 unset RESTIC_HOST && restic restore "$SNAPSHOT_ID" --path /home/agent/workspace --target / \
                   --exclude /home/agent/workspace/config.yaml \
                   || true
-                echo "Restored files to /home/agent/workspace"
+                echo "DEBUG: Restore complete, checking files..."
+                echo "DEBUG: Workspace root:"
+                ls -la /home/agent/workspace/ 2>&1 | head -15
+                echo "DEBUG: Cron directory after restore:"
+                ls -la /home/agent/workspace/cron/ 2>&1 || echo "DEBUG: cron dir does not exist after restore"
               elif unset RESTIC_HOST && restic snapshots --path /home/agent/workspace --quiet --latest 1 > /dev/null 2>&1; then
-                echo "Restoring from latest snapshot (no snapshots > 10 MB found)"
+                echo "DEBUG: Restoring from latest snapshot"
                 unset RESTIC_HOST && restic restore latest --path /home/agent/workspace --target / \
                   --exclude /home/agent/workspace/config.yaml \
                   || true
               fi
               
-              # Create any missing directory structure (after restore)
+              echo "DEBUG: Creating missing directories..."
               mkdir -p /home/agent/workspace/{sessions,memories,skills,cron,hooks,logs,pairing,image_cache,audio_cache}
               
-              # Create .env file if it doesn't exist
+              echo "DEBUG: After mkdir, workspace root:"
+              ls -la /home/agent/workspace/ 2>&1 | head -15
+              echo "DEBUG: Cron directory after mkdir:"
+              ls -la /home/agent/workspace/cron/ 2>&1 || echo "DEBUG: cron dir missing after mkdir"
+              
               touch /home/agent/workspace/.env
+              echo "DEBUG: Init container complete"
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
@@ -107,9 +115,8 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
-            - hermes
-            - gateway
-            - run
+            - sleep
+            - infinity
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
