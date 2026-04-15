@@ -78,21 +78,19 @@ spec:
             - -c
           args:
             - |
-              # Test fixes before entrypoint runs
+              # Debug: check permissions
               mkdir -p "$HERMES_HOME"
+              echo "After mkdir, workspace perms:"
+              ls -la /home/agent/ | grep workspace
+              
               chmod -R u+w "$HERMES_HOME" 2>/dev/null || true
+              echo "After chmod, workspace perms:"
+              ls -la /home/agent/ | grep workspace
               
-              # Force copy config template (remove old one first if exists)
-              if [[ -n "${HERMES_CONFIG_TEMPLATE:-}" ]] && [[ -f "$HERMES_CONFIG_TEMPLATE" ]]; then
-                rm -f "$HERMES_HOME/config.yaml" 2>/dev/null || true
-                cp "$HERMES_CONFIG_TEMPLATE" "$HERMES_HOME/config.yaml" || echo "ERROR: Failed to copy config"
-              fi
+              # Try to create a test file
+              echo "test" > "$HERMES_HOME/test.txt" && echo "SUCCESS: Can write to workspace" || echo "FAIL: Cannot write to workspace"
               
-              # Create required directories
-              mkdir -p "$HERMES_HOME"/{sessions,memories,skills,cron,hooks,logs,pairing,image_cache,audio_cache,cache/images,cache/documents}
-              touch "$HERMES_HOME/.env"
-              
-              # Now run entrypoint (which will do restore and start hermes)
+              # Now run entrypoint
               exec /entrypoint.sh hermes gateway run
           securityContext:
             runAsNonRoot: true
