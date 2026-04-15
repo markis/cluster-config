@@ -112,14 +112,10 @@ spec:
             - -c
           args:
             - |
-              echo "Main container starting..."
-              
               # Move restored files from temp location to workspace
               if [ -d /home/agent/.restore-tmp/home/agent/workspace ]; then
-                echo "Restoring workspace files..."
                 cp -a /home/agent/.restore-tmp/home/agent/workspace/* /home/agent/workspace/ 2>/dev/null || true
                 rm -rf /home/agent/.restore-tmp
-                echo "Workspace restored"
               fi
               
               # Copy config from ConfigMap mount
@@ -129,11 +125,8 @@ spec:
               mkdir -p /home/agent/workspace/{sessions,memories,skills,cron,hooks,logs,pairing,image_cache,audio_cache}
               touch /home/agent/workspace/.env
               
-              echo "Checking restored files..."
-              ls -la /home/agent/workspace/cron/ 2>&1 || echo "cron directory empty/missing"
-              
-              # For debugging - sleep instead of running hermes
-              sleep infinity
+              # Start Hermes via entrypoint
+              exec /entrypoint.sh hermes gateway run
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
