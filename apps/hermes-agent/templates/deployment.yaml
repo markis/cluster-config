@@ -24,13 +24,13 @@ spec:
       annotations:
         checksum/config: {{ .Files.Get "files/config.yaml" | sha256sum }}
         # Kube-linter suppressions for init container that requires write access
-        ignore-check.kube-linter.io/no-read-only-root-fs: "Init container needs write access to setup SSH, git config, and restore backups"
+        ignore-check.kube-linter.io/no-read-only-root-fs: "Init container needs write access to setup SSH and git config"
     spec:
       restartPolicy: Always
       securityContext:
         fsGroup: 1000
       initContainers:
-        - name: setup-and-restore
+        - name: setup-ssh-kubeconfig
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           command:
             - /bin/bash
@@ -47,30 +47,6 @@ spec:
               chmod 400 /home/agent/.kube/config
               git config --global user.name "$GIT_USER_NAME"
               git config --global user.email "$GIT_USER_EMAIL"
-              
-              # Initialize restic repo if needed
-              restic snapshots > /dev/null 2>&1 || restic init || true
-              
-              # Clean up old snapshots with pod-name hostnames (keep only hermes-agent)
-              unset RESTIC_HOST
-              for host in $(restic snapshots --json 2>/dev/null | jq -r '.[].hostname' | sort -u | grep -v '^hermes-agent$'); do
-                echo "Removing snapshots from old hostname: $host"
-                restic forget --host "$host" --prune --quiet || true
-              done
-              
-              # Find latest snapshot with full content (>10MB indicates complete backup)
-              # Unset RESTIC_HOST to search all hostnames (old backups used pod names)
-              SNAPSHOT_ID=$(unset RESTIC_HOST && restic snapshots --path /home/agent/workspace --compact 2>/dev/null | \
-                awk '$NF ~ /MiB$/ && $(NF-1) > 10 {id=$1} END {print id}')
-              
-              # Restore to temp location (workspace has VOLUME directive that creates separate mount)
-              if [ -n "$SNAPSHOT_ID" ]; then
-                unset RESTIC_HOST && restic restore "$SNAPSHOT_ID" --path /home/agent/workspace --target /home/agent/.restore-tmp \
-                  --exclude /home/agent/workspace/config.yaml || true
-              elif unset RESTIC_HOST && restic snapshots --path /home/agent/workspace --quiet --latest 1 > /dev/null 2>&1; then
-                unset RESTIC_HOST && restic restore latest --path /home/agent/workspace --target /home/agent/.restore-tmp \
-                  --exclude /home/agent/workspace/config.yaml || true
-              fi
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
@@ -78,11 +54,6 @@ spec:
             capabilities:
               drop:
                 - ALL
-          env:
-            - name: HOME
-              value: /home/agent
-            - name: RESTIC_HOST
-              value: hermes-agent
           envFrom:
             - secretRef:
                 name: {{ .Values.secretName }}
@@ -91,11 +62,11 @@ spec:
               mountPath: /home/agent
           resources:
             requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
               memory: "128Mi"
               cpu: "100m"
-            limits:
-              memory: "512Mi"
-              cpu: "500m"
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -105,17 +76,12 @@ spec:
             - -c
           args:
             - |
-              # Restore workspace from temp location (avoids VOLUME directive conflict)
-              [ -d /home/agent/.restore-tmp/home/agent/workspace ] && \
-                cp -a /home/agent/.restore-tmp/home/agent/workspace/* /home/agent/workspace/ 2>/dev/null || true
-              rm -rf /home/agent/.restore-tmp
-              
               # Copy config and create missing directories
               cp /tmp/hermes-config.yaml /home/agent/workspace/config.yaml
               mkdir -p /home/agent/workspace/{sessions,memories,skills,cron,hooks,logs,pairing,image_cache,audio_cache}
               touch /home/agent/workspace/.env
               
-              # Start Hermes
+              # Start Hermes (entrypoint.sh handles snapshot restore)
               exec /entrypoint.sh hermes gateway run
           securityContext:
             runAsNonRoot: true
