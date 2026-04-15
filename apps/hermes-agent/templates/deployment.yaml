@@ -78,17 +78,13 @@ spec:
             - -c
           args:
             - |
-              # Debug: check permissions
+              # Create workspace with group write permissions (owned by root:agent due to fsGroup)
               mkdir -p "$HERMES_HOME"
-              echo "After mkdir, workspace perms:"
-              ls -la /home/agent/ | grep workspace
+              chmod 775 "$HERMES_HOME"
               
-              chmod -R u+w "$HERMES_HOME" 2>/dev/null || true
-              echo "After chmod, workspace perms:"
+              echo "Workspace perms after setup:"
               ls -la /home/agent/ | grep workspace
-              
-              # Try to create a test file
-              echo "test" > "$HERMES_HOME/test.txt" && echo "SUCCESS: Can write to workspace" || echo "FAIL: Cannot write to workspace"
+              echo "test" > "$HERMES_HOME/test.txt" && echo "SUCCESS: Can write" || echo "FAIL: Cannot write"
               
               # Now run entrypoint
               exec /entrypoint.sh hermes gateway run
