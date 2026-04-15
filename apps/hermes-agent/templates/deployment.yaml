@@ -62,8 +62,9 @@ spec:
               restic snapshots > /dev/null 2>&1 || restic init || true
               
               # Restore from latest snapshot with /home/agent/workspace path (from any pod/host)
-              if restic snapshots --path /home/agent/workspace --quiet --latest 1 > /dev/null 2>&1; then
-                restic restore latest --path /home/agent/workspace --target / \
+              # Unset RESTIC_HOST to find snapshots from all hostnames, not just current pod
+              if unset RESTIC_HOST && restic snapshots --path /home/agent/workspace --quiet --latest 1 > /dev/null 2>&1; then
+                unset RESTIC_HOST && restic restore latest --path /home/agent/workspace --target / \
                   --exclude /home/agent/workspace/config.yaml \
                   || true
               fi
