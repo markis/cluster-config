@@ -114,9 +114,15 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /bin/bash
+            - -c
           args:
-            - sleep
-            - infinity
+            - |
+              # Copy config from temp location to workspace
+              cp /tmp/hermes-config.yaml /home/agent/workspace/config.yaml
+              # Run sleep for debugging
+              sleep infinity
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
@@ -173,7 +179,7 @@ spec:
             - name: shm
               mountPath: /dev/shm
             - name: config-template
-              mountPath: /home/agent/workspace/config.yaml
+              mountPath: /tmp/hermes-config.yaml
               subPath: config.yaml
               readOnly: true
       volumes:
