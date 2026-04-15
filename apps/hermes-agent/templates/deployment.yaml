@@ -76,10 +76,7 @@ spec:
             - -c
           args:
             - |
-              # Copy config template (entrypoint.sh handles restore and directory creation)
-              cp /tmp/hermes-config.yaml /home/agent/workspace/config.yaml
-              
-              # Start Hermes (entrypoint.sh handles snapshot restore and setup)
+              # Entrypoint.sh handles snapshot restore, directory creation, and config setup
               exec /entrypoint.sh hermes gateway run
           securityContext:
             runAsNonRoot: true
@@ -101,6 +98,8 @@ spec:
               value: /home/agent/.kube/config
             - name: RESTIC_HOST
               value: hermes-agent
+            - name: HERMES_CONFIG_TEMPLATE
+              value: /tmp/hermes-config.yaml
           envFrom:
             - secretRef:
                 name: {{ .Values.secretName }}
