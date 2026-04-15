@@ -60,18 +60,11 @@ spec:
               
               if [ -n "$SNAPSHOT_ID" ]; then
                 echo "Restoring from snapshot $SNAPSHOT_ID (latest with full content)"
-                # Restore to temp location first
-                RESTORE_TMP=$(mktemp -d)
-                unset RESTIC_HOST && restic restore "$SNAPSHOT_ID" --path /home/agent/workspace --target "$RESTORE_TMP" \
+                # Restore directly to target - this should work with emptyDir volumes
+                unset RESTIC_HOST && restic restore "$SNAPSHOT_ID" --path /home/agent/workspace --target / \
                   --exclude /home/agent/workspace/config.yaml \
                   || true
-                
-                # Copy restored files to actual location (this ensures proper persistence)
-                if [ -d "$RESTORE_TMP/home/agent/workspace" ]; then
-                  cp -a "$RESTORE_TMP/home/agent/workspace"/* /home/agent/workspace/ 2>/dev/null || true
-                  rm -rf "$RESTORE_TMP"
-                  echo "Restored and copied files"
-                fi
+                echo "Restored files to /home/agent/workspace"
               elif unset RESTIC_HOST && restic snapshots --path /home/agent/workspace --quiet --latest 1 > /dev/null 2>&1; then
                 echo "Restoring from latest snapshot (no snapshots > 10 MB found)"
                 unset RESTIC_HOST && restic restore latest --path /home/agent/workspace --target / \
@@ -84,10 +77,6 @@ spec:
               
               # Create .env file if it doesn't exist
               touch /home/agent/workspace/.env
-              
-              # Final verification before container starts
-              echo "Final check before main container starts:"
-              ls -la /home/agent/workspace/cron/jobs.json 2>&1 || echo "jobs.json MISSING before main container start"
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
