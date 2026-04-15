@@ -25,7 +25,6 @@ spec:
         checksum/config: {{ .Files.Get "files/config.yaml" | sha256sum }}
     spec:
       restartPolicy: Always
-      shareProcessNamespace: true
       securityContext:
         fsGroup: 1000
       initContainers:
@@ -143,11 +142,41 @@ spec:
           command: ["/bin/bash", "-c"]
           args:
             - |
-              # Background process to keep workspace readable for backup sidecar
+              # Background restic backup process
               (
+                # Setup SSH for SFTP
+                mkdir -p /tmp/.ssh
+                chmod 700 /tmp/.ssh
+                echo "$SSH_PRIVATE_KEY" > /tmp/.ssh/id_ed25519
+                chmod 600 /tmp/.ssh/id_ed25519
+                printf 'Host *\n  StrictHostKeyChecking accept-new\n  IdentityFile /tmp/.ssh/id_ed25519\n  UserKnownHostsFile /tmp/.ssh/known_hosts\n' > /tmp/.ssh/config
+                chmod 600 /tmp/.ssh/config
+                
+                # Initialize repo if needed
+                HOME=/tmp restic snapshots > /dev/null 2>&1 || HOME=/tmp restic init || true
+                
+                # Wait for Hermes to start and create workspace files
+                sleep 60
+                
+                # Backup loop every 15 minutes
                 while true; do
-                  chmod 755 /home/agent/workspace 2>/dev/null || true
-                  sleep 60
+                  HOME=/tmp restic backup /home/agent/workspace \
+                    --tag hermes-agent \
+                    --tag "pod:$HOSTNAME" \
+                    --exclude /home/agent/workspace/config.yaml \
+                    --exclude /home/agent/workspace/logs \
+                    --exclude /home/agent/workspace/image_cache \
+                    --exclude /home/agent/workspace/audio_cache \
+                    --quiet
+                  
+                  HOME=/tmp restic forget \
+                    --keep-last 48 \
+                    --keep-daily 7 \
+                    --keep-weekly 4 \
+                    --prune \
+                    --quiet
+                  
+                  sleep 900
                 done
               ) &
               
@@ -210,77 +239,6 @@ spec:
               mountPath: /home/agent/workspace/config.yaml
               subPath: config.yaml
               readOnly: true
-        - name: restic-backup
-          image: restic/restic:latest
-          command:
-            - sh
-            - -c
-            - |
-              # Add user entry for UID 1000 (running as root initially)
-              echo "agent:x:1000:1000:agent:/tmp:/bin/sh" >> /etc/passwd
-              
-              # Setup SSH for SFTP
-              mkdir -p /tmp/.ssh
-              chmod 700 /tmp/.ssh
-              echo "$SSH_PRIVATE_KEY" > /tmp/.ssh/id_ed25519
-              chmod 600 /tmp/.ssh/id_ed25519
-              printf 'Host *\n  StrictHostKeyChecking accept-new\n  IdentityFile /tmp/.ssh/id_ed25519\n  UserKnownHostsFile /tmp/.ssh/known_hosts\n' > /tmp/.ssh/config
-              chmod 600 /tmp/.ssh/config
-              chown -R 1000:1000 /tmp/.ssh
-              export HOME=/tmp
-              
-              # Switch to user 1000 and run backup loop
-              su -s /bin/sh agent -c '
-                export HOME=/tmp
-                restic snapshots > /dev/null 2>&1 || restic init || true
-                
-                while true; do
-                  restic backup /home/agent/workspace \
-                    --tag hermes-agent \
-                    --tag "pod:$HOSTNAME" \
-                    --exclude /home/agent/workspace/config.yaml \
-                    --exclude /home/agent/workspace/logs \
-                    --exclude /home/agent/workspace/image_cache \
-                    --exclude /home/agent/workspace/audio_cache \
-                    --quiet
-                  
-                  restic forget \
-                    --keep-last 48 \
-                    --keep-daily 7 \
-                    --keep-weekly 4 \
-                    --prune \
-                    --quiet
-                  
-                  sleep 900
-                done
-              '
-          securityContext:
-            runAsUser: 0
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: false
-            capabilities:
-              drop:
-                - ALL
-              add:
-                - CHOWN
-                - SETGID
-                - SETUID
-          env:
-            - name: RESTIC_HOST
-              value: hermes-agent
-          envFrom:
-            - secretRef:
-                name: {{ .Values.secretName }}
-          volumeMounts:
-            - name: home
-              mountPath: /home/agent
-          resources:
-            requests:
-              memory: "64Mi"
-              cpu: "50m"
-            limits:
-              memory: "256Mi"
-              cpu: "200m"
       volumes:
         - name: home
           emptyDir: {}
