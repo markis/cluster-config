@@ -112,12 +112,10 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
-            - /bin/bash
-            - -c
-          args:
-            - |
-              # Workspace is set up by root init container with proper permissions
-              exec /entrypoint.sh hermes gateway run
+            - /entrypoint.sh
+            - hermes
+            - gateway
+            - run
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
