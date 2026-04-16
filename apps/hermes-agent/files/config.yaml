@@ -5,6 +5,9 @@
 terminal:
   backend: local
 
+display:
+  skin: markis-bot
+
 # Gateway configuration
 gateway:
   enabled: true
@@ -44,6 +47,10 @@ skills:
 # Logging
 logging:
   level: INFO
+
+browser:
+  camofox:
+    managed_persistence: true
 
 mcp_servers:
   perplexity:
