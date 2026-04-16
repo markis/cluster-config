@@ -51,3 +51,7 @@ mcp_servers:
     args: ["-y", "@perplexity-ai/mcp-server"]
     env:
       PERPLEXITY_API_KEY: "${PERPLEXITY_API_KEY}"
+    tools:
+      include: [perplexity_ask, perplexity_search]
+      prompts: false
+      resources: false
