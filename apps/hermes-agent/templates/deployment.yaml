@@ -23,8 +23,9 @@ spec:
         app: {{ .Chart.Name }}
       annotations:
         checksum/config: {{ .Files.Get "files/config.yaml" | sha256sum }}
-        # Kube-linter suppressions for init container that requires write access
-        ignore-check.kube-linter.io/no-read-only-root-fs: "Init container needs write access to setup SSH and git config"
+        # Kube-linter suppressions
+        ignore-check.kube-linter.io/no-read-only-root-fs: "Init containers need write access for setup"
+        ignore-check.kube-linter.io/run-as-non-root: "setup-workspace init container runs as root to set workspace permissions"
     spec:
       restartPolicy: Always
       securityContext:
@@ -109,22 +110,8 @@ spec:
             - -c
           args:
             - |
-              # Run entrypoint in background to let it create workspace
-              /entrypoint.sh hermes gateway run &
-              ENTRYPOINT_PID=$!
-              
-              # Give it a moment to create workspace directory
-              sleep 2
-              
-              # Fix permissions: make group-writable since dir is owned by root:agent (fsGroup)
-              echo "=== Fixing workspace permissions ==="
-              ls -la /home/agent/ | grep workspace || echo "No workspace yet"
-              chmod -R g+w "$HERMES_HOME" 2>/dev/null || echo "chmod failed"
-              echo "After chmod g+w:"
-              ls -la /home/agent/ | grep workspace || echo "No workspace yet"
-              
-              # Wait for entrypoint
-              wait $ENTRYPOINT_PID
+              # Workspace is set up by root init container with proper permissions
+              exec /entrypoint.sh hermes gateway run
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
