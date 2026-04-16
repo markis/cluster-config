@@ -39,10 +39,9 @@ spec:
             - -c
             - |
               # Run as root to create workspace with proper permissions
-              echo "Running as: $(id)"
               mkdir -p /home/agent/workspace
               chmod 775 /home/agent/workspace
-              chown 1000:1000 /home/agent/workspace || echo "chown failed, workspace owned by: $(stat -c '%U:%G' /home/agent/workspace)"
+              chown 1000:1000 /home/agent/workspace || true
           securityContext:
             runAsUser: 0
             runAsGroup: 0
