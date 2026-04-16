@@ -50,6 +50,12 @@ spec:
               chmod 400 /home/agent/.kube/config
               git config --global user.name "$GIT_USER_NAME"
               git config --global user.email "$GIT_USER_EMAIL"
+              
+              # Create workspace with group-write permissions for main container
+              mkdir -p /home/agent/workspace
+              chmod 775 /home/agent/workspace
+              echo "Init: Created workspace with perms:"
+              ls -la /home/agent/ | grep workspace
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
