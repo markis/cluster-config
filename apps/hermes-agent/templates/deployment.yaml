@@ -44,8 +44,6 @@ spec:
               mkdir -p /home/agent/workspace
               chmod 775 /home/agent/workspace
               chown 1000:1000 /home/agent/workspace
-              echo "Workspace created with perms:"
-              ls -la /home/agent/ | grep workspace
           securityContext:
             runAsUser: 0
             runAsGroup: 0
