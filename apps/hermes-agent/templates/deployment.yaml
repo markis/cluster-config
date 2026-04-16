@@ -33,6 +33,35 @@ spec:
         fsGroup: 1000
         fsGroupChangePolicy: "OnRootMismatch"
       initContainers:
+        - name: setup-workspace
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command:
+            - /bin/bash
+            - -c
+            - |
+              # Run as root to create workspace with proper permissions
+              mkdir -p /home/agent/workspace
+              chmod 775 /home/agent/workspace
+              chown 1000:1000 /home/agent/workspace
+              echo "Workspace created with perms:"
+              ls -la /home/agent/ | grep workspace
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: home
+              mountPath: /home/agent
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "10m"
+            limits:
+              memory: "64Mi"
+              cpu: "50m"
         - name: setup-ssh-kubeconfig
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           command:
@@ -50,12 +79,6 @@ spec:
               chmod 400 /home/agent/.kube/config
               git config --global user.name "$GIT_USER_NAME"
               git config --global user.email "$GIT_USER_EMAIL"
-              
-              # Create workspace with group-write permissions for main container
-              mkdir -p /home/agent/workspace
-              chmod 775 /home/agent/workspace
-              echo "Init: Created workspace with perms:"
-              ls -la /home/agent/ | grep workspace
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
