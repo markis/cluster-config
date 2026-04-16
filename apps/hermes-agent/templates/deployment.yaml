@@ -80,18 +80,18 @@ spec:
             - -c
           args:
             - |
-              # Debug: check what entrypoint creates
-              echo "=== Before entrypoint ==="
-              ls -la /home/agent/ || true
-              
-              # Run entrypoint
+              # Run entrypoint in background to let it create workspace
               /entrypoint.sh hermes gateway run &
               ENTRYPOINT_PID=$!
               
-              # Give it a moment to create workspace
+              # Give it a moment to create workspace directory
               sleep 2
               
-              echo "=== After entrypoint starts ==="
+              # Fix permissions: make group-writable since dir is owned by root:agent (fsGroup)
+              echo "=== Fixing workspace permissions ==="
+              ls -la /home/agent/ | grep workspace || echo "No workspace yet"
+              chmod -R g+w "$HERMES_HOME" 2>/dev/null || echo "chmod failed"
+              echo "After chmod g+w:"
               ls -la /home/agent/ | grep workspace || echo "No workspace yet"
               
               # Wait for entrypoint
