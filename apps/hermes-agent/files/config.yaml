@@ -24,8 +24,8 @@ model:
 # Discord-specific settings
 discord:
   require_mention: true
-  auto_thread: true
-  reactions: true
+  auto_thread: false
+  reactions: false
 
 # Session isolation
 group_sessions_per_user: true
@@ -44,3 +44,10 @@ skills:
 # Logging
 logging:
   level: INFO
+
+mcp_servers:
+  perplexity:
+    command: "npx"
+    args: ["-y", "@perplexity-ai/mcp-server"]
+    env:
+      PERPLEXITY_API_KEY: "${PERPLEXITY_API_KEY}"
