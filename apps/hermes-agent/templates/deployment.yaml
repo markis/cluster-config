@@ -185,7 +185,7 @@ spec:
         - name: tmp
           emptyDir:
             medium: Memory
-            sizeLimit: 100Mi
+            sizeLimit: 1Gi
         - name: shm
           emptyDir:
             medium: Memory

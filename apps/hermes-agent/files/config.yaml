@@ -6,7 +6,7 @@ terminal:
   backend: local
 
 display:
-  skin: markis-bot
+  skin: markis_bot
 
 # Gateway configuration
 gateway:
