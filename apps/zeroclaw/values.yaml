@@ -1,3 +1,5 @@
+enabled: false
+
 image:
   repository: ghcr.io/markis/zeroclaw-container
   tag: "v0.4.0"

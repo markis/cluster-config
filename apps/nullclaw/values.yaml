@@ -1,3 +1,5 @@
+enabled: false
+
 image:
   repository: ghcr.io/markis/nullclaw-container
   tag: "v0.5.0"

@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -193,3 +194,4 @@ spec:
         - name: config-template
           configMap:
             name: {{ .Chart.Name }}-config
+{{- end }}

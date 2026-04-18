@@ -1,3 +1,5 @@
+enabled: true
+
 image:
   repository: ghcr.io/markis/hermes-agent-container
   tag: "v0.3.0"
