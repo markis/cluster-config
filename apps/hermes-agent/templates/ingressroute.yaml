@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
@@ -16,3 +17,4 @@ spec:
       services:
         - name: {{ .Chart.Name }}
           port: {{ .Values.service.port }}
+{{- end }}
