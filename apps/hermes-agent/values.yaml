@@ -2,7 +2,7 @@ enabled: false
 
 image:
   repository: ghcr.io/markis/hermes-agent-container
-  tag: "v0.3.0"
+  tag: "v0.4.3"
   pullPolicy: IfNotPresent
 
 replicas: 1
