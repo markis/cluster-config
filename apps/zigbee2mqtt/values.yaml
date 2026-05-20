@@ -3,7 +3,7 @@ replicaCount: 1
 
 image:
   repository: koenkk/zigbee2mqtt
-  tag: "2.9.2"
+  tag: "2.10.1"
   pullPolicy: IfNotPresent
 
 # Zigbee adapter configuration
