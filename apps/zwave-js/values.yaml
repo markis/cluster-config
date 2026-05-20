@@ -3,7 +3,7 @@ replicaCount: 1
 
 image:
   repository: zwavejs/zwave-js-ui
-  tag: "11.15.1"
+  tag: "11.18.0"
   pullPolicy: IfNotPresent
 
 # Z-Wave adapter configuration (SLZB-MRW10U network adapter)
