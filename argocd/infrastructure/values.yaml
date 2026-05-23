@@ -247,3 +247,16 @@ infra:
       additionalArguments:
         - "--metrics.prometheus=true"
         - "--ping=true"
+
+  # ===========================================================================
+  # Cloudflared - Cloudflare Tunnel Daemon
+  # ===========================================================================
+  # Routes external traffic from Cloudflare into the cluster via Traefik.
+  # Tunnel ID: b919dff9-5486-4fee-be38-071a3284e121
+  # Credentials stored in 1Password: vaults/k8s-secrets/items/cloudflare-tunnel
+  # ===========================================================================
+  - name: cloudflared
+    namespace: cloudflare
+    repoURL: https://github.com/markis/cluster-config.git
+    path: infrastructure/cloudflared
+    targetRevision: main
