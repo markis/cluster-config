@@ -10,6 +10,7 @@ metadata:
   annotations:
     ignore-check.kube-linter.io/no-read-only-root-fs: "nginx requires writable temp directories"
     ignore-check.kube-linter.io/run-as-non-root: "nginx master process runs as root"
+    ignore-check.kube-linter.io/latest-tag: "lineup tracks latest by design"
 spec:
   replicas: {{ .Values.replicas }}
   selector:
