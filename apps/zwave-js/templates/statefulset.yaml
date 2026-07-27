@@ -23,7 +23,7 @@ spec:
       initContainers:
       - name: fix-permissions
         image: alpine:3.19
-        command: 
+        command:
           - sh
           - -c
           - |
