@@ -8,6 +8,8 @@ image:
 ingress:
   - hostname: lineup.markis.network
     service: http://traefik.traefik.svc.cluster.local:80
+  - hostname: hudson-news.markis.network
+    service: http://10.0.1.4:8090
 
 resources:
   requests:
