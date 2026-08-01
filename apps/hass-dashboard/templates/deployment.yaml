@@ -57,6 +57,10 @@ spec:
               mountPath: /app/config.yaml
               subPath: config.yaml
               readOnly: true
+            - name: secrets
+              mountPath: /app/credentials.json
+              subPath: credentials.json
+              readOnly: true
             - name: dshm
               mountPath: /dev/shm
             - name: tmp
