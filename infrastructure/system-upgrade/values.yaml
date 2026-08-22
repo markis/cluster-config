@@ -1,0 +1,23 @@
+# =============================================================================
+# system-upgrade-controller + K3s upgrade plans
+# =============================================================================
+# Deploys rancher/system-upgrade-controller and version-pinned upgrade Plans.
+# To upgrade the cluster: bump k3sVersion below, commit, and push. Git is the
+# approval boundary - never use a channel (e.g. stable) here, or the cluster
+# auto-upgrades outside of Git review.
+#
+# Vendored manifests: templates/crd.yaml and templates/controller.yaml are
+# copied verbatim from the pinned system-upgrade-controller release in
+# README.md. When re-vendoring, re-apply the local patch documented there.
+# =============================================================================
+
+# Target K3s version for upgrade plans (pin exact patch releases)
+k3sVersion: v1.32.13+k3s1
+
+plans:
+  # Server (control-plane/etcd) nodes upgrade one at a time
+  server:
+    enabled: false
+  # Agent nodes upgrade after the server plan completes (prepare gate)
+  agent:
+    enabled: false

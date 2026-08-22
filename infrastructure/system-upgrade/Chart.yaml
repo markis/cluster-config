@@ -1,0 +1,6 @@
+apiVersion: v2
+name: system-upgrade
+description: system-upgrade-controller and version-pinned K3s upgrade Plans
+type: application
+version: 0.1.0
+appVersion: "v0.20.1"
