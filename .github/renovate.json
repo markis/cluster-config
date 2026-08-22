@@ -5,20 +5,22 @@
   ],
   "gitAuthor": "Markis Taylor <m@rkis.net>",
   "kubernetes": {
-    "fileMatch": [
-      "^apps/.+/values\\.yaml$"
+    "managerFilePatterns": [
+      "/^apps/.+/values\\.yaml$/"
     ]
   },
   "helm-values": {
-    "fileMatch": [
-      "^apps/.+/values\\.yaml$"
+    "managerFilePatterns": [
+      "/^apps/.+/values\\.yaml$/"
     ]
   },
   "customManagers": [
     {
       "customType": "regex",
       "description": "Update appVersion in Chart.yaml for hass-dashboard",
-      "fileMatch": ["^apps/hass-dashboard/Chart\\.yaml$"],
+      "managerFilePatterns": [
+        "/^apps/hass-dashboard/Chart\\.yaml$/"
+      ],
       "matchStrings": ["appVersion:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"],
       "datasourceTemplate": "docker",
       "depNameTemplate": "ghcr.io/markis/hass-dashboard"
@@ -26,7 +28,9 @@
     {
       "customType": "regex",
       "description": "Update appVersion in Chart.yaml for budget-importer",
-      "fileMatch": ["^apps/budget-importer/Chart\\.yaml$"],
+      "managerFilePatterns": [
+        "/^apps/budget-importer/Chart\\.yaml$/"
+      ],
       "matchStrings": ["appVersion:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"],
       "datasourceTemplate": "docker",
       "depNameTemplate": "ghcr.io/markis/budget-importer"
@@ -34,7 +38,9 @@
     {
       "customType": "regex",
       "description": "Update appVersion in Chart.yaml for dark-detector",
-      "fileMatch": ["^apps/dark-detector/Chart\\.yaml$"],
+      "managerFilePatterns": [
+        "/^apps/dark-detector/Chart\\.yaml$/"
+      ],
       "matchStrings": ["appVersion:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"],
       "datasourceTemplate": "docker",
       "depNameTemplate": "ghcr.io/markis/dark-detector"
@@ -42,7 +48,9 @@
     {
       "customType": "regex",
       "description": "Update appVersion in Chart.yaml for dynasty",
-      "fileMatch": ["^apps/dynasty/Chart\\.yaml$"],
+      "managerFilePatterns": [
+        "/^apps/dynasty/Chart\\.yaml$/"
+      ],
       "matchStrings": ["appVersion:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"],
       "datasourceTemplate": "docker",
       "depNameTemplate": "ghcr.io/markis/dynasty"
@@ -50,7 +58,9 @@
     {
       "customType": "regex",
       "description": "Update appVersion in Chart.yaml for mqtt",
-      "fileMatch": ["^apps/mqtt/Chart\\.yaml$"],
+      "managerFilePatterns": [
+        "/^apps/mqtt/Chart\\.yaml$/"
+      ],
       "matchStrings": ["appVersion:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"],
       "datasourceTemplate": "docker",
       "depNameTemplate": "emqx/emqx"
@@ -58,7 +68,9 @@
     {
       "customType": "regex",
       "description": "Update appVersion in Chart.yaml for rtlsdr",
-      "fileMatch": ["^apps/rtlsdr/Chart\\.yaml$"],
+      "managerFilePatterns": [
+        "/^apps/rtlsdr/Chart\\.yaml$/"
+      ],
       "matchStrings": ["appVersion:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"],
       "datasourceTemplate": "docker",
       "depNameTemplate": "ghcr.io/markis/rtlsdr2mqtt"
@@ -66,7 +78,9 @@
     {
       "customType": "regex",
       "description": "Update appVersion in Chart.yaml for zigbee2mqtt",
-      "fileMatch": ["^apps/zigbee2mqtt/Chart\\.yaml$"],
+      "managerFilePatterns": [
+        "/^apps/zigbee2mqtt/Chart\\.yaml$/"
+      ],
       "matchStrings": ["appVersion:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"],
       "datasourceTemplate": "docker",
       "depNameTemplate": "koenkk/zigbee2mqtt"
@@ -74,7 +88,9 @@
     {
       "customType": "regex",
       "description": "Update appVersion in Chart.yaml for zwave-js",
-      "fileMatch": ["^apps/zwave-js/Chart\\.yaml$"],
+      "managerFilePatterns": [
+        "/^apps/zwave-js/Chart\\.yaml$/"
+      ],
       "matchStrings": ["appVersion:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"],
       "datasourceTemplate": "docker",
       "depNameTemplate": "zwavejs/zwave-js-ui"
@@ -82,7 +98,9 @@
     {
       "customType": "regex",
       "description": "Update k3sVersion in system-upgrade values.yaml",
-      "fileMatch": ["^infrastructure/system-upgrade/values\\.yaml$"],
+      "managerFilePatterns": [
+        "/^infrastructure/system-upgrade/values\\.yaml$/"
+      ],
       "matchStrings": ["k3sVersion:\\s*(?<currentValue>[^\\s]+)"],
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "k3s-io/k3s"
