@@ -12,7 +12,7 @@
 # =============================================================================
 
 # Target K3s version for upgrade plans (pin exact patch releases)
-k3sVersion: v1.35.7+k3s1
+k3sVersion: v1.36.3+k3s1
 
 plans:
   # Server (control-plane/etcd) nodes upgrade one at a time
