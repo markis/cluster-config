@@ -17,6 +17,13 @@ applied to `controller.yaml` on top of upstream:
 When re-vendoring a new SUC release, re-download both files from the new
 release tag and re-apply that patch.
 
+## Plan schema note
+
+The SUC CRD declares `version` and `channel` at the **spec top level**
+(`spec.version`), not under `spec.upgrade`. The plan templates here place
+`version` accordingly; a nested `spec.upgrade.version` is pruned by the API
+server (undeclared in the CRD schema) and the Plan resolves invalid.
+
 ## Upgrading the cluster
 
 1. Take/verify an etcd snapshot:
