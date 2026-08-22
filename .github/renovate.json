@@ -3,6 +3,7 @@
   "extends": [
     "config:recommended"
   ],
+  "gitAuthor": "Markis Taylor <m@rkis.net>",
   "kubernetes": {
     "fileMatch": [
       "^apps/.+/values\\.yaml$"
