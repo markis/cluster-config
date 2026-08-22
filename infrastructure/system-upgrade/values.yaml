@@ -17,7 +17,7 @@ k3sVersion: v1.32.13+k3s1
 plans:
   # Server (control-plane/etcd) nodes upgrade one at a time
   server:
-    enabled: false
+    enabled: true
   # Agent nodes upgrade after the server plan completes (prepare gate)
   agent:
-    enabled: false
+    enabled: true
