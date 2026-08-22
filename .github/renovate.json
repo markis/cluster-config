@@ -77,6 +77,14 @@
       "matchStrings": ["appVersion:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"],
       "datasourceTemplate": "docker",
       "depNameTemplate": "zwavejs/zwave-js-ui"
+    },
+    {
+      "customType": "regex",
+      "description": "Update k3sVersion in system-upgrade values.yaml",
+      "fileMatch": ["^infrastructure/system-upgrade/values\\.yaml$"],
+      "matchStrings": ["k3sVersion:\\s*(?<currentValue>[^\\s]+)"],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "k3s-io/k3s"
     }
   ],
   "packageRules": [
@@ -224,6 +232,12 @@
       "commitMessageTopic": "vernemq",
       "commitMessageExtra": "to {{newVersion}}",
       "commitMessagePrefix": "chore:"
+    },
+    {
+      "description": "k3s cluster upgrades - require manual review (etcd snapshot before merge)",
+      "matchDatasources": ["github-releases"],
+      "matchPackageNames": ["k3s-io/k3s"],
+      "automerge": false
     }
   ],
   "hostRules": [
