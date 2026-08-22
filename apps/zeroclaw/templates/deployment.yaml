@@ -117,7 +117,7 @@ spec:
             - name: ZEROCLAW_HOME
               value: /home/agent
             - name: ZEROCLAW_DATA_DIR
-              value: /home/agent/.zeroclaw/data
+              value: /home/agent/data
             - name: ZEROCLAW_WORKSPACE
               value: /home/agent/workspace
             - name: KUBECONFIG
