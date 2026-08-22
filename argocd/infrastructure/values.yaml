@@ -275,4 +275,3 @@ infra:
     repoURL: https://github.com/markis/cluster-config.git
     path: infrastructure/system-upgrade
     targetRevision: main
-    serverSideApply: true
