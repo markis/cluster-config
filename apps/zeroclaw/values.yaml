@@ -1,11 +1,11 @@
-enabled: false
+enabled: true
 
 image:
   repository: ghcr.io/markis/zeroclaw-container
   tag: "v0.10.6"
   pullPolicy: IfNotPresent
 
-replicas: 0
+replicas: 1
 
 deployment:
   resources:
