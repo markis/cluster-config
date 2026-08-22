@@ -240,13 +240,6 @@
       "automerge": false
     }
   ],
-  "hostRules": [
-    {
-      "matchHost": "ghcr.io",
-      "username": "x-access-token",
-      "password": "{{ secrets.GHCR_TOKEN }}"
-    }
-  ],
   "prConcurrentLimit": 3,
   "prHourlyLimit": 2,
   "semanticCommits": "enabled",

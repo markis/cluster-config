@@ -15,4 +15,5 @@ jobs:
           configurationFile: .github/renovate.json
           token: ${{ secrets.RENOVATE_TOKEN }}
         env:
-          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+          RENOVATE_HOST_RULES: |
+            [{"matchHost":"ghcr.io","hostType":"docker","username":"x-access-token","password":"${{ secrets.GHCR_TOKEN }}"}]
