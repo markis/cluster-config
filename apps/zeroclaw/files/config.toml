@@ -1,5 +1,5 @@
-default_provider = "opencode-go"
-default_model = "glm-5.1"
+default_provider = "ollama"
+default_model = "gpt-oss:120b"
 default_temperature = 0.7
 
 [agent]
@@ -63,7 +63,7 @@ pair_rate_limit_per_minute = 30
 webhook_rate_limit_per_minute = 300
 
 [reliability]
-fallback_providers = ["opencode"]
+fallback_providers = ["opencode-go"]
 provider_retries = 3
 provider_backoff_ms = 1000
 channel_initial_backoff_secs = 2
@@ -103,7 +103,9 @@ timeout_secs = 30
 
 [providers.models]
 
-[providers.models.opencode]
+[providers.models.ollama]
+base_url = "https://api.ollama-cloud.com"
+api_key = "$OLLAMA_API_KEY"
 
 [providers.models.opencode.go]
 api_key = "$OPENCODE_API_KEY_ENCRYPTED"
