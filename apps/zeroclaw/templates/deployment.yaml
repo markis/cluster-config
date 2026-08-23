@@ -41,7 +41,7 @@ spec:
               cd / && \
               mkdir -p /home/agent/.ssh /home/agent/.kube /home/agent/.zeroclaw /home/agent/workspace && \
               echo "$SECRET_KEY" > /home/agent/.zeroclaw/.secret_key && \
-              envsubst '$DISCORD_TOKEN_ENCRYPTED $DISCORD_GUILD_ID $DISCORD_ALLOW_FROM $GATEWAY_PAIRED_TOKEN_ENCRYPTED $CHROMIUM_PATH' \
+              envsubst '$DISCORD_TOKEN_ENCRYPTED $DISCORD_GUILD_ID $DISCORD_ALLOW_FROM $DISCORD_CHANNEL_ID $GATEWAY_PAIRED_TOKEN_ENCRYPTED $CHROMIUM_PATH' \
                 < /config-template/config.toml > /home/agent/.zeroclaw/config.toml && \
               chmod 400 /home/agent/.zeroclaw/.secret_key && \
               chmod 400 /home/agent/.zeroclaw/config.toml && \

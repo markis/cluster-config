@@ -34,10 +34,24 @@ shell_env_passthrough = [
 kind = "native" # "native" or "docker"
 
 [channels_config.discord]
+approval_timeout_secs = 0
+archive = false
+enabled = true
+interrupt_on_new_message = false
+listen_to_bots = false
+mention_only = false
+multi_message_delay_ms = 0
+reaction_notifications = "off"
+reply_min_interval_secs = 0
+reply_queue_depth_max = 0
+slash_command_scope = "global"
+slash_commands = false
+stall_timeout_secs = 0
+stream_mode = "off"
+channel_ids = ["$DISCORD_CHANNEL_ID"]
+guild_ids = ["$DISCORD_GUILD_ID"]
 bot_token = "$DISCORD_TOKEN_ENCRYPTED"
-guild_id = "$DISCORD_GUILD_ID"
 allowed_users = ["$DISCORD_ALLOW_FROM"]
-mention_only = true
 
 [gateway]
 port = 42617
