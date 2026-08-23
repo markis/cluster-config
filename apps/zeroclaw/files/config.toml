@@ -106,7 +106,7 @@ timeout_secs = 30
 [providers.models.opencode]
 
 [providers.models.opencode.go]
-api_key = "$OPENCODE_GO_API_KEY"
+api_key = "$OPENCODE_API_KEY_ENCRYPTED"
 
 [cost]
 enabled = false
