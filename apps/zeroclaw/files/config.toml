@@ -1,4 +1,4 @@
-default_provider = "ollama"
+default_provider = "custom"
 default_model = "gpt-oss:120b"
 default_temperature = 0.7
 
@@ -103,8 +103,8 @@ timeout_secs = 30
 
 [providers.models]
 
-[providers.models.ollama]
-base_url = "https://api.ollama-cloud.com"
+[providers.models.custom.ollama-cloud]
+uri = "https://api.ollama-cloud.com/v1"
 api_key = "$OLLAMA_API_KEY"
 
 [providers.models.opencode.go]
