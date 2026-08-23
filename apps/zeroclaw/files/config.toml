@@ -56,6 +56,7 @@ bot_token = "$DISCORD_TOKEN_ENCRYPTED"
 port = 42617
 host = "0.0.0.0"
 allow_public_bind = true
+allow_remote_admin = true
 require_pairing = true
 paired_tokens = ["$GATEWAY_PAIRED_TOKEN_ENCRYPTED"]
 pair_rate_limit_per_minute = 30
