@@ -99,6 +99,15 @@ format = "openclaw"
 enabled = true
 timeout_secs = 30
 
+[providers]
+
+[providers.models]
+
+[providers.models.opencode]
+
+[providers.models.opencode.go]
+api_key = "$OPENCODE_GO_API_KEY"
+
 [cost]
 enabled = false
 daily_limit_usd = 10
