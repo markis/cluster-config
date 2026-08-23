@@ -33,7 +33,7 @@ shell_env_passthrough = [
 [runtime]
 kind = "native" # "native" or "docker"
 
-[channels.discord]
+[channels.discord.bot]
 approval_timeout_secs = 0
 archive = false
 enabled = true
