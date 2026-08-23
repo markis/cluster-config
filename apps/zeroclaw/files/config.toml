@@ -1,5 +1,5 @@
 default_provider = "custom"
-default_model = "gpt-oss:120b"
+default_model = "minimax-m3"
 default_temperature = 0.7
 
 [agent]
