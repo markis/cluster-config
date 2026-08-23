@@ -119,6 +119,7 @@ enabled = true
 model_provider = "custom.ollama"
 risk_profile = "yolo"
 runtime_profile = "unbounded"
+channels = ["discord.bot"]
 
 [acp]
 default_agent = "main"
