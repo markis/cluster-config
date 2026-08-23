@@ -1,4 +1,4 @@
-default_provider = "custom:default"
+default_provider = "custom:ollama"
 default_model = "minimax-m3"
 default_temperature = 0.7
 
@@ -105,7 +105,7 @@ timeout_secs = 30
 
 [providers.models.custom]
 
-[providers.models.custom.default]
+[providers.models.custom.ollama]
 model = "minimax-m3"
 uri = "https://ollama.com/v1"
 api_key = "$OLLAMA_API_KEY_ENCRYPTED"
@@ -115,7 +115,7 @@ api_key = "$OPENCODE_API_KEY_ENCRYPTED"
 
 [agents.main]
 enabled = true
-model_provider = "custom:default"
+model_provider = "custom:ollama"
 risk_profile = "yolo"
 runtime_profile = "unbounded"
 
