@@ -33,7 +33,7 @@ shell_env_passthrough = [
 [runtime]
 kind = "native" # "native" or "docker"
 
-[channels_config.discord]
+[channels.discord]
 approval_timeout_secs = 0
 archive = false
 enabled = true
@@ -51,7 +51,6 @@ stream_mode = "off"
 channel_ids = ["$DISCORD_CHANNEL_ID"]
 guild_ids = ["$DISCORD_GUILD_ID"]
 bot_token = "$DISCORD_TOKEN_ENCRYPTED"
-allowed_users = ["$DISCORD_ALLOW_FROM"]
 
 [gateway]
 port = 42617
@@ -109,6 +108,13 @@ api_key = "$OLLAMA_API_KEY"
 
 [providers.models.opencode.go]
 api_key = "$OPENCODE_API_KEY_ENCRYPTED"
+
+[agents.main]
+enabled = true
+model_provider = "custom:ollama-cloud"
+
+[acp]
+default_agent = "main"
 
 [cost]
 enabled = false
