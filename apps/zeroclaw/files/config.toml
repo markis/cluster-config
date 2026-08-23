@@ -1,4 +1,4 @@
-default_provider = "custom"
+default_provider = "custom:ollama-cloud"
 default_model = "minimax-m3"
 default_temperature = 0.7
 
