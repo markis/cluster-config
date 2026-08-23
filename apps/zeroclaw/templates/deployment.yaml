@@ -44,6 +44,8 @@ spec:
               envsubst '$DISCORD_TOKEN $DISCORD_GUILD_ID $DISCORD_ALLOW_FROM $DISCORD_CHANNEL_ID $GATEWAY_PAIRED_TOKEN $OPENCODE_API_KEY $OLLAMA_API_KEY $CHROMIUM_PATH' \
                 < /config-template/config.toml > /home/agent/.zeroclaw/config.toml && \
               chmod 400 /home/agent/.zeroclaw/.secret_key && \
+              chmod 644 /home/agent/.zeroclaw/config.toml && \
+              zeroclaw config migrate && \
               chmod 400 /home/agent/.zeroclaw/config.toml && \
               echo "$KUBECONFIG_CONTENT" > /home/agent/.kube/config && \
               chmod 400 /home/agent/.kube/config && \
