@@ -104,7 +104,7 @@ timeout_secs = 30
 
 [providers.models.custom.ollama-cloud]
 uri = "https://api.ollama-cloud.com/v1"
-api_key = "$OLLAMA_API_KEY"
+api_key = "$OLLAMA_API_KEY_ENCRYPTED"
 
 [providers.models.opencode.go]
 api_key = "$OPENCODE_API_KEY_ENCRYPTED"
