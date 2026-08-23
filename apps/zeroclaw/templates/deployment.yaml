@@ -124,6 +124,8 @@ spec:
               value: /home/agent/.kube/config
             - name: HOME
               value: /home/agent
+            - name: SHELL
+              value: /bin/sh
             - name: OPENCODE_GO_API_KEY
               valueFrom:
                 secretKeyRef:
