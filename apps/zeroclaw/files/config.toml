@@ -50,7 +50,7 @@ stall_timeout_secs = 0
 stream_mode = "off"
 channel_ids = ["$DISCORD_CHANNEL_ID"]
 guild_ids = ["$DISCORD_GUILD_ID"]
-bot_token = "$DISCORD_TOKEN_ENCRYPTED"
+bot_token = "$DISCORD_TOKEN"
 
 [gateway]
 port = 42617
@@ -58,7 +58,7 @@ host = "0.0.0.0"
 allow_public_bind = true
 allow_remote_admin = true
 require_pairing = true
-paired_tokens = ["$GATEWAY_PAIRED_TOKEN_ENCRYPTED"]
+paired_tokens = ["$GATEWAY_PAIRED_TOKEN"]
 pair_rate_limit_per_minute = 30
 webhook_rate_limit_per_minute = 300
 
@@ -108,11 +108,11 @@ timeout_secs = 30
 [providers.models.custom.ollama]
 model = "minimax-m3"
 uri = "https://ollama.com/v1"
-api_key = "$OLLAMA_API_KEY_ENCRYPTED"
+api_key = "$OLLAMA_API_KEY"
 
 [providers.models.opencode.go]
 model = "glm-5.1"
-api_key = "$OPENCODE_API_KEY_ENCRYPTED"
+api_key = "$OPENCODE_API_KEY"
 
 [agents.main]
 enabled = true
