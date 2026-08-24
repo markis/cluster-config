@@ -85,6 +85,11 @@ channels = ["discord.default"]
 [agents.main.identity]
 format = "openclaw"
 
+[peer_groups.discord]
+channel = "discord"
+agents = ["main"]
+external_peers = ["345082342479626242"]
+
 [acp]
 default_agent = "main"
 
