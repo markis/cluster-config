@@ -6,7 +6,7 @@ default_temperature = 0.7
 [runtime]
 kind = "native"
 
-[channels.discord.default.bot]
+[channels.discord.default]
 approval_timeout_secs = 0
 archive = false
 enabled = true
@@ -84,7 +84,7 @@ enabled = true
 model_provider = "custom.ollama"
 risk_profile = "yolo"
 runtime_profile = "unbounded"
-channels = ["discord.default.bot"]
+channels = ["discord.default"]
 
 [agents.main.identity]
 format = "openclaw"
