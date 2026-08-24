@@ -56,6 +56,8 @@ spec:
               git config --global user.name "$GIT_USER_NAME" && \
               git config --global user.email "$GIT_USER_EMAIL" && \
               mkdir -p /home/agent/workspace && \
+              echo '# Markis Bot' > /home/agent/workspace/SOUL.md && \
+              echo 'You are markis-bot, a helpful assistant running on ZeroClaw.' > /home/agent/workspace/AGENTS.md && \
               echo "===Done Init Config==="
           securityContext:
             runAsNonRoot: true

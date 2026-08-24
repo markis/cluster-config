@@ -70,7 +70,7 @@ timeout_secs = 30
 
 [providers]
 
-[providers.models."custom.ollama".default]
+[providers.models.custom.ollama]
 model = "minimax-m3"
 uri = "https://ollama.com/v1"
 api_key = "$OLLAMA_API_KEY"
