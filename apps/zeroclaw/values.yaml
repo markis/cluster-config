@@ -2,7 +2,7 @@ enabled: true
 
 image:
   repository: ghcr.io/markis/zeroclaw-container
-  tag: "v0.10.11"
+  tag: "v0.10.13"
   pullPolicy: IfNotPresent
 
 replicas: 1
