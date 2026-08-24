@@ -42,7 +42,7 @@ spec:
               cd / && \
               mkdir -p /home/agent/.ssh /home/agent/.kube /home/agent/.zeroclaw /home/agent/workspace && \
               echo "$SECRET_KEY" > /home/agent/.zeroclaw/.secret_key && \
-              envsubst '$DISCORD_TOKEN $DISCORD_GUILD_ID $DISCORD_ALLOW_FROM $DISCORD_CHANNEL_ID $GATEWAY_PAIRED_TOKEN $OPENCODE_API_KEY $OLLAMA_API_KEY $CHROMIUM_PATH' \
+              envsubst '$DISCORD_TOKEN $DISCORD_GUILD_ID $DISCORD_ALLOW_FROM $DISCORD_CHANNEL_ID $GATEWAY_PAIRED_TOKEN $OLLAMA_API_KEY $CHROMIUM_PATH' \
                 < /config-template/config.toml > /home/agent/.zeroclaw/config.toml && \
               chmod 400 /home/agent/.zeroclaw/.secret_key && \
               chmod 400 /home/agent/.zeroclaw/config.toml && \
@@ -125,11 +125,6 @@ spec:
               value: /home/agent
             - name: SHELL
               value: /bin/sh
-            - name: OPENCODE_GO_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.secretName }}
-                  key: OPENCODE_API_KEY
           envFrom:
             - secretRef:
                 name: {{ .Values.secretName }}
