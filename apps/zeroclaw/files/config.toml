@@ -1,39 +1,12 @@
+schema_version = 3
 default_provider = "custom.ollama"
 default_model = "minimax-m3"
 default_temperature = 0.7
 
-[agent]
-compact_context = false
-max_tool_iterations = 1000
-max_history_messages = 100
-parallel_tools = false
-tool_dispatcher = "auto"
-message_timeout_secs = 600
-
-[autonomy]
-level = "full"
-workspace_only = false
-allowed_commands = ["*"]
-allowed_roots = ["*"]
-forbidden_paths = [
-  "/home/agent/.ssh",
-  "/home/agent/.kube",
-  "/home/agent/.zeroclaw",
-  "/proc",
-  "/sys",
-]
-max_actions_per_hour = 500
-shell_env_passthrough = [
-  "KUBECONFIG",
-  "RESTIC_REPOSITORY",
-  "RESTIC_PASSWORD",
-  "RESTIC_HOST",
-]
-
 [runtime]
-kind = "native" # "native" or "docker"
+kind = "native"
 
-[channels.discord.bot]
+[channels.discord.default.bot]
 approval_timeout_secs = 0
 archive = false
 enabled = true
@@ -63,7 +36,6 @@ pair_rate_limit_per_minute = 30
 webhook_rate_limit_per_minute = 300
 
 [reliability]
-fallback_providers = ["opencode-go"]
 provider_retries = 3
 provider_backoff_ms = 1000
 channel_initial_backoff_secs = 2
@@ -72,7 +44,7 @@ channel_max_backoff_secs = 120
 [memory]
 backend = "markdown.markdown"
 auto_save = true
-embedding_provider = "none"   # none | openai | custom:https://...
+embedding_provider = "none"
 vector_weight = 0.7
 keyword_weight = 0.3
 
@@ -92,20 +64,13 @@ native_headless = true
 native_chrome_path = "$CHROMIUM_PATH"
 allowed_domains = ["*"]
 
-[identity]
-format = "openclaw"
-
 [http_request]
 enabled = true
 timeout_secs = 30
 
 [providers]
 
-[providers.models]
-
-[providers.models.custom]
-
-[providers.models.custom.ollama]
+[providers.models."custom.ollama".default]
 model = "minimax-m3"
 uri = "https://ollama.com/v1"
 api_key = "$OLLAMA_API_KEY"
@@ -119,7 +84,10 @@ enabled = true
 model_provider = "custom.ollama"
 risk_profile = "yolo"
 runtime_profile = "unbounded"
-channels = ["discord.bot"]
+channels = ["discord.default.bot"]
+
+[agents.main.identity]
+format = "openclaw"
 
 [acp]
 default_agent = "main"
