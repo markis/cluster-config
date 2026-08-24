@@ -1,5 +1,5 @@
 schema_version = 3
-default_provider = "custom.ollama"
+default_provider = "opencode.ollama"
 default_model = "minimax-m3"
 default_temperature = 0.7
 
@@ -70,7 +70,7 @@ timeout_secs = 30
 
 [providers]
 
-[providers.models.custom.ollama]
+[providers.models.opencode.ollama]
 model = "minimax-m3"
 uri = "https://ollama.com/v1"
 api_key = "$OLLAMA_API_KEY"
@@ -81,7 +81,7 @@ api_key = "$OPENCODE_API_KEY"
 
 [agents.main]
 enabled = true
-model_provider = "custom.ollama"
+model_provider = "opencode.ollama"
 risk_profile = "yolo"
 runtime_profile = "unbounded"
 channels = ["discord.default"]
