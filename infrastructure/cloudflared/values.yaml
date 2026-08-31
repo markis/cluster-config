@@ -2,7 +2,7 @@ tunnelId: "b919dff9-5486-4fee-be38-071a3284e121"
 
 image:
   repository: cloudflare/cloudflared
-  tag: "2026.8.2"
+  tag: "2026.8.3"
   pullPolicy: IfNotPresent
 
 ingress:
