@@ -14,7 +14,7 @@ generator:
 nginx:
   image:
     repository: nginx
-    tag: "1.31.4"
+    tag: "1.31.5"
     pullPolicy: IfNotPresent
   resources:
     requests:
